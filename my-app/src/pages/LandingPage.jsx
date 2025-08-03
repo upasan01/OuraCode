@@ -6,7 +6,7 @@ import Particles from "../components/ui/particles"
 import Nav from "../components/Nav"
 import { Code2, Share2, Terminal, GitBranch, Play, MessageSquare, Eye, DiscIcon as Discord, Github, Twitter } from "lucide-react"
 import CreateRoom from "../components/CreateRoom"
-import TargetCursor from "../components/ui/TargetCursor"
+import ClickSpark from "../components/ui/ClickSpark"
 import TextType from "../components/ui/TextType"
 
 export default function GoonShareAILanding() {
@@ -16,13 +16,7 @@ export default function GoonShareAILanding() {
       <div className="fixed inset-0 w-full h-full z-10">
         <Particles />
       </div>
-
-      {/* Target Cursor */}
-      <TargetCursor
-        targetSelector=".cursor-target"
-        spinDuration={2}
-        hideDefaultCursor={false}
-      />
+      <ClickSpark sparkColor="#a6e3a1" sparkSize={5} sparkCount={100} duration={2000} easeFunc="easeOutCubic" extraScale={1.2} />
 
       <Nav />
 
@@ -89,7 +83,7 @@ export default function GoonShareAILanding() {
           </div>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#a6e3a1]/50 transition-all duration-300 group cursor-target">
+            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#a6e3a1]/50 transition-all duration-300 group">
               <CardHeader>
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#a6e3a1]/20 group-hover:bg-[#a6e3a1]/30 transition-colors">
                   <Code2 className="h-6 w-6 text-[#a6e3a1]" />
@@ -106,7 +100,7 @@ export default function GoonShareAILanding() {
               </CardContent>
             </Card>
 
-            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#89b4fa]/50 transition-all duration-300 group cursor-target">
+            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#89b4fa]/50 transition-all duration-300 group">
               <CardHeader>
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#89b4fa]/20 group-hover:bg-[#89b4fa]/30 transition-colors">
                   <Play className="h-6 w-6 text-[#89b4fa]" />
@@ -123,7 +117,7 @@ export default function GoonShareAILanding() {
               </CardContent>
             </Card>
 
-            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#cba6f7]/50 transition-all duration-300 group cursor-target">
+            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#cba6f7]/50 transition-all duration-300 group">
               <CardHeader>
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#cba6f7]/20 group-hover:bg-[#cba6f7]/30 transition-colors">
                   <MessageSquare className="h-6 w-6 text-[#cba6f7]" />
@@ -140,7 +134,7 @@ export default function GoonShareAILanding() {
               </CardContent>
             </Card>
 
-            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#fab387]/50 transition-all duration-300 group cursor-target">
+            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#fab387]/50 transition-all duration-300 group">
               <CardHeader>
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#fab387]/20 group-hover:bg-[#fab387]/30 transition-colors">
                   <Share2 className="h-6 w-6 text-[#fab387]" />
@@ -155,7 +149,7 @@ export default function GoonShareAILanding() {
               </CardContent>
             </Card>
 
-            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#94e2d5]/50 transition-all duration-300 group cursor-target">
+            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#94e2d5]/50 transition-all duration-300 group">
               <CardHeader>
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#94e2d5]/20 group-hover:bg-[#94e2d5]/30 transition-colors">
                   <GitBranch className="h-6 w-6 text-[#94e2d5]" />
@@ -170,7 +164,7 @@ export default function GoonShareAILanding() {
               </CardContent>
             </Card>
 
-            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#f9e2af]/50 transition-all duration-300 group cursor-target">
+            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#f9e2af]/50 transition-all duration-300 group">
               <CardHeader>
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#f9e2af]/20 group-hover:bg-[#f9e2af]/30 transition-colors">
                   <Eye className="h-6 w-6 text-[#f9e2af]" />
