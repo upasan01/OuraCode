@@ -1,0 +1,1 @@
+{"root":["./src/app.ts","./src/index.ts","./src/config/db.ts","./src/controllers/roomcontroller.ts","./src/models/room.model.ts","./src/routes/room.routes.ts","./src/sockets/roomsockethandler.ts","./src/types/env.d.ts"],"version":"5.9.2"}
