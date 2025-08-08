@@ -1,10 +1,10 @@
 // initializing room routes
 
 import { Router } from "express";
-import { getResult } from "../controllers/roomController.js";
+import { createRoom } from "../controllers/createRoom.js";
 
 const roomRouter = Router()
 
-roomRouter.get("/", getResult)
+roomRouter.post("/create", createRoom)
 
 export default roomRouter
