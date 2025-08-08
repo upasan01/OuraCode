@@ -7,18 +7,20 @@ export const createRoom = async (req: Request, res: Response) => {
     try {
         const { username, language, roomId } = req.body
 
-        if (!username || !language || !roomId) {
+        if (!username || !language) {
             return res.status(400).json({
-                message: "Username, Language and Room Id is needed",
+                message: "Username and Language is needed",
                 code: 400
             })
         }
 
-        const checkRoomId = await Room.findOne({
-            roomId: roomId
+        const finalRoomId = roomId || crypto.randomBytes(4).toString("hex")
+
+        const existingRoom = await Room.findOne({
+            roomId: finalRoomId
         })
 
-        if (checkRoomId) {
+        if (existingRoom) {
             return res.status(409).json({
                 message: "Room Id already exists",
                 code: 409
@@ -26,16 +28,17 @@ export const createRoom = async (req: Request, res: Response) => {
         }
 
         const room = await Room.create({
+            roomId: finalRoomId,
             username: username,
             language: language,
-            roomId: roomId,
             users: [username]
         })
 
         return res.json({
-            message: "Success",
+            message: "Successfully room created",
             room
         })
+
     } catch (err) {
         return res.status(500).json({
             message: "Something went wrong",
