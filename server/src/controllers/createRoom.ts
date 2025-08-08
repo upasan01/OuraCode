@@ -28,7 +28,8 @@ export const createRoom = async (req: Request, res: Response) => {
         const room = await Room.create({
             username: username,
             language: language,
-            roomId: roomId
+            roomId: roomId,
+            users: [username]
         })
 
         return res.json({

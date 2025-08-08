@@ -6,7 +6,7 @@ export interface userRoom extends Document {
     roomId: string | null;
     language: string;
     username: string;
-    users: ObjectId[];
+    users: string[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -28,7 +28,7 @@ const roomSchema: Schema<userRoom> = new Schema(
         },
         users: [
             {
-                type: Schema.Types.ObjectId,
+                type: String,
                 ref: "User" 
             }
         ]
