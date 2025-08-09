@@ -27,7 +27,7 @@ export const joinRoom = async (req: Request, res: Response) => {
 
         if (userLimit === MAX_USER_LIMITS) {
             return res.status(403).json({
-                message: "Maximum ammout of users joined already",
+                message: "Maximum amount of users joined already",
                 code: 403
             })
         }
