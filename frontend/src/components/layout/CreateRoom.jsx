@@ -104,7 +104,7 @@ const CreateRoom = () => {
         navigator.clipboard.writeText(roomCode)
     }
     return (
-        <div className="mx-auto max-w-2xl mb-12">
+        <div id= "room" className="mx-auto max-w-2xl mb-12">
             <Card className="bg-[#313244]/50 border-[#45475a] backdrop-blur">
                 <CardHeader className="pb-4">
                     <CardTitle className="text-[#a6e3a1] text-lg font-mono">
@@ -161,6 +161,7 @@ const CreateRoom = () => {
                                 </label>
                                 <Input
                                     value={username}
+                                    placeholder="/* enter your username */"
                                     onChange={(e) => setUsername(e.target.value)}
                                     className="bg-[#11111b] border-[#45475a] text-[#cdd6f4] font-mono "
                                 />
@@ -173,7 +174,7 @@ const CreateRoom = () => {
                                     <span className="text-[#89b4fa]">=</span>
                                 </label>
                                 <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
-                                    <SelectTrigger className="bg-[#11111b] border-[#45475a] text-[#cdd6f4] font-mono">
+                                    <SelectTrigger className="bg-[#11111b] border-[#45475a] text-[#c8cad0] font-mono">
                                         <SelectValue placeholder="/* select programming language */" />
                                     </SelectTrigger>
                                     <SelectContent className="bg-[#11111b] border-[#45475a]">
@@ -264,12 +265,12 @@ const CreateRoom = () => {
 
                                 <Button
                                     onClick={handleCreateRoom}
-                                    disabled={!username || !selectedLanguage}
+                                    disabled={!username || !selectedLanguage || isLoading}
                                     className="w-full bg-gradient-to-r from-[#a6e3a1] to-[#89b4fa] hover:from-[#94e2d5] hover:to-[#74c7ec] text-[#1e1e2e] font-semibold py-3 font-mono"
                                 >
                                     <Play className="w-4 h-4 mr-2" />
                                     {"session.start()"}
-                                    {isLoading ? <LoadingIcon /> : <ArrowRight className="w-4 h-4 ml-2" />}
+                                    {isLoading ? <LoadingIcon className='m-2' /> : <ArrowRight className="w-4 h-4 ml-2" />}
                                 </Button>
                             </div>
                         </>
@@ -312,10 +313,10 @@ const CreateRoom = () => {
 
                                 <Button
                                     onClick={handleJoinRoom}
-                                    disabled={!username || !roomCode}
+                                    disabled={!username || !roomCode || isLoading}
                                     className="w-full bg-gradient-to-r from-[#89b4fa] to-[#cba6f7] hover:from-[#74c7ec] hover:to-[#b4befe] text-[#1e1e2e] font-semibold py-3 font-mono"
                                 >
-                                    {isLoading ? <LoadingIcon /> : <ArrowRight className="w-4 h-4 mr-2" />}
+                                    {isLoading ? <LoadingIcon className='m-2' /> : <ArrowRight className="w-4 h-4 mr-2" />}
                                     {"await joinSession()"}
                                 </Button>
                             </div>

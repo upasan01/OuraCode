@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Menu, X, FileText, Zap, Users, Settings, Code2, Terminal } from "lucide-react"
+import { Menu, X, GitPullRequestCreate, Zap, Users, Settings, Code2, Terminal } from "lucide-react"
 import { Button } from "../ui/button"
 
 const Nav = () => {
@@ -15,7 +15,7 @@ const Nav = () => {
           </div>
           <div>
             <span className="text-2xl font-bold text-[#a6e3a1]">{"<GoonShareAI/>"}</span>
-            <div className="text-xs text-[#6c7086]">{"// v2.1.0-stable"}</div>
+            <div className="text-xs text-[#6c7086]">{"// v1.1.0-stable"}</div>
           </div>
         </div>
 
@@ -33,11 +33,11 @@ const Nav = () => {
               <span>{"features()"}</span>
             </a>
             <a
-              href="#docs"
+              href="#room"
               className="text-sm text-[#9399b2] hover:text-[#89b4fa] transition-colors font-mono flex items-center space-x-1"
             >
-              <FileText className="h-4 w-4" />
-              <span>{"docs.read()"}</span>
+              <GitPullRequestCreate className="h-4 w-4" />
+              <span>{"room()"}</span>
             </a>
             <a
               href="#api"

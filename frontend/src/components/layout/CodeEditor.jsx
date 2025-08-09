@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useRef, useImperativeHandle } from 'react';
 import MonacoEditor from '@monaco-editor/react';
 import { CopyIcon, EnhanceIcon, LoadingIcon } from '../ui/Icons';
 
@@ -15,6 +15,20 @@ const CodeEditor = forwardRef(({
   languages = [],
   width = '100%'
 }, ref) => {
+  const editorRef = useRef(null);
+
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      if (editorRef.current) {
+        editorRef.current.focus();
+      }
+    }
+  }));
+  const handleEditorDidMount = (editor) => {
+    editorRef.current = editor;
+    editor.focus();
+  };
+
   return (
     <div
       ref={ref}
@@ -37,6 +51,7 @@ const CodeEditor = forwardRef(({
           </button>
         </div>
       </div>
+      
       {/* Code Editor */}
       <div className="flex-grow min-h-0 px-2">
         <MonacoEditor
@@ -46,8 +61,9 @@ const CodeEditor = forwardRef(({
           language={language}
           onChange={(value) => setCode(value || '')}
           theme="vs-dark"
+          onMount={handleEditorDidMount}
           options={{
-            fontSize: 14,
+            fontSize: 16,
             fontFamily: 'Fira Mono, Menlo, Monaco, Consolas, monospace',
             automaticLayout: true,
             scrollBeyondLastLine: false,

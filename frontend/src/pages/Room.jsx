@@ -8,6 +8,7 @@ import { SendIcon, SparklesIcon, CloseIcon } from '../components/ui/Icons';
 import AnimatedButton from '../components/ui/AnimatedButton';
 import BackgroundGradientAnimation from '../components/ui/BackgroundGradientAnimation';
 import { useParams, useLocation } from 'react-router-dom';
+import { Code2 } from 'lucide-react';
 
 export default function Room() {
 
@@ -16,7 +17,7 @@ export default function Room() {
 
   // Get username and language from location state
   const location = useLocation();
-  const {username, language: selectedlanguage} = location.state || {};
+  const { username, language: selectedlanguage } = location.state || {};
 
   const [code, setCode] = useState('');
   const [language, setLanguage] = useState(selectedlanguage);
@@ -202,14 +203,19 @@ export default function Room() {
   // 🧱 Main UI structure
   return (
     <div className="relative h-screen font-mono text-white p-2 sm:p-5 flex flex-col overflow-hidden">
-      <div className="fixed inset-0 w-full h-full z-1">
+      <div className="fixed inset-0 w-full h-full z-0">
         <BackgroundGradientAnimation />
       </div>
 
       {/* 💡 App title */}
-      <div className="relative left-0 top-0 mb-2 z-10">
-        <span className="text-3xl font-bold text-[#a6e3a1]">&lt;GoonShareAI/&gt;</span>
-        <div className="text-xs text-[#6c7086]">{"// v2.1.0-stable"}</div>
+      <div className="flex items-center space-x-3 z-10 mb-2">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#a6e3a1] to-[#89b4fa]">
+          <Code2 className="h-6 w-6 text-[#1e1e2e]" />
+        </div>
+        <div>
+          <span className="text-2xl font-bold text-[#a6e3a1]">{"<GoonShareAI/>"}</span>
+          <div className="text-xs text-[#7b7d87]">{"// v1.1.0-stable"}</div>
+        </div>
       </div>
 
       <main className="flex-grow flex min-h-0">

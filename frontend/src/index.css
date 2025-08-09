@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+
 @theme{
     --font-bitcount: 'Bitcount', cursive;
     --font-playwrite: 'Playwrite HU', sans-serif;
