@@ -200,7 +200,7 @@ export default function Room() {
     }
   };
 
-  // 🧱 Main UI structure
+  // Main UI structure
   return (
     <div className="relative h-screen font-mono text-white p-2 sm:p-5 flex flex-col overflow-hidden">
       <div className="fixed inset-0 w-full h-full z-0">
