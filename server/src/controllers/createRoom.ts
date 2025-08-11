@@ -37,8 +37,9 @@ export const createRoom = async (req: Request, res: Response) => {
 
         await redis.sadd(`room:${finalRoomId}:users`, username)
         await redis.set(`room:${finalRoomId}:language`, language)
-        await redis.expire(`room:${finalRoomId}:users`, 10)
-        await redis.expire(`room:${finalRoomId}:language`, 10)
+        // expiretion will be enabled in prod
+        /*await redis.expire(`room:${finalRoomId}:users`, 10)
+        await redis.expire(`room:${finalRoomId}:language`, 10)*/
 
         return res.json({
             message: "Successfully room created",
