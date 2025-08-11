@@ -1,13 +1,13 @@
 // starts HTTP and WebSocket server
+import dotenv from "dotenv"
+dotenv.config()
 
 import http from "http"
 import app from "./app.js"
 import { Server } from "ws"
 //import roomSocketHandler from "./sockets/roomSocketHandler.js"
 import { connectDB } from "./config/db.js"
-import dotenv from "dotenv"
 
-dotenv.config()
 connectDB()
 
 const server = http.createServer(app)

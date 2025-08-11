@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Room from "../models/room.model.js";
+import { redis } from "../lib/redis.js";
 
 export const joinRoom = async (req: Request, res: Response) => {
     try {
@@ -34,13 +35,14 @@ export const joinRoom = async (req: Request, res: Response) => {
 
         if (room.users.includes(username)) {
             return res.status(409).json({
-                message: "Username already taken in this room",
+                message: "Username already exists in this room",
                 code: 409
             });
         }
 
         room.users.push(username);
         await room.save();
+        await redis.sadd(`room:${roomId}:users`, username);
 
         return res.status(200).json({
             message: "Joined successfully",
@@ -48,7 +50,7 @@ export const joinRoom = async (req: Request, res: Response) => {
         });
     } catch (err) {
         return res.status(500).json({
-            messgae: "Something went worng",
+            message: "Something went wrong",
             //@ts-ignore
             error: err.message,
             code: 500

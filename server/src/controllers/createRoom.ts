@@ -2,6 +2,7 @@
 import { Request, Response } from "express";
 import Room from "../models/room.model.js";
 import crypto from "crypto"
+import { redis } from "../lib/redis.js";
 
 export const createRoom = async (req: Request, res: Response) => {
     try {
@@ -9,7 +10,7 @@ export const createRoom = async (req: Request, res: Response) => {
 
         if (!username || !language) {
             return res.status(400).json({
-                message: "Username and Language is needed",
+                message: "Username and Language is required",
                 code: 400
             })
         }
@@ -33,6 +34,11 @@ export const createRoom = async (req: Request, res: Response) => {
             language: language,
             users: [username]
         })
+
+        await redis.sadd(`room:${finalRoomId}:users`, username)
+        await redis.set(`room:${finalRoomId}:language`, language)
+        await redis.expire(`room:${finalRoomId}:users`, 10)
+        await redis.expire(`room:${finalRoomId}:language`, 10)
 
         return res.json({
             message: "Successfully room created",

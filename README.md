@@ -1,5 +1,6 @@
 # GoonShareAI
 ## Backend
+*Make a redis instance at upstrash then proceed*
 ```bash
 cd server
 ```

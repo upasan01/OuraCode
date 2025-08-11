@@ -1,5 +1,4 @@
 // mongoose schema for room model
-
 import mongoose, { Document, Model, ObjectId, Schema } from "mongoose";
 
 export interface userRoom extends Document {
@@ -7,8 +6,8 @@ export interface userRoom extends Document {
     language: string;
     username: string;
     users: string[];
+    code: string;
     createdAt: Date;
-    updatedAt: Date;
 }
 
 const roomSchema: Schema<userRoom> = new Schema(
@@ -31,7 +30,11 @@ const roomSchema: Schema<userRoom> = new Schema(
                 type: String,
                 ref: "User" 
             }
-        ]
+        ],
+        code: {
+            type: String,
+            default: ""
+        }
     },
     {
         timestamps: true
