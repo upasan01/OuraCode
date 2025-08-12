@@ -8,7 +8,6 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/:roomCode" element={<Room />} />
         <Route path="/test" element={<Test />} />
       </Routes>
     </Router>

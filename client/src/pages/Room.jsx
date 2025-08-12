@@ -13,11 +13,11 @@ import { Code2 } from 'lucide-react';
 export default function Room() {
 
   // Room code from URL param
-  const { roomCode } = useParams();
+  const { roomCode, username } = useParams();
 
   // Get username and language from location state
   const location = useLocation();
-  const { username, language: selectedlanguage } = location.state || {};
+  const { language: selectedlanguage } = location.state || {};
 
   const [code, setCode] = useState('');
   const [language, setLanguage] = useState(selectedlanguage);
@@ -41,14 +41,14 @@ export default function Room() {
   const chatContainerRef = useRef(null);
   const isResizing = useRef(false);
 
-  // 🔁 Scroll to bottom of chat when history changes
+  // Scroll to bottom of chat when history changes
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [chatHistory, isChatLoading]);
 
-  // ⚙️ Handle drag start on AI panel resizer
+  // Handle drag start on AI panel resizer
   const handleMouseDown = (e) => {
     e.preventDefault();
     isResizing.current = true;

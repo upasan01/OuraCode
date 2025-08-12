@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
@@ -6,9 +7,18 @@ import Particles from "../components/ui/particles";
 import Nav from "../components/layout/Nav";
 import { Code2, Share2, Terminal, GitBranch, Play, MessageSquare, Eye, DiscIcon as Discord, Github, Twitter } from "lucide-react";
 import CreateRoom from "../components/layout/CreateRoom";
+import Room from "./Room";
 import TextType from "../components/ui/TextType";
 
 export default function GoonShareAILanding() {
+  const [searchParams] = useSearchParams();
+  const roomId = searchParams.get('roomId');
+  const username = searchParams.get('username');
+
+  // If we have roomId and username query parameters, render the Room component
+  if (roomId && username) {
+    return <Room />;
+  }
 
   return (
     <main className="relative min-h-screen w-full bg-gradient-to-br from-[#11111b] via-[#181825] to-[#1e1e2e] overflow-x-hidden font-mono">
@@ -16,9 +26,7 @@ export default function GoonShareAILanding() {
       <div className="fixed inset-0 w-full h-full z-10">
         <Particles />
       </div>
-   
       <Nav />
-
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 md:py-32 z-0">
         <div className="absolute inset-0"></div>
@@ -65,7 +73,7 @@ export default function GoonShareAILanding() {
       </section>
 
       {/* Room Creation/Join Section */}
-      <div className="relative z-20">
+      <div id="room" className="relative z-20">
         <CreateRoom />
       </div>
 
