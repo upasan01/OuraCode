@@ -43,6 +43,7 @@ export const joinRoom = async (req: Request, res: Response) => {
         room.users.push(username);
         await room.save();
         await redis.sadd(`room:${roomId}:users`, username);
+        // have to add expire also here before prod
 
         return res.status(200).json({
             message: "Joined successfully",
