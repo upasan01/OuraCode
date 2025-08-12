@@ -7,16 +7,27 @@ import PromptTemplate from '../components/layout/PromptTemplate';
 import { SendIcon, SparklesIcon, CloseIcon } from '../components/ui/Icons';
 import AnimatedButton from '../components/ui/AnimatedButton';
 import BackgroundGradientAnimation from '../components/ui/BackgroundGradientAnimation';
-import { useParams, useLocation } from 'react-router-dom';
+import { useLocation, useSearchParams, useNavigate } from 'react-router-dom';
 import { Code2 } from 'lucide-react';
 
 export default function Room() {
 
-  // Room code from URL param
-  const { roomCode, username } = useParams();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const roomId = searchParams.get('roomId');
+  const username = searchParams.get('username');
 
-  // Get username and language from location state
+  useEffect(() => {
+    if (!roomId || !username) {
+      navigate('/error', { 
+        state: { message: 'Missing roomId or username' },
+        replace: true 
+      });
+    }
+  }, [roomId, username, navigate]);
+
   const location = useLocation();
+
   const { language: selectedlanguage } = location.state || {};
 
   const [code, setCode] = useState('');
@@ -57,7 +68,7 @@ export default function Room() {
     document.addEventListener('mouseup', handleMouseUp);
   };
 
-  // ⚙️ Resize AI panel width, within bounds with throttling for smoother performance
+  // Resize AI panel width, within bounds with throttling for smoother performance
   const handleMouseMove = (e) => {
     if (!isResizing.current) return;
 
@@ -69,7 +80,7 @@ export default function Room() {
     });
   };
 
-  // ⚙️ Stop resizing on mouse release
+  // Stop resizing on mouse release
   const handleMouseUp = () => {
     isResizing.current = false;
     setIsResizingPanel(false);
@@ -79,10 +90,11 @@ export default function Room() {
 
   // Supported language options for dropdown
   const languages = [
-    { value: 'javascript', label: 'JavaScript' },
-    { value: 'python', label: 'Python' },
+    {value: 'c', label: 'C'},
+    { value: 'js', label: 'JavaScript' },
+    { value: 'py', label: 'Python' },
     { value: 'java', label: 'Java' },
-    { value: 'csharp', label: 'C#' },
+    { value: 'cs', label: 'C#' },
     { value: 'cpp', label: 'C++' },
     { value: 'go', label: 'Go' },
   ];

@@ -51,7 +51,7 @@ const CreateRoom = () => {
             // Update the roomCode state with the backend-generated or confirmed code
             setRoomCode(response.room.roomId);
 
-            navigate(`/?roomId=${response.room.roomId}&username=${username}`, {
+            navigate(`/room?roomId=${response.room.roomId}&username=${username}`, {
                 state: {
                     language: selectedLanguage,
                 }
@@ -80,7 +80,7 @@ const CreateRoom = () => {
             console.log("Complete room data:", response.room);
             console.log("Room language from backend:", response.room.language);
 
-            navigate(`/?roomId=${roomCode}&username=${username}`, {
+            navigate(`/room?roomId=${roomCode}&username=${username}`, {
                 state: {
                     language: response.room.language, 
                     roomData: response.room 
