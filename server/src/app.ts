@@ -7,7 +7,10 @@ import codeRouter from "./routes/code.routes.js";
 
 const app = express()
 
-app.use(cors())
+app.use(cors({
+    origin: "http://localhost:5173",
+    exposedHeaders: ["Content-Disposition", "Content-Type"]
+}))
 app.use(express.json())
 
 app.use("/api/v1/room", roomRouter)
