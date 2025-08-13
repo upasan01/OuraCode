@@ -78,10 +78,9 @@ const CodeEditor = forwardRef(({
   return (
     <div
       ref={ref}
-      className="flex-grow flex flex-col bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-2xl z-10"
-      style={{ width }}
+      className="flex-grow flex flex-col bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-2xl z-10 h-full"
     >
-      <div className="flex justify-between items-center p-4 flex-shrink-0">
+      {/* <div className="flex justify-between items-center p-4 flex-shrink-0">
         <h2 className="text-xl font-semibold text-slate-200">Code Editor</h2>
         <div className="flex items-center gap-4">
           <button onClick={onCopyToClipboard} className="text-slate-400 hover:text-white transition-colors duration-200 flex items-center gap-2 disabled:opacity-50" disabled={!code}>
@@ -106,10 +105,10 @@ const CodeEditor = forwardRef(({
             <span>Goon More</span>
           </button>
         </div>
-      </div>
+      </div> */}
       
       {/* Code Editor */}
-      <div className="flex-grow min-h-0 px-2">
+      <div className="flex-grow px-2">
         <MonacoEditor
           width="100%"
           height="100%"

@@ -11,19 +11,19 @@ import TextType from "../components/ui/TextType";
 export default function GoonShareAILanding() {
 
   return (
-    <main className="relative min-h-screen w-full bg-gradient-to-br from-[#11111b] via-[#181825] to-[#1e1e2e] overflow-x-hidden font-mono">
+    <main className="relative min-h-screen w-full bg-gradient-to-br from-[#11111b] via-[#181825] to-[#1e1e2e] font-mono">
       {/* Background */}
       <div className="fixed inset-0 w-full h-full z-10">
         <Particles />
       </div>
       <Nav />
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 md:py-32 z-0">
+      <section className="relative overflow-hidden py-10 md:py-10 z-0">
         <div className="absolute inset-0"></div>
 
         <div className="w-full max-w-7xl mx-auto relative px-4 md:px-6">
           <div className="mx-auto max-w-4xl text-center">
-            <Badge className="mb-6 bg-[#313260]/50 text-[#a6e3a1] border-[#313244] hover:bg-[#313244]/70 mt-6">
+            <Badge className="mb-4 bg-[#313260]/50 text-[#a6e3a1] border-[#313244] hover:bg-[#313244]/70 mt-6">
               <Terminal className="w-4 h-4 mr-1" />
               {"/* real-time vibe coding */"}
             </Badge>

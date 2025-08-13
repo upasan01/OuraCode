@@ -3,6 +3,7 @@ import LandingPage from './pages/LandingPage';
 import Room from './pages/Room';
 import ErrorPage from './pages/ErrorPage';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import CodeEditorPage from './pages/CodeEditorPage';
 
 function App() {
   return (

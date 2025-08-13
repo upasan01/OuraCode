@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_BASE_URL = 'http://localhost:3000/api/v1/code';
 
 export const downloadCode = async (code, roomId) => {
-    
+
     try {
         const response = await axios.post(
             `${API_BASE_URL}/download?roomId=${roomId}`,
@@ -24,7 +24,7 @@ export const downloadCode = async (code, roomId) => {
 
         // Extract filename from response headers (save korar jonno filename set korbe)
         const contentDisposition = response.headers['content-disposition'];
-        const filename = contentDisposition 
+        const filename = contentDisposition
             ? contentDisposition.split('filename=')[1].replace(/"/g, '')
             : 'code.txt';
 
@@ -42,11 +42,11 @@ export const downloadCode = async (code, roomId) => {
 
     } catch (error) {
         console.error('Download error:', error);
-        
+
         if (error.code === 'ECONNABORTED') {
             throw new Error('Download timeout - server is not responding');
         }
-        
+
         if (error.response?.data) {
             // Handle blob error responses
             if (error.response.data instanceof Blob) {
@@ -57,12 +57,35 @@ export const downloadCode = async (code, roomId) => {
             // Handle JSON error responses
             throw new Error(error.response.data.message || 'Download failed');
         }
-        
+
         if (error.request) {
             throw new Error('No response from server - check if backend is running');
         }
-        
+
         throw new Error(error.message || 'Download failed');
     }
 };
+
+
+export const saveCode = async (roomId, username, code) => {
+    try {
+        const res = await axios.post(
+            `${API_BASE_URL}/save?roomId=${roomId}&username=${username}`,
+            { code },
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                timeout: 30000
+            }
+        );
+
+        return { success: true, message: res.data.message || "Code saved successfully" };
+    } catch (err) {
+        const errorMsg = err.response?.data?.message || err.message || "Error saving code";
+        console.error("Error saving code:", errorMsg);
+        throw new Error(errorMsg);
+    }
+};
+
 

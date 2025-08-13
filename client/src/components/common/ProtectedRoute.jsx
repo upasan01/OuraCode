@@ -1,10 +1,12 @@
 import { Navigate, Outlet, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
+import axios from "axios";
 
 function ProtectedRoute() {
   const [searchParams] = useSearchParams();
   const roomCode = searchParams.get("roomId");
   const username = searchParams.get("username");
+  
 
   const [isValid, setIsValid] = useState(null);
 

@@ -1,307 +1,432 @@
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
 
-import React, { useState, useEffect, useRef } from 'react';
+// UI Components
+import { Button } from "../components/ui/button";
+import { ScrollArea } from "../components/ui/ScrollArea";
+import { Badge } from "../components/ui/badge";
+import { Input } from "../components/ui/input";
+import { LoadingIcon, EnhanceIcon } from "../components/ui/Icons";
+import BackgroundGradientAnimation from "../components/ui/BackgroundGradientAnimation";
+import { SiJavascript, SiPython, SiCplusplus, SiC } from 'react-icons/si';
+import { FaJava } from "react-icons/fa"
+import { TbBrandCSharp } from "react-icons/tb"
+import { FaGolang } from "react-icons/fa6"
 
-import CodeEditor from '../components/layout/CodeEditor';
-import MarkdownRenderer from '../components/layout/MarkdownRenderer';
-import PromptTemplate from '../components/layout/PromptTemplate';
-import { SendIcon, SparklesIcon, CloseIcon } from '../components/ui/Icons';
-import AnimatedButton from '../components/ui/AnimatedButton';
-import BackgroundGradientAnimation from '../components/ui/BackgroundGradientAnimation';
-import { useLocation, useSearchParams } from 'react-router-dom';
-import { Code2 } from 'lucide-react';
+// App Components
+import CodeEditor from "../components/layout/CodeEditor";
+import MarkdownRenderer from "../components/layout/MarkdownRenderer";
+import PromptTemplate from "../components/layout/PromptTemplate";
 
-export default function Room() {
+// Icons
+import {
+    MessageCircle, X, Code2, ArrowUp, Copy, Check, DownloadIcon, Save
+} from "lucide-react";
 
-  const [searchParams] = useSearchParams();
-  const roomId = searchParams.get("roomId");
+// API
+import { downloadCode, saveCode } from '../api/controllerApi';
 
-  const location = useLocation();
+// Panel Configuration Constants
+const DEFAULT_PANEL_WIDTH = 500;
+const MIN_PANEL_WIDTH = 400;
+const MAX_PANEL_WIDTH = 900;
 
-  const { language: selectedlanguage } = location.state || {};
+export default function App() {
+    const [searchParams] = useSearchParams();
+    const roomId = searchParams.get("roomId");
+    const username = searchParams.get("username");
+    const location = useLocation();
+    const { language: initialLanguage } = location.state || {};
 
-  const [code, setCode] = useState('');
-  const [language, setLanguage] = useState(selectedlanguage);
+    const languages = useMemo(
+        () => [
+            { id: "C", value: "c", name: "C", icon: SiC, color: "bg-gray-500/20 text-gray-300", ext: "c" },
+            { id: "javascript", value: "js", name: "JavaScript", icon: SiJavascript, color: "bg-yellow-500/20 text-yellow-300", ext: "js" },
+            { id: "python", value: "py", name: "Python", icon: SiPython, color: "bg-green-500/20 text-green-300", ext: "py" },
+            { id: "java", value: "java", name: "Java", icon: FaJava, color: "bg-orange-500/20 text-orange-300", ext: "java" },
+            { id: "cpp", value: "cpp", name: "C++", icon: SiCplusplus, color: "bg-purple-500/20 text-purple-300", ext: "cpp" },
+            { id: "csharp", value: "cs", name: "C#", icon: TbBrandCSharp, color: "bg-teal-500/20 ", ext: "cs" },
+            { id: "go", value: "go", name: "Go lang", icon: FaGolang, color: "bg-[#00ADD8]/20 text-[#00ADD8]", ext: "go" },
+        ],
+        []
+    );
 
-  //  UI state
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [copySuccess, setCopySuccess] = useState('');
+    const defaultLang = languages.find((l) => l.value === initialLanguage) || languages[0];
+    const [selectedLanguage, setSelectedLanguage] = useState(defaultLang);
+    const [code, setCode] = useState("");
 
-  // Chat state - All messages now go into chatHistory.
-  const [chatHistory, setChatHistory] = useState([]);
-  const [chatInput, setChatInput] = useState('');
-  const [isChatLoading, setIsChatLoading] = useState(false);
-
-  // AI Panel state and sizing
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [panelWidth, setPanelWidth] = useState(600);
-  const [isResizingPanel, setIsResizingPanel] = useState(false);
-
-  // Refs for chat scroll and panel resizing
-  const chatContainerRef = useRef(null);
-  const isResizing = useRef(false);
-
-  // Scroll to bottom of chat when history changes
-  useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-    }
-  }, [chatHistory, isChatLoading]);
-
-  // Handle drag start on AI panel resizer
-  const handleMouseDown = (e) => {
-    e.preventDefault();
-    isResizing.current = true;
-    setIsResizingPanel(true);
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  };
-
-  // Resize AI panel width, within bounds with throttling for smoother performance
-  const handleMouseMove = (e) => {
-    if (!isResizing.current) return;
-
-    // Throttle the resize for smoother performance
-    requestAnimationFrame(() => {
-      const maxWidth = window.innerWidth - 200;
-      const newWidth = Math.min(Math.max(window.innerWidth - e.clientX, 400), Math.min(900, maxWidth));
-      setPanelWidth(newWidth);
-    });
-  };
-
-  // Stop resizing on mouse release
-  const handleMouseUp = () => {
-    isResizing.current = false;
-    setIsResizingPanel(false);
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
-  };
-
-
-  // Supported language options for dropdown
-  const languages = [
-    { value: 'c', label: 'C' },
-    { value: 'js', label: 'JavaScript' },
-    { value: 'py', label: 'Python' },
-    { value: 'java', label: 'Java' },
-    { value: 'cs', label: 'C#' },
-    { value: 'cpp', label: 'C++' },
-    { value: 'go', label: 'Go' },
-  ];
-
-  // Copy code to clipboard and show feedback
-  const handleCopyToClipboard = () => {
-    if (!code) return;
-    const textArea = document.createElement("textarea");
-    textArea.value = code;
-    document.body.appendChild(textArea);
-    textArea.select();
-
-    try {
-      document.execCommand('copy');
-      setCopySuccess('Copied!');
-      setTimeout(() => setCopySuccess(''), 2000);
-    } catch (err) {
-      setCopySuccess('Failed to copy');
-    }
-    document.body.removeChild(textArea);
-  };
-
-  // Call Gemini API with a prompt and return result text
-  const callGeminiAPI = async (prompt) => {
-    const apiKey = import.meta.env.VITE_GENAI_API_KEY
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-    const payload = {
-      contents: [{ role: "user", parts: [{ text: prompt }] }]
+    const [isCopied, setIsCopied] = useState(false);
+    const handleCopyCode = async () => {
+        try {
+            await navigator.clipboard.writeText(code);
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        } catch (err) {
+            console.error("Failed to copy code:", err);
+        }
     };
 
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.json();
-      throw new Error(`API Error: ${response.status} - ${errorBody.error?.message || 'Unknown error'}`);
-    }
-
-    const result = await response.json();
-    if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
-      return result.candidates[0].content.parts[0].text;
-    } else {
-      throw new Error("Invalid response structure from API.");
-    }
-  };
+    const [error, setError] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [chatHistory, setChatHistory] = useState([]);
+    const [chatInput, setChatInput] = useState("");
+    const [isChatLoading, setIsChatLoading] = useState(false);
 
 
-  const handleReview = async () => {
-    if (!code.trim() || !language) {
-      setError('Please enter code/task and select a language.');
-      if (!isPanelOpen) setIsPanelOpen(true);
-      return;
-    }
+    const [isChatOpen, setChatOpen] = useState(false);
+    const [panelWidth, setPanelWidth] = useState(DEFAULT_PANEL_WIDTH);
+    const isResizing = useRef(false);
+    const chatContainerRef = useRef(null);
 
-    setIsLoading(true);
-    setError(null);
-    if (!isPanelOpen) setIsPanelOpen(true);
+    useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    }, [chatHistory, isChatLoading]);
 
-    const prompt = PromptTemplate.getReviewPrompt(language, code);
+    const handleMouseDown = (e) => {
+        e.preventDefault();
+        isResizing.current = true;
+        document.addEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mouseup", handleMouseUp);
+    };
 
-    const analysisPlaceholder = { role: 'ai', text: '' };
-    setChatHistory(prev => [...prev, analysisPlaceholder]);
+    const handleMouseMove = (e) => {
+        if (!isResizing.current) return;
 
-    try {
-      const resultText = await callGeminiAPI(prompt);
-      setChatHistory(prev => {
-        const newHistory = [...prev];
-        newHistory[newHistory.length - 1] = { role: 'ai', text: resultText };
-        return newHistory;
-      });
-    } catch (err) {
-      console.error(err);
-      setError(err.message);
-      setChatHistory(prev => {
-        const newHistory = [...prev];
-        newHistory[newHistory.length - 1] = { role: 'ai', text: `Error: ${err.message}` };
-        return newHistory;
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        requestAnimationFrame(() => {
+            const newWidth = window.innerWidth - e.clientX;
+            const maxAllowedWidth = window.innerWidth - 256 - 400;
+            const clampedWidth = Math.max(MIN_PANEL_WIDTH, Math.min(newWidth, MAX_PANEL_WIDTH, maxAllowedWidth));
+            setPanelWidth(clampedWidth);
+        });
+    };
+
+    const handleMouseUp = () => {
+        isResizing.current = false;
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    const callGeminiAPI = async (prompt) => {
+        const apiKey = import.meta.env.VITE_GENAI_API_KEY;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.json().catch(() => ({}));
+            throw new Error(`API Error: ${response.status} - ${errorBody.error?.message || "Unknown error"}`);
+        }
+
+        const result = await response.json();
+        const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!text) throw new Error("Invalid response structure from API.");
+        return text;
+    };
+
+    const handleReview = async () => {
+        if (!code.trim()) {
+            setError("Please enter some code to review.");
+            if (!isChatOpen) setChatOpen(true);
+            return;
+        }
+
+        setIsLoading(true);
+        setError(null);
+        if (!isChatOpen) setChatOpen(true);
+
+        const prompt = PromptTemplate.getReviewPrompt(selectedLanguage.value, code);
+        setChatHistory((prev) => [...prev, { role: "user", text: `Please review the following ${selectedLanguage.name} code.` }, { role: "ai", text: "" }]);
+
+        try {
+            const resultText = await callGeminiAPI(prompt);
+            setChatHistory((prev) => {
+                const newHistory = [...prev];
+                newHistory[newHistory.length - 1] = { role: "ai", text: resultText };
+                return newHistory;
+            });
+        } catch (err) {
+            console.error(err);
+            setError(err.message);
+            setChatHistory((prev) => {
+                const newHistory = [...prev];
+                newHistory[newHistory.length - 1] = { role: "ai", text: `Error: ${err.message}` };
+                return newHistory;
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleChatSubmit = async (e) => {
+        e.preventDefault();
+        if (!chatInput.trim() || isChatLoading) return;
+
+        const newUserMessage = { role: "user", text: chatInput };
+        setChatHistory((prev) => [...prev, newUserMessage, { role: "ai", text: "" }]);
+        setIsChatLoading(true);
+        setChatInput("");
+
+        const prompt = PromptTemplate.getChatPrompt({
+            language: selectedLanguage.value, code, chatHistory: [...chatHistory, newUserMessage], chatInput,
+        });
+
+        try {
+            const resultText = await callGeminiAPI(prompt);
+            setChatHistory((prev) => {
+                const newHistory = [...prev];
+                newHistory[newHistory.length - 1] = { role: "ai", text: resultText };
+                return newHistory;
+            });
+        } catch (err) {
+            setChatHistory((prev) => {
+                const newHistory = [...prev];
+                newHistory[newHistory.length - 1] = { role: "ai", text: `Sorry, I encountered an error: ${err.message}` };
+                return newHistory;
+            });
+        } finally {
+            setIsChatLoading(false);
+        }
+    };
+
+    // Download states
+    const [downloadLoading, setDownloadLoading] = useState(false);
+    const [downloadError, setDownloadError] = useState('');
+
+    // Download handler
+    const handleDownload = async () => {
+        if (!code || !roomId) {
+            setDownloadError('Missing code or room ID');
+            return;
+        }
+
+        try {
+            setDownloadLoading(true);
+            setDownloadError('');
+
+            // Add timeout to prevent infinite loading
+            const downloadPromise = downloadCode(code, roomId);
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Download timeout - server may be unresponsive')), 30000)
+            );
+
+            await Promise.race([downloadPromise, timeoutPromise]);
+
+        } catch (error) {
+            console.error('Download failed:', error);
+            setDownloadError(error.message);
+        } finally {
+            setDownloadLoading(false);
+        }
+    };
+    const [saveMessage, setSaveMessage] = useState('');
+    //Save code handler
+    const handleSaveCode = async () => {
+        setIsLoading(true);
+        setSaveMessage('');
+        try {
+            const response = await saveCode(roomId, username, code);
+            if (response.success) {
+                setSaveMessage( response.message ||'Code saved successfully!');
+            } else {
+                setSaveMessage(response.message || 'Failed to save code.');
+            }
+        } catch (error) {
+            console.error('Save code error:', error);
+            setSaveMessage(error.response?.message || error.message || 'Failed to save code.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
 
-  const handleChatSubmit = async (e) => {
-    e.preventDefault();
-    if (!chatInput.trim() || isChatLoading) return;
-
-    const newUserMessage = { role: 'user', text: chatInput };
-    setChatHistory(prev => [...prev, newUserMessage, { role: 'ai', text: '' }]);
-    setIsChatLoading(true);
-    setChatInput('');
-
-    const prompt = PromptTemplate.getChatPrompt({ language, code, chatHistory: [...chatHistory, newUserMessage], chatInput });
-
-    try {
-      const resultText = await callGeminiAPI(prompt);
-      setChatHistory(prev => {
-        const newHistory = [...prev];
-        newHistory[newHistory.length - 1] = { role: 'ai', text: resultText };
-        return newHistory;
-      });
-    } catch (err) {
-      const errorResponse = { role: 'ai', text: `Sorry, I encountered an error: ${err.message}` };
-      setChatHistory(prev => {
-        const newHistory = [...prev];
-        newHistory[newHistory.length - 1] = errorResponse;
-        return newHistory;
-      });
-    } finally {
-      setIsChatLoading(false);
-    }
-  };
-
-  // Main UI structure
-  return (
-    <div className="relative h-screen font-mono text-white p-2 sm:p-5 flex flex-col overflow-hidden">
-      <div className="fixed inset-0 w-full h-full z-0">
-        <BackgroundGradientAnimation />
-      </div>
-
-      {/* 💡 App title */}
-      <div className="flex items-center space-x-3 z-10 mb-2">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#a6e3a1] to-[#89b4fa]">
-          <Code2 className="h-6 w-6 text-[#1e1e2e]" />
-        </div>
-        <div>
-          <span className="text-2xl font-bold text-[#a6e3a1]">{"<GoonShareAI/>"}</span>
-          <div className="text-xs text-[#7b7d87]">{"// v1.1.0-stable"}</div>
-        </div>
-      </div>
-
-      <main className="flex-grow flex min-h-0">
-        {/* 📝 Code editor panel */}
-        <CodeEditor
-          code={code}
-          setCode={setCode}
-          language={language}
-          roomId={roomId}
-          onLanguageChange={setLanguage}
-          onCopyToClipboard={handleCopyToClipboard}
-          onReview={handleReview}
-          copySuccess={copySuccess}
-          isLoading={isLoading}
-          languages={languages}
-          width={isPanelOpen ? `calc(100% - ${panelWidth}px - 8px)` : '100%'}
-        />
-
-        {/* 🧠 Open panel button */}
-        {!isPanelOpen && (
-          <AnimatedButton
-            show={<SparklesIcon />}
-            more="GoonologyAI"
-            onClick={() => setIsPanelOpen(true)}
-            className="fixed bottom-8 right-8"
-          />
-        )}
-
-        {/* 🧠 AI Panel + resizer */}
-        {isPanelOpen && (
-          <>
-            {/* Resizer line */}
-            <div
-              onMouseDown={handleMouseDown}
-              className="w-2 cursor-col-resize bg-slate-700/50 hover:bg-indigo-500 transition-all duration-500 ease-in-out flex-shrink-0 z-10 animate-fade-in"
-            ></div>
-
-            {/* Panel */}
-            <div
-              style={{ width: panelWidth }}
-              className={`bg-slate-800/80 backdrop-blur-xl border-l border-slate-700 shadow-2xl flex flex-col rounded-r-xl flex-shrink-0 h-full z-10 translate-x-0 opacity-100 ${!isResizingPanel ? 'transition-all duration-700 ease-in-out' : ''
-                }`}
-            >
-              <div className="p-4 border-b border-slate-700/50 flex justify-between items-center flex-shrink-0 animate-fade-in-delay-100">
-                <h2 className="text-xl font-semibold text-slate-200">Goonology AI</h2>
-                <button onClick={() => setIsPanelOpen(false)} className="text-slate-400 hover:text-white"><CloseIcon /></button>
-              </div>
-
-              {/* Chat and review output */}
-              <div className="p-6 flex-grow overflow-y-auto animate-fade-in-delay-200" ref={chatContainerRef}>
-                {error && <div className="bg-red-900/50 text-red-300 p-4 rounded-md"><p className="font-bold">An error occurred:</p><p className="mt-1 text-sm">{error}</p></div>}
-
-                {/* Simplified render logic now only depends on chatHistory */}
-                {chatHistory.length === 0 && !isLoading && !error && (
-                  <div className="flex justify-center items-center h-full text-center"><p className="text-slate-500">Analyze your code or start a conversation.</p></div>
-                )}
-
-                {chatHistory.map((msg, index) => (
-                  <div key={index} className={`my-4 p-4 rounded-lg w-fit ${msg.role === 'user' ? 'bg-slate-700/50 ml-auto' : 'bg-slate-800'}`} style={{ maxWidth: '90%' }}>
-                    <p className="font-bold text-sm mb-2">{msg.role === 'user' ? 'You' : 'GoonologyAI'}</p>
-                    {/* Display loading placeholder or the final message */}
-                    {msg.text ? <MarkdownRenderer text={msg.text} onUseCode={(newCode) => setCode(newCode)} /> : <div className="text-center text-slate-400 animate-pulse">Gooner is thinking...</div>}
-                  </div>
-                ))}
-              </div>
-
-              {/* Chat input */}
-              <form onSubmit={handleChatSubmit} className="p-4 border-t border-slate-700/50 flex items-center gap-4 flex-shrink-0">
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  placeholder="Ask a question..."
-                  className="flex-grow bg-slate-700/80 border border-slate-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  disabled={isChatLoading || isLoading}
-                />
-                <button type="submit" disabled={isChatLoading || isLoading || !chatInput.trim()} className="p-2 bg-indigo-600 rounded-full text-white hover:bg-indigo-700 disabled:bg-indigo-500/50 disabled:cursor-not-allowed transition-colors">
-                  <SendIcon />
-                </button>
-              </form>
+    return (
+        <div className="relative h-screen bg-[#1e1e2e] text-[#cdd6f4] flex flex-col overflow-hidden">
+            <div className="fixed inset-0 w-full h-full z-0">
+                <BackgroundGradientAnimation />
             </div>
-          </>
-        )}
-      </main>
-    </div>
-  );
+
+            <header className="h-16 bg-[#11111b] border-b border-[#313244] flex items-center justify-between px-6 z-10 flex-shrink-0">
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center space-x-3 z-10 mb-2">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#a6e3a1] to-[#89b4fa]">
+                            <Code2 className="h-6 w-6 text-[#1e1e2e]" />
+                        </div>
+                        <div>
+                            <span className="text-2xl font-bold text-[#a6e3a1]">{"<GoonShareAI/>"}</span>
+                            <div className="text-xs text-[#7b7d87]">{"// v1.1.0-stable"}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2 z-10">
+                    <Button
+                        onClick={handleSaveCode}
+                        variant="outline"
+                        size="sm"
+                        className="border-[#313244] hover:bg-[#313244] text-[#cdd6f4] bg-transparent"
+                    >
+                        {isLoading ? <LoadingIcon className="w-5 h-5" /> : <Save size={16} className="mr-2" />}
+                        Save
+                    </Button>
+                    {saveMessage && (
+                        <span className={`ml-2 text-sm ${saveMessage.includes('success') ? 'text-green-400' : 'text-red-400'}`}>
+                            {saveMessage}
+                        </span>
+                    )}
+                </div>
+            </header>
+
+
+            <div className="flex-1 flex overflow-hidden">
+
+                <div className="w-64 bg-[#181825] border-r border-[#313244] flex flex-col z-10 flex-shrink-0">
+                    <div className="p-4 border-b border-[#313244]">
+                        <h2 className="text-lg font-semibold text-[#f38ba8] mb-2">Languages</h2>
+                        <Badge variant="secondary" className="bg-[#313244] text-[#a6adc8]">
+                            {languages.length} Available
+                        </Badge>
+                    </div>
+                    <ScrollArea className="flex-1 p-2">
+                        <div className="space-y-1">
+                            {languages.map((language) => (
+                                <button
+                                    key={language.value}
+                                    onClick={() => setSelectedLanguage(language)}
+                                    className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-[#313244] ${selectedLanguage.value === language.value ? "bg-[#313244] border border-[#f38ba8]" : ""}`}
+                                >
+                                    <div className={`p-2 rounded-md ${language.color}`}>
+                                        <language.icon size={16} />
+                                    </div>
+                                    <span className="font-medium">{language.name}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </ScrollArea>
+                </div>
+
+                {/* Column 2: Editor */}
+                <div className="flex-1 flex flex-col relative overflow-hidden">
+                    <div className="h-14 bg-[#181825] border-b border-[#313244] flex items-center justify-between px-4 flex-shrink-0">
+                        <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-md ${selectedLanguage.color}`}>
+                                <selectedLanguage.icon size={20} />
+                            </div>
+                            <h1 className="text-xl font-semibold">{selectedLanguage.name} Editor</h1>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button onClick={handleCopyCode} variant="outline" size="sm" className=" hover:bg-[#313244] text-[#cdd6f4] bg-transparent"
+                                disabled={!code}>
+
+                                {isCopied ? <Check size={16} className="mr-2" /> : <Copy size={16} />}
+                                {isCopied ? "Copied!" : ''}
+                            </Button>
+
+                            <Button
+                                onClick={handleDownload} variant="outline" size="sm"
+                                disabled={downloadLoading || !code}
+                                className={`hover:bg-[#313244] text-[#cdd6f4] bg-transparent transition-colors duration-200 disabled:opacity-50 flex items-center gap-2 ${downloadError ? "bg-red-900/50" : ""}`}
+                                title={downloadError || 'Download code'}
+                            >
+                                {downloadLoading ? <LoadingIcon className="w-5 h-5" /> : <DownloadIcon className="w-5 h-5" />}
+                                {downloadError ? <span className="text-xs text-red-400 ml-2">{downloadError}</span> : null}
+                            </Button>
+
+                            <Button onClick={handleReview} className="bg-[#f38ba8] hover:bg-[#f38ba8]/80 text-[#1e1e2e] font-semibold" disabled={isLoading}>
+                                <EnhanceIcon size={16} className="mr-2" />
+                                GoonMore
+                            </Button>
+                            <Button variant="outline" size="icon" onClick={() => setChatOpen((v) => !v)} className="border-[#313244] hover:bg-[#313244]">
+                                <MessageCircle size={16} />
+                            </Button>
+                        </div>
+                    </div>
+                    <div className="flex-1 p-4 h-full">
+                        <CodeEditor
+                            code={code}
+                            setCode={setCode}
+                            language={selectedLanguage.value}
+                            roomId={roomId}
+                            onLanguageChange={(val) => {
+                                const found = languages.find((l) => l.value === val) || selectedLanguage;
+                                setSelectedLanguage(found);
+                            }}
+                        />
+                    </div>
+                </div>
+
+
+                {isChatOpen && (
+                    <div className="flex flex-shrink-0">
+                        <div onMouseDown={handleMouseDown} className="w-1 bg-[#313244] cursor-col-resize hover:bg-[#f38ba8] z-10 transition-colors" />
+                        <div className=" border-l border-[#313244] flex flex-col z-10" style={{ width: panelWidth }}>
+                            <div className="h-14 bg-[#181825] border-b border-[#313244] flex items-center justify-between px-4 flex-shrink-0">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-[#a6e3a1] rounded-full animate-pulse" />
+                                    <h3 className="font-semibold text-[#a6e3a1]">AI Assistant</h3>
+                                </div>
+                                <Button variant="ghost" size="icon" onClick={() => setChatOpen(false)} className="hover:bg-[#313244]">
+                                    <X size={16} />
+                                </Button>
+                            </div>
+                            <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto">
+                                {error && (
+                                    <div className="bg-red-900/50 text-red-300 p-4 rounded-md mb-4">
+                                        <p className="font-bold">An error occurred:</p>
+                                        <p className="mt-1 text-sm">{error}</p>
+                                    </div>
+                                )}
+                                {chatHistory.length === 0 && !isLoading && !error && (
+                                    <div className="flex justify-center items-center h-full text-center">
+                                        <p className="text-[#6c7086]">Analyze your code or start a conversation.</p>
+                                    </div>
+                                )}
+                                <div className="space-y-2">
+                                    {chatHistory.map((msg, idx) => (
+                                        <div key={idx} className={`py-3 px-4 ${msg.role === "user" ? "bg-transparent" : "bg-transparent"}`}>
+                                            <div className={`${msg.role === "user" ? "ml-auto max-w-[75%] bg-[#242431] text-[#ffffff] px-4 py-3 rounded-3xl" : "max-w-[85%] bg-[#1e1e2e] text-[#ffffff] px-4 py-3 rounded-3xl"}`}>
+                                                <p className="text-xs opacity-90 mb-2 font-medium">{msg.role === "user" ? "You" : "GoonologyAI"}</p>
+                                                {msg.text ? (
+                                                    <MarkdownRenderer text={msg.text} onUseCode={(newCode) => setCode(newCode)} />
+                                                ) : (
+                                                    <div className="text-[#a1a1a1] animate-pulse flex items-center gap-2">
+                                                        <div className="flex space-x-1">
+                                                            <div className="w-2 h-2 bg-[#a1a1a1] rounded-full animate-bounce"></div>
+                                                            <div className="w-2 h-2 bg-[#a1a1a1] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                                            <div className="w-2 h-2 bg-[#a1a1a1] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                                        </div>
+                                                        <span>Thinking...</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="p-4 border-t border-[#313244] flex-shrink-0 ">
+                                <form onSubmit={handleChatSubmit} className="flex gap-2">
+                                    <Input
+                                        value={chatInput}
+                                        onChange={(e) => setChatInput(e.target.value)}
+                                        placeholder="Ask about your code..."
+                                        className="bg-[#11111b] border-[#313244] rounded-lg text-[#cdd6f4] placeholder:text-[#6c7086]"
+                                        disabled={isChatLoading || isLoading}
+                                    />
+                                    <Button type="submit" size="icon" disabled={isChatLoading || isLoading || !chatInput.trim()} className="bg-[#f0f6ef] hover:bg-[#a6e3a1]/80 text-[#1e1e2e]">
+                                        <ArrowUp size={16} />
+                                    </Button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
 }
