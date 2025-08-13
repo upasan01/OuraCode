@@ -13,11 +13,12 @@ export const downloadCode = async (req: Request, res: Response) => {
             })
         }
 
-        const languagae = await redis.get(`room:${roomId}:language`)
-        const fileName = `code.${languagae || "txt"}`
+        const language = await redis.get(`room:${roomId}:language`)
+        const fileName = `code.${language || "txt"}`
 
         res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
         res.setHeader("Content-Type", "text/plain; charset=utf-8");
+        return res.send(code);
 
     } catch (err) {
         return res.status(500).json({
