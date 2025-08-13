@@ -1,12 +1,13 @@
-import React, { forwardRef, useRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useRef, useImperativeHandle, useState } from 'react';
 import MonacoEditor from '@monaco-editor/react';
-import { CopyIcon, EnhanceIcon, LoadingIcon } from '../ui/Icons';
-
+import { CopyIcon, EnhanceIcon, LoadingIcon, DownloadIcon } from '../ui/Icons';
+import { downloadCode } from '../../api/controllerApi';
 
 const CodeEditor = forwardRef(({
   code,
   setCode,
   language,
+  roomId,
   onLanguageChange,
   onCopyToClipboard,
   onReview,
@@ -16,6 +17,51 @@ const CodeEditor = forwardRef(({
   width = '100%'
 }, ref) => {
   const editorRef = useRef(null);
+  
+  // Download states
+  const [downloadLoading, setDownloadLoading] = useState(false);
+  const [downloadError, setDownloadError] = useState('');
+
+  const getMonacoLanguage = (lang) => {
+    const languageMap = {
+      'js': 'javascript',
+      'py': 'python', 
+      'java': 'java',
+      'cs': 'csharp',
+      'cpp': 'cpp',
+      'c': 'c',
+      'go': 'go',
+    };
+    
+    return languageMap[lang] || lang || 'javascript'; 
+  };
+
+  // Download handler
+  const handleDownload = async () => {
+    if (!code || !roomId) {
+      setDownloadError('Missing code or room ID');
+      return;
+    }
+
+    try {
+      setDownloadLoading(true);
+      setDownloadError('');
+      
+      // Add timeout to prevent infinite loading
+      const downloadPromise = downloadCode(code, roomId);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Download timeout - server may be unresponsive')), 30000)
+      );
+      
+      await Promise.race([downloadPromise, timeoutPromise]);
+      
+    } catch (error) {
+      console.error('Download failed:', error);
+      setDownloadError(error.message);
+    } finally {
+      setDownloadLoading(false);
+    }
+  };
 
   useImperativeHandle(ref, () => ({
     focus: () => {
@@ -41,10 +87,20 @@ const CodeEditor = forwardRef(({
           <button onClick={onCopyToClipboard} className="text-slate-400 hover:text-white transition-colors duration-200 flex items-center gap-2 disabled:opacity-50" disabled={!code}>
             {copySuccess ? <span className="text-sm text-green-400">{copySuccess}</span> : <><CopyIcon className="w-5 h-5" /> <span className="text-sm">Copy</span></>}
           </button>
+          <button 
+            onClick={handleDownload} 
+            disabled={downloadLoading || !code}
+            className="text-slate-400 hover:text-white transition-colors duration-200 disabled:opacity-50 flex items-center gap-2"
+            title={downloadError || 'Download code'}
+          >
+            {downloadLoading ? <LoadingIcon className="w-5 h-5" /> : <DownloadIcon className="w-5 h-5" />}
+            {downloadError && <span className="text-xs text-red-400">Error</span>}
+          </button>
           <select value={language} onChange={(e) => onLanguageChange(e.target.value)} className="bg-slate-700/80 border border-slate-600 rounded-md px-3 py-1 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
             <option value="" disabled>Select Language</option>
             {languages.map(lang => <option key={lang.value} value={lang.value}>{lang.label}</option>)}
           </select>
+
           <button onClick={onReview} disabled={isLoading} className="flex justify-center items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-500/50 disabled:cursor-not-allowed text-white font-bold py-2 px-3 rounded-md transition-all duration-300 shadow-lg hover:shadow-indigo-500/50">
             {isLoading ? <LoadingIcon /> : <EnhanceIcon className="w-5 h-5" />}
             <span>Goon More</span>
@@ -58,7 +114,7 @@ const CodeEditor = forwardRef(({
           width="100%"
           height="100%"
           value={code}
-          language={language}
+          language={getMonacoLanguage(language)}
           onChange={(value) => setCode(value || '')}
           theme="vs-dark"
           onMount={handleEditorDidMount}

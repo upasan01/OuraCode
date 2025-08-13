@@ -7,24 +7,13 @@ import PromptTemplate from '../components/layout/PromptTemplate';
 import { SendIcon, SparklesIcon, CloseIcon } from '../components/ui/Icons';
 import AnimatedButton from '../components/ui/AnimatedButton';
 import BackgroundGradientAnimation from '../components/ui/BackgroundGradientAnimation';
-import { useLocation, useSearchParams, useNavigate } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { Code2 } from 'lucide-react';
 
 export default function Room() {
 
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const roomId = searchParams.get('roomId');
-  const username = searchParams.get('username');
-
-  useEffect(() => {
-    if (!roomId || !username) {
-      navigate('/error', { 
-        state: { message: 'Missing roomId or username' },
-        replace: true 
-      });
-    }
-  }, [roomId, username, navigate]);
+  const roomId = searchParams.get("roomId");
 
   const location = useLocation();
 
@@ -88,9 +77,10 @@ export default function Room() {
     document.removeEventListener('mouseup', handleMouseUp);
   };
 
+
   // Supported language options for dropdown
   const languages = [
-    {value: 'c', label: 'C'},
+    { value: 'c', label: 'C' },
     { value: 'js', label: 'JavaScript' },
     { value: 'py', label: 'Python' },
     { value: 'java', label: 'Java' },
@@ -99,7 +89,7 @@ export default function Room() {
     { value: 'go', label: 'Go' },
   ];
 
-  // 📋 Copy code to clipboard and show feedback
+  // Copy code to clipboard and show feedback
   const handleCopyToClipboard = () => {
     if (!code) return;
     const textArea = document.createElement("textarea");
@@ -236,6 +226,7 @@ export default function Room() {
           code={code}
           setCode={setCode}
           language={language}
+          roomId={roomId}
           onLanguageChange={setLanguage}
           onCopyToClipboard={handleCopyToClipboard}
           onReview={handleReview}
