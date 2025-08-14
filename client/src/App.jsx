@@ -3,10 +3,13 @@ import LandingPage from './pages/LandingPage';
 import Room from './pages/Room';
 import ErrorPage from './pages/ErrorPage';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
     <Router>
+      <Toaster position="top-center" reverseOrder={false} />
+
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route element={<ProtectedRoute />}>

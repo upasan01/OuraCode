@@ -5,18 +5,47 @@ import axios from "axios";
 function ProtectedRoute() {
   const [searchParams] = useSearchParams();
   const roomCode = searchParams.get("roomId");
-  const username = searchParams.get("username");
   
-
   const [isValid, setIsValid] = useState(null);
+  const [error, setError] = useState("");
+
+  const validateRoom = async (roomId) => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/v1/room/verify?roomId=${roomId}`);
+      
+      if (response.status === 200) {
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Room validation failed:", error);
+      
+      if (error.response?.status === 404) {
+        setError("Room not found");
+      } else if (error.response?.status === 500) {
+        setError("Server error occurred");
+      } else {
+        setError("Failed to validate room");
+      }
+      
+      return false;
+    }
+  };
 
   useEffect(() => {
-    if (!roomCode || !username) {
-      setIsValid(false);
-    } else {
-      setIsValid(true);
-    }
-  }, [roomCode, username]);
+    const checkRoomAndUser = async () => {
+      if (!roomCode) {
+        setError("Missing roomId ");
+        setIsValid(false);
+        return;
+      }
+
+      const roomIsValid = await validateRoom(roomCode);
+      setIsValid(roomIsValid);
+    };
+
+    checkRoomAndUser();
+  }, [roomCode]);
 
   if (isValid === null) {
     return (
@@ -31,10 +60,10 @@ function ProtectedRoute() {
   }
 
   if (!isValid) {
-    return <Navigate to="/error" state={{ message: "Missing roomId or username" }} replace />;
+    return <Navigate to="/error" state={{ message: error || "Access denied" }} replace />;
   }
+  
   return <Outlet />;
-
 }
 
 

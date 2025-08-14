@@ -9,6 +9,6 @@ const roomRouter = Router()
 
 roomRouter.post("/create", createRoom)
 roomRouter.post("/join", joinRoom)
-roomRouter.post("/verify", roomAndUserIsReal)
+roomRouter.get("/verify", roomAndUserIsReal)
 
 export default roomRouter

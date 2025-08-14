@@ -63,9 +63,9 @@ export default function GoonShareAILanding() {
       </section>
 
       {/* Room Creation/Join Section */}
-      <div id="room" className="relative z-20">
+      <section id="room" className="relative z-20 py-25">
         <CreateRoom />
-      </div>
+      </section>
 
       {/* Features Cards */}
       <section id="features" className="py-20 md:py-32 relative">

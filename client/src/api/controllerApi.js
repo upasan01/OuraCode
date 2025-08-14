@@ -67,10 +67,10 @@ export const downloadCode = async (code, roomId) => {
 };
 
 
-export const saveCode = async (roomId, username, code) => {
+export const saveCode = async (roomId, code) => {
     try {
         const res = await axios.post(
-            `${API_BASE_URL}/save?roomId=${roomId}&username=${username}`,
+            `${API_BASE_URL}/save?roomId=${roomId}`,
             { code },
             {
                 headers: {

@@ -17,6 +17,7 @@ import { FaGolang } from "react-icons/fa6"
 import CodeEditor from "../components/layout/CodeEditor";
 import MarkdownRenderer from "../components/layout/MarkdownRenderer";
 import PromptTemplate from "../components/layout/PromptTemplate";
+import { toast } from "react-hot-toast";
 
 // Icons
 import {
@@ -34,7 +35,6 @@ const MAX_PANEL_WIDTH = 900;
 export default function App() {
     const [searchParams] = useSearchParams();
     const roomId = searchParams.get("roomId");
-    const username = searchParams.get("username");
     const location = useLocation();
     const { language: initialLanguage } = location.state || {};
 
@@ -62,7 +62,7 @@ export default function App() {
             setIsCopied(true);
             setTimeout(() => setIsCopied(false), 2000);
         } catch (err) {
-            console.error("Failed to copy code:", err);
+            toast.error("Failed to copy code:", err);
         }
     };
 
@@ -107,6 +107,8 @@ export default function App() {
         document.removeEventListener("mousemove", handleMouseMove);
         document.removeEventListener("mouseup", handleMouseUp);
     };
+
+    // The ChatBot call 
 
     const callGeminiAPI = async (prompt) => {
         const apiKey = import.meta.env.VITE_GENAI_API_KEY;
@@ -202,7 +204,7 @@ export default function App() {
     // Download handler
     const handleDownload = async () => {
         if (!code || !roomId) {
-            setDownloadError('Missing code or room ID');
+            toast.error('Missing code or room ID');
             return;
         }
 
@@ -217,33 +219,47 @@ export default function App() {
             );
 
             await Promise.race([downloadPromise, timeoutPromise]);
-
+            toast.success('Download Started!')
         } catch (error) {
-            console.error('Download failed:', error);
-            setDownloadError(error.message);
+            toast.error(`Download failed: ${error.message || error}`);
+            setDownloadError(error.message || 'Unknown error');
         } finally {
             setDownloadLoading(false);
         }
     };
-    const [saveMessage, setSaveMessage] = useState('');
+
     //Save code handler
     const handleSaveCode = async () => {
         setIsLoading(true);
-        setSaveMessage('');
         try {
-            const response = await saveCode(roomId, username, code);
+            const response = await saveCode(roomId, code);
             if (response.success) {
-                setSaveMessage( response.message ||'Code saved successfully!');
+                toast.success(response.message || 'Code saved successfully!');
             } else {
-                setSaveMessage(response.message || 'Failed to save code.');
+                toast.error(response.message || 'Failed to save code.');
             }
         } catch (error) {
             console.error('Save code error:', error);
-            setSaveMessage(error.response?.message || error.message || 'Failed to save code.');
+            toast.error(error.response?.message || error.message || 'Failed to save code.');
         } finally {
             setIsLoading(false);
         }
     };
+
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.ctrlKey && event.key === 's') {
+                event.preventDefault();
+                handleSaveCode();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [roomId, code]);
 
 
     return (
@@ -271,15 +287,11 @@ export default function App() {
                         variant="outline"
                         size="sm"
                         className="border-[#313244] hover:bg-[#313244] text-[#cdd6f4] bg-transparent"
+                        title="Save (Ctrl+S)"
                     >
-                        {isLoading ? <LoadingIcon className="w-5 h-5" /> : <Save size={16} className="mr-2" />}
+                        {isLoading ? <LoadingIcon className="w-5 h-5 mx-2" /> : <Save size={16} className="mr-2" />}
                         Save
                     </Button>
-                    {saveMessage && (
-                        <span className={`ml-2 text-sm ${saveMessage.includes('success') ? 'text-green-400' : 'text-red-400'}`}>
-                            {saveMessage}
-                        </span>
-                    )}
                 </div>
             </header>
 
@@ -340,7 +352,7 @@ export default function App() {
 
                             <Button onClick={handleReview} className="bg-[#f38ba8] hover:bg-[#f38ba8]/80 text-[#1e1e2e] font-semibold" disabled={isLoading}>
                                 <EnhanceIcon size={16} className="mr-2" />
-                                GoonMore
+                                Goon
                             </Button>
                             <Button variant="outline" size="icon" onClick={() => setChatOpen((v) => !v)} className="border-[#313244] hover:bg-[#313244]">
                                 <MessageCircle size={16} />
@@ -369,7 +381,7 @@ export default function App() {
                             <div className="h-14 bg-[#181825] border-b border-[#313244] flex items-center justify-between px-4 flex-shrink-0">
                                 <div className="flex items-center gap-2">
                                     <div className="w-2 h-2 bg-[#a6e3a1] rounded-full animate-pulse" />
-                                    <h3 className="font-semibold text-[#a6e3a1]">AI Assistant</h3>
+                                    <h3 className="font-semibold text-[#a6e3a1]">Goonology AI</h3>
                                 </div>
                                 <Button variant="ghost" size="icon" onClick={() => setChatOpen(false)} className="hover:bg-[#313244]">
                                     <X size={16} />
@@ -391,7 +403,13 @@ export default function App() {
                                     {chatHistory.map((msg, idx) => (
                                         <div key={idx} className={`py-3 px-4 ${msg.role === "user" ? "bg-transparent" : "bg-transparent"}`}>
                                             <div className={`${msg.role === "user" ? "ml-auto max-w-[75%] bg-[#242431] text-[#ffffff] px-4 py-3 rounded-3xl" : "max-w-[85%] bg-[#1e1e2e] text-[#ffffff] px-4 py-3 rounded-3xl"}`}>
-                                                <p className="text-xs opacity-90 mb-2 font-medium">{msg.role === "user" ? "You" : "GoonologyAI"}</p>
+                                                <p
+                                                    className={`text-xs opacity-90 mb-2 font-medium ${msg.role === "user" ? "text-gray-400" : "text-[#a6e3a1]"
+                                                        }`}
+                                                >
+                                                    {msg.role === "user" ? "You" : "GoonologyAI"}
+                                                </p>
+
                                                 {msg.text ? (
                                                     <MarkdownRenderer text={msg.text} onUseCode={(newCode) => setCode(newCode)} />
                                                 ) : (
