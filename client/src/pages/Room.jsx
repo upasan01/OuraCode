@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 
 // API
-import { downloadCode, saveCode } from '../api/controllerApi';
+import { downloadCode, saveCode, changeLanguage } from '../api/controllerApi';
 
 // Panel Configuration Constants
 const DEFAULT_PANEL_WIDTH = 500;
@@ -40,13 +40,13 @@ export default function App() {
 
     const languages = useMemo(
         () => [
-            { id: "C", value: "c", name: "C", icon: SiC, color: "bg-gray-500/20 text-gray-300", ext: "c" },
-            { id: "javascript", value: "js", name: "JavaScript", icon: SiJavascript, color: "bg-yellow-500/20 text-yellow-300", ext: "js" },
-            { id: "python", value: "py", name: "Python", icon: SiPython, color: "bg-green-500/20 text-green-300", ext: "py" },
-            { id: "java", value: "java", name: "Java", icon: FaJava, color: "bg-orange-500/20 text-orange-300", ext: "java" },
-            { id: "cpp", value: "cpp", name: "C++", icon: SiCplusplus, color: "bg-purple-500/20 text-purple-300", ext: "cpp" },
-            { id: "csharp", value: "cs", name: "C#", icon: TbBrandCSharp, color: "bg-teal-500/20 ", ext: "cs" },
-            { id: "go", value: "go", name: "Go lang", icon: FaGolang, color: "bg-[#00ADD8]/20 text-[#00ADD8]", ext: "go" },
+            { id: "c", value: "c", name: "C", icon: SiC, color: "bg-gray-500/20 text-gray-300" },
+            { id: "javascript", value: "js", name: "JavaScript", icon: SiJavascript, color: "bg-yellow-500/20 text-yellow-300" },
+            { id: "python", value: "py", name: "Python", icon: SiPython, color: "bg-green-500/20 text-green-300" },
+            { id: "java", value: "java", name: "Java", icon: FaJava, color: "bg-orange-500/20 text-orange-300" },
+            { id: "cpp", value: "cpp", name: "C++", icon: SiCplusplus, color: "bg-purple-500/20 text-purple-300" },
+            { id: "csharp", value: "cs", name: "C#", icon: TbBrandCSharp, color: "bg-teal-500/20" },
+            { id: "go", value: "go", name: "Go lang", icon: FaGolang, color: "bg-[#00ADD8]/20 text-[#00ADD8]" },
         ],
         []
     );
@@ -261,6 +261,20 @@ export default function App() {
         };
     }, [roomId, code]);
 
+    // Language change handler
+    useEffect(() => {
+        if (!roomId || !selectedLanguage) return;
+        const handleLanguageChange = async () => {
+            try{
+                await changeLanguage(selectedLanguage.value, roomId);
+            } catch (error) {
+                toast.error(`Error changing language: ${error.message || error}`);
+            }
+        };
+        handleLanguageChange();
+    }, [selectedLanguage, roomId]);
+
+
 
     return (
         <div className="relative h-screen bg-[#1e1e2e] text-[#cdd6f4] flex flex-col overflow-hidden">
@@ -363,10 +377,10 @@ export default function App() {
                         <CodeEditor
                             code={code}
                             setCode={setCode}
-                            language={selectedLanguage.value}
+                            language={selectedLanguage.id}
                             roomId={roomId}
                             onLanguageChange={(val) => {
-                                const found = languages.find((l) => l.value === val) || selectedLanguage;
+                                const found = languages.find((l) => l.id === val) || selectedLanguage;
                                 setSelectedLanguage(found);
                             }}
                         />
