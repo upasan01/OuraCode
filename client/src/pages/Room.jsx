@@ -4,14 +4,14 @@ import { useLocation, useSearchParams } from "react-router-dom";
 // UI Components
 import { Button } from "../components/ui/button";
 import { ScrollArea } from "../components/ui/ScrollArea";
-import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { LoadingIcon, EnhanceIcon } from "../components/ui/Icons";
 import BackgroundGradientAnimation from "../components/ui/BackgroundGradientAnimation";
-import { SiJavascript, SiPython, SiCplusplus, SiC } from 'react-icons/si';
-import { FaJava } from "react-icons/fa"
+import { SiJavascript, SiPython, SiCplusplus, SiC, SiTypescript, SiKotlin } from 'react-icons/si';
+import { FaJava, FaRust, FaPhp, FaSwift } from "react-icons/fa"
 import { TbBrandCSharp } from "react-icons/tb"
 import { FaGolang } from "react-icons/fa6"
+import { DiRuby } from "react-icons/di";
 
 // App Components
 import CodeEditor from "../components/layout/CodeEditor";
@@ -21,7 +21,7 @@ import { toast } from "react-hot-toast";
 
 // Icons
 import {
-    MessageCircle, X, Code2, ArrowUp, Copy, Check, DownloadIcon, Save
+    MessageCircle, X, Code2, ArrowUp, Copy, Check, DownloadIcon, Save, Menu
 } from "lucide-react";
 
 // API
@@ -47,6 +47,12 @@ export default function App() {
             { id: "cpp", value: "cpp", name: "C++", icon: SiCplusplus, color: "bg-purple-500/20 text-purple-300" },
             { id: "csharp", value: "cs", name: "C#", icon: TbBrandCSharp, color: "bg-teal-500/20" },
             { id: "go", value: "go", name: "Go lang", icon: FaGolang, color: "bg-[#00ADD8]/20 text-[#00ADD8]" },
+            { id: "rust", value: "rs", name: "Rust", icon: FaRust, color: "bg-orange-600/20 text-orange-400" },
+            { id: "typescript", value: "ts", name: "TypeScript", icon: SiTypescript, color: "bg-blue-500/20 text-blue-300" },
+            { id: "php", value: "php", name: "PHP", icon: FaPhp, color: "bg-indigo-500/20 text-indigo-300" },
+            { id: "ruby", value: "rb", name: "Ruby", icon: DiRuby, color: "bg-red-500/20 text-red-300" },
+            { id: "swift", value: "swift", name: "Swift", icon: FaSwift, color: "bg-orange-500/20 text-orange-300" },
+            { id: "kotlin", value: "kt", name: "Kotlin", icon: SiKotlin, color: "bg-purple-600/20 text-purple-400" }
         ],
         []
     );
@@ -71,6 +77,28 @@ export default function App() {
     const [chatHistory, setChatHistory] = useState([]);
     const [chatInput, setChatInput] = useState("");
     const [isChatLoading, setIsChatLoading] = useState(false);
+    const [isSidebarCollapsed, setSidebarCollapsed] = useState(false)
+    const [isSidebarOpen, setSidebarOpen] = useState(false)
+    const [isTerminalOpen, setTerminalOpen] = useState(false)
+    const [terminalHeight, setTerminalHeight] = useState(200)
+    const [isMobile, setIsMobile] = useState(false)
+    const resizeRef = useRef(null)
+
+
+    useEffect(() => {
+        const handleResize = () => {
+            const mobile = window.innerWidth < 768
+            setIsMobile(mobile)
+            if (mobile) {
+                setSidebarCollapsed(false)
+                setSidebarOpen(false)
+            }
+        }
+
+        handleResize()
+        window.addEventListener("resize", handleResize)
+        return () => window.removeEventListener("resize", handleResize)
+    }, [])
 
 
     const [isChatOpen, setChatOpen] = useState(false);
@@ -265,7 +293,7 @@ export default function App() {
     useEffect(() => {
         if (!roomId || !selectedLanguage) return;
         const handleLanguageChange = async () => {
-            try{
+            try {
                 await changeLanguage(selectedLanguage.value, roomId);
             } catch (error) {
                 toast.error(`Error changing language: ${error.message || error}`);
@@ -273,6 +301,15 @@ export default function App() {
         };
         handleLanguageChange();
     }, [selectedLanguage, roomId]);
+
+
+    const toggleSidebar = () => {
+        if (isMobile) {
+            setSidebarOpen(!isSidebarOpen)
+        } else {
+            setSidebarCollapsed(!isSidebarCollapsed)
+        }
+    }
 
 
 
@@ -284,6 +321,33 @@ export default function App() {
 
             <header className="h-16 bg-[#11111b] border-b border-[#313244] flex items-center justify-between px-6 z-10 flex-shrink-0">
                 <div className="flex items-center gap-4">
+                    {/* Mobile menu button */}
+                    <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={toggleSidebar} 
+                        className={`${isMobile ? 'flex' : 'hidden'} hover:bg-[#313244] text-[#cdd6f4] p-2 transition-all duration-300`}
+                    >
+                        <div className="relative w-5 h-5 flex items-center justify-center">
+                            <Menu 
+                                size={20} 
+                                className={`absolute transition-all duration-300 ${
+                                    isSidebarOpen 
+                                        ? 'opacity-0 rotate-90 scale-75' 
+                                        : 'opacity-100 rotate-0 scale-100'
+                                }`}
+                            />
+                            <X 
+                                size={20} 
+                                className={`absolute transition-all duration-300 ${
+                                    isSidebarOpen 
+                                        ? 'opacity-100 rotate-0 scale-100' 
+                                        : 'opacity-0 rotate-90 scale-75'
+                                }`}
+                            />
+                        </div>
+                    </Button>
+                    
                     <div className="flex items-center space-x-3 z-10 mb-2">
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#a6e3a1] to-[#89b4fa]">
                             <Code2 className="h-6 w-6 text-[#1e1e2e]" />
@@ -311,28 +375,77 @@ export default function App() {
 
 
             <div className="flex-1 flex overflow-hidden">
+                {/* Mobile overlay */}
+                {isMobile && isSidebarOpen && (
+                    <div 
+                        className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 animate-in fade-in-0" 
+                        onClick={() => setSidebarOpen(false)} 
+                    />
+                )}
 
-                <div className="w-64 bg-[#181825] border-r border-[#313244] flex flex-col z-10 flex-shrink-0">
-                    <div className="p-4 border-b border-[#313244]">
-                        <h2 className="text-lg font-semibold text-[#f38ba8] mb-2">Languages</h2>
-                        <Badge variant="secondary" className="bg-[#313244] text-[#a6adc8]">
-                            {languages.length} Available
-                        </Badge>
+                <div
+                    className={`
+            ${isMobile ? "fixed left-0 top-16 bottom-0 z-50" : "relative"}
+            ${isMobile && !isSidebarOpen ? "-translate-x-full" : "translate-x-0"}
+            ${!isMobile && isSidebarCollapsed ? "w-16" : "w-64"}
+            bg-[#181825] border-r border-[#313244] flex flex-col transition-all duration-500 ease-in-out
+            ${isMobile ? 'shadow-2xl' : ''}
+          `}
+                >
+                    <div className="p-4 border-b border-[#313244] flex items-center justify-between">
+                        <div className={`transition-all duration-500 overflow-hidden ${!isSidebarCollapsed ? 'opacity-100 max-w-full' : 'opacity-0 max-w-0'}`}>
+                            <div className={`transition-all duration-300 ${!isSidebarCollapsed ? 'translate-x-0' : 'translate-x-4'}`}>
+                                <h2 className="text-lg font-semibold text-[#f38ba8] mb-2">Languages</h2>
+                            </div>
+                        </div>
+                        <Button variant="ghost" size="icon" onClick={toggleSidebar} className="hover:bg-[#313244] text-[#cdd6f4] p-2 transition-all duration-300">
+                            <div className="relative w-5 h-5 flex items-center justify-center">
+                                <Menu 
+                                    size={20} 
+                                    className={`absolute transition-all duration-300 ${
+                                        (isMobile && isSidebarOpen) || (!isMobile && !isSidebarCollapsed) 
+                                            ? 'opacity-0 rotate-90 scale-75' 
+                                            : 'opacity-100 rotate-0 scale-100'
+                                    }`}
+                                />
+                                <X 
+                                    size={20} 
+                                    className={`absolute transition-all duration-300 ${
+                                        (isMobile && isSidebarOpen) || (!isMobile && !isSidebarCollapsed) 
+                                            ? 'opacity-100 rotate-0 scale-100' 
+                                            : 'opacity-0 rotate-90 scale-75'
+                                    }`}
+                                />
+                            </div>
+                        </Button>
                     </div>
+
                     <ScrollArea className="flex-1 p-2">
                         <div className="space-y-1">
-                            {languages.map((language) => (
-                                <button
-                                    key={language.value}
-                                    onClick={() => setSelectedLanguage(language)}
-                                    className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-[#313244] ${selectedLanguage.value === language.value ? "bg-[#313244] border border-[#f38ba8]" : ""}`}
-                                >
-                                    <div className={`p-2 rounded-md ${language.color}`}>
-                                        <language.icon size={16} />
-                                    </div>
-                                    <span className="font-medium">{language.name}</span>
-                                </button>
-                            ))}
+                            {languages.map((language) => {
+                                const IconComponent = language.icon
+                                return (
+                                    <button
+                                        key={language.id}
+                                        onClick={() => {
+                                            setSelectedLanguage(language)
+                                            if (isMobile) setSidebarOpen(false)
+                                        }}
+                                        className={`w-full flex items-center rounded-lg transition-all duration-300 hover:bg-[#313244] hover:scale-[1.02] active:scale-[0.98] ${selectedLanguage.id === language.id ? "bg-[#313244] border border-[#f38ba8] shadow-lg shadow-[#f38ba8]/20" : ""
+                                            } ${isSidebarCollapsed ? "justify-center p-2" : "gap-3 p-3"}`}
+                                        title={isSidebarCollapsed ? language.name : ""}
+                                    >
+                                        <div className={`p-2 rounded-md ${language.color} flex-shrink-0 transition-all duration-300`}>
+                                            <IconComponent size={16} />
+                                        </div>
+                                        {!isSidebarCollapsed && (
+                                            <span className="font-medium transition-all duration-300 opacity-100 translate-x-0">
+                                                {language.name}
+                                            </span>
+                                        )}
+                                    </button>
+                                )
+                            })}
                         </div>
                     </ScrollArea>
                 </div>
