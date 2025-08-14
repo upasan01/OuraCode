@@ -55,6 +55,8 @@ ${history}
 - **If Asked for Code**: Provide a complete, working solution in a markdown code block, including the language identifier (e.g., \`\`\`javascript).
 - **If Asked for a Detailed Explanation**: When the user asks to "explain this," "go into more detail," or similar, provide a deep analysis covering:
     - **Logic Flow**: A step-by-step explanation of how the code works.
+    - **Key Functions**: Describe the purpose and functionality of important functions.
+    - **Data Structures**: Explain the data structures used and their roles.
     - **Key Components**: Describe the purpose of important functions, classes, or variables.
     - **Best Practices**: Explain why certain patterns or techniques were used only when relevant.
 - Otherwise, keep responses focused and to the point.;

@@ -13,7 +13,7 @@ export const downloadCode = async (code, roomId) => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                timeout: 300000 // 30 second timeout
+                timeout: 30000 // 30 second timeout
             }
         );
 
@@ -22,13 +22,13 @@ export const downloadCode = async (code, roomId) => {
             throw new Error('No data received from server');
         }
 
-        // Extract filename from response headers (save korar jonno filename set korbe)
+        // Extract filename from response headers
         const contentDisposition = response.headers['content-disposition'];
         const filename = contentDisposition
             ? contentDisposition.split('filename=')[1].replace(/"/g, '')
             : 'code.txt';
 
-        // Create and trigger download (sohoj kothay explorer khulbe)
+        // Create and trigger download
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
@@ -84,6 +84,28 @@ export const saveCode = async (roomId, code) => {
     } catch (err) {
         const errorMsg = err.response?.data?.message || err.message || "Error saving code";
         console.error("Error saving code:", errorMsg);
+        throw new Error(errorMsg);
+    }
+};
+
+export const changeLanguage = async (language, roomId) => {
+    try{
+        const response = await axios.post(
+            `${API_BASE_URL}/change?roomId=${roomId}`,
+            { language },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                timeout: 30000
+            }
+        );
+
+        return { success: true, message: response?.data?.message || "Language changed successfully" };
+    }
+    catch (error) {
+        const errorMsg = error.response?.data?.message || "Error changing language";
+        console.error("Error changing language:", errorMsg);
         throw new Error(errorMsg);
     }
 };

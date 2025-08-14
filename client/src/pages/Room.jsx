@@ -28,9 +28,9 @@ import {
 import { downloadCode, saveCode, changeLanguage } from '../api/controllerApi';
 
 // Panel Configuration Constants
-const DEFAULT_PANEL_WIDTH = 500;
+const DEFAULT_PANEL_WIDTH = 600;
 const MIN_PANEL_WIDTH = 400;
-const MAX_PANEL_WIDTH = 900;
+const MAX_PANEL_WIDTH = 800;
 
 export default function App() {
     const [searchParams] = useSearchParams();

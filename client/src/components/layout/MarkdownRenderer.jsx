@@ -9,6 +9,7 @@ import ruby from 'react-syntax-highlighter/dist/esm/languages/hljs/ruby';
 import go from 'react-syntax-highlighter/dist/esm/languages/hljs/go';
 import css from 'react-syntax-highlighter/dist/esm/languages/hljs/css';
 import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { Copy, Check } from 'lucide-react';
 
 // Registering languages for the syntax highlighter
 SyntaxHighlighter.registerLanguage('javascript', js);
@@ -20,6 +21,53 @@ SyntaxHighlighter.registerLanguage('ruby', ruby);
 SyntaxHighlighter.registerLanguage('go', go);
 SyntaxHighlighter.registerLanguage('css', css);
 
+// Enhanced CodeBlock component with copy functionality
+const CodeBlock = ({ language, code, index }) => {
+    const [copied, setCopied] = useState(false);
+    
+    const handleCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(code);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy code:', err);
+        }
+    };
+
+    return (
+        <div key={`code-block-${index}`} className="my-4 relative group">
+            {/* Copy Button */}
+            <button
+                onClick={handleCopy}
+                className="absolute top-3 right-3 bg-gray-700/80 hover:bg-gray-600 text-gray-300 hover:text-white p-2 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 backdrop-blur-sm"
+                title={copied ? "Copied!" : "Copy code"}
+            >
+                {copied ? (
+                    <Check className="w-4 h-4 text-green-400" />
+                ) : (
+                    <Copy className="w-4 h-4" />
+                )}
+            </button>
+            
+            
+            <SyntaxHighlighter
+                language={language}
+                style={atomOneDark}
+                wrapLongLines
+                customStyle={{ 
+                    margin: 0, 
+                    borderRadius: '0.5rem',
+                    paddingTop: '1rem',
+                    paddingBottom: '1rem'
+                }}
+            >
+                {code}
+            </SyntaxHighlighter>
+        </div>
+    );
+};
+
 const MarkdownRenderer = ({ text, onUseCode }) => {
     const codeBlockRegex = /```(\w*)\n([\s\S]*?)```/g;
 
@@ -30,18 +78,7 @@ const MarkdownRenderer = ({ text, onUseCode }) => {
             if (codeMatch) {
                 const language = codeMatch[1] || 'text';
                 const code = codeMatch[2];
-                return (
-                    <div key={`code-block-${index}`} className="my-4">
-                        <SyntaxHighlighter
-                            language={language}
-                            style={atomOneDark}
-                            wrapLongLines
-                            customStyle={{ margin: 0, borderRadius: '0.5rem' }}
-                        >
-                            {code}
-                        </SyntaxHighlighter>
-                    </div>
-                );
+                return <CodeBlock language={language} code={code} index={index} />;
             } else {
                 return part.split('\n').map((line, lineIndex) => {
                     const key = `text-${index}-${lineIndex}`;
@@ -86,12 +123,18 @@ const MarkdownRenderer = ({ text, onUseCode }) => {
         <div className="prose prose-invert max-w-none">
             {parseMarkdown(text)}
             {lastCodeBlock && onUseCode && (
-                <button
-                    onClick={() => onUseCode(lastCodeBlock)}
-                    className="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md text-sm transition-all duration-300 shadow-lg hover:shadow-xl"
-                >
-                    Use Last Code Snippet
-                </button>
+                <div className="mt-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-gray-400">Quick Actions</span>
+                    </div>
+                    <button
+                        onClick={() => onUseCode(lastCodeBlock)}
+                        className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md text-sm transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2"
+                    >
+                        <Check className="w-4 h-4" />
+                        Use Last Code Snippet
+                    </button>
+                </div>
             )}
         </div>
     );
