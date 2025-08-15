@@ -18,10 +18,11 @@ import CodeEditor from "../components/layout/CodeEditor";
 import MarkdownRenderer from "../components/layout/MarkdownRenderer";
 import PromptTemplate from "../components/layout/PromptTemplate";
 import { toast } from "react-hot-toast";
+import { Terminal } from "../components/ui/Terminal";
 
 // Icons
 import {
-    MessageCircle, X, Code2, ArrowUp, Copy, Check, DownloadIcon, Save, Menu
+    MessageCircle, X, Code2, ArrowUp, Copy, Check, DownloadIcon, Save, Menu, Terminal as TerminalIcon
 } from "lucide-react";
 
 // API
@@ -79,12 +80,11 @@ export default function App() {
     const [isChatLoading, setIsChatLoading] = useState(false);
     const [isSidebarCollapsed, setSidebarCollapsed] = useState(false)
     const [isSidebarOpen, setSidebarOpen] = useState(false)
-    const [isTerminalOpen, setTerminalOpen] = useState(false)
-    const [terminalHeight, setTerminalHeight] = useState(200)
     const [isMobile, setIsMobile] = useState(false)
-    const resizeRef = useRef(null)
+    const terminalRef = useRef(null);
 
 
+    // For handling mobile responsiveness and sidebar states
     useEffect(() => {
         const handleResize = () => {
             const mobile = window.innerWidth < 768
@@ -100,6 +100,8 @@ export default function App() {
         return () => window.removeEventListener("resize", handleResize)
     }, [])
 
+
+    // AI Panel States
 
     const [isChatOpen, setChatOpen] = useState(false);
     const [panelWidth, setPanelWidth] = useState(DEFAULT_PANEL_WIDTH);
@@ -322,20 +324,19 @@ export default function App() {
             <header className="h-16 bg-[#11111b] border-b border-[#313244] flex items-center justify-between px-6 z-10 flex-shrink-0">
                 <div className="flex items-center gap-4">
                     {/* Mobile menu button */}
-                    <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={toggleSidebar} 
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={toggleSidebar}
                         className={`${isMobile ? 'flex' : 'hidden'} hover:bg-[#313244] text-[#cdd6f4] p-2 transition-all duration-300`}
                     >
                         <div className="relative w-5 h-5 flex items-center justify-center">
-                            <Menu 
-                                size={20} 
-                                className={`absolute transition-all duration-300 ${
-                                    isSidebarOpen 
-                                        ? 'opacity-0 rotate-90 scale-75' 
-                                        : 'opacity-100 rotate-0 scale-100'
-                                }`}
+                            <Menu
+                                size={20}
+                                className={`absolute transition-all duration-300 ${isSidebarOpen
+                                    ? 'opacity-0 rotate-90 scale-75'
+                                    : 'opacity-100 rotate-0 scale-100'
+                                    }`}
                             />
                             {/* <X 
                                 size={20} 
@@ -347,7 +348,7 @@ export default function App() {
                             /> */}
                         </div>
                     </Button>
-                    
+
                     <div className="flex items-center space-x-3 z-10 mb-2">
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#a6e3a1] to-[#89b4fa]">
                             <Code2 className="h-6 w-6 text-[#1e1e2e]" />
@@ -377,9 +378,9 @@ export default function App() {
             <div className="flex-1 flex overflow-hidden">
                 {/* Mobile overlay */}
                 {isMobile && isSidebarOpen && (
-                    <div 
-                        className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 animate-in fade-in-0" 
-                        onClick={() => setSidebarOpen(false)} 
+                    <div
+                        className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 animate-in fade-in-0"
+                        onClick={() => setSidebarOpen(false)}
                     />
                 )}
 
@@ -400,21 +401,19 @@ export default function App() {
                         </div>
                         <Button variant="ghost" size="icon" onClick={toggleSidebar} className="hover:bg-[#313244] text-[#cdd6f4] p-2 transition-all duration-300">
                             <div className="relative w-5 h-5 flex items-center justify-center">
-                                <Menu 
-                                    size={20} 
-                                    className={`absolute transition-all duration-300 ${
-                                        (isMobile && isSidebarOpen) || (!isMobile && !isSidebarCollapsed) 
-                                            ? 'opacity-0 rotate-90 scale-75' 
-                                            : 'opacity-100 rotate-0 scale-100'
-                                    }`}
+                                <Menu
+                                    size={20}
+                                    className={`absolute transition-all duration-300 ${(isMobile && isSidebarOpen) || (!isMobile && !isSidebarCollapsed)
+                                        ? 'opacity-0 rotate-90 scale-75'
+                                        : 'opacity-100 rotate-0 scale-100'
+                                        }`}
                                 />
-                                <X 
-                                    size={20} 
-                                    className={`absolute transition-all duration-300 ${
-                                        (isMobile && isSidebarOpen) || (!isMobile && !isSidebarCollapsed) 
-                                            ? 'opacity-100 rotate-0 scale-100' 
-                                            : 'opacity-0 rotate-90 scale-75'
-                                    }`}
+                                <X
+                                    size={20}
+                                    className={`absolute transition-all duration-300 ${(isMobile && isSidebarOpen) || (!isMobile && !isSidebarCollapsed)
+                                        ? 'opacity-100 rotate-0 scale-100'
+                                        : 'opacity-0 rotate-90 scale-75'
+                                        }`}
                                 />
                             </div>
                         </Button>
@@ -460,6 +459,14 @@ export default function App() {
                             <h1 className="text-xl font-semibold">{selectedLanguage.name} Editor</h1>
                         </div>
                         <div className="flex items-center gap-2">
+                            <Button
+                                onClick={() => terminalRef.current?.toggle?.()}
+                                variant="outline"
+                                size="icon"
+                                className={`border-[#313244] hover:bg-[#313244] ${/* no parent state here */ ""}`}
+                            >
+                                <TerminalIcon size={16} />
+                            </Button>
                             <Button onClick={handleCopyCode} variant="outline" size="sm" className=" hover:bg-[#313244] text-[#cdd6f4] bg-transparent"
                                 disabled={!code}>
 
@@ -486,7 +493,7 @@ export default function App() {
                             </Button>
                         </div>
                     </div>
-                    <div className="flex-1 p-4 h-full">
+                    <div className="flex-1 p-4 h-full editor-area">
                         <CodeEditor
                             code={code}
                             setCode={setCode}
@@ -497,6 +504,15 @@ export default function App() {
                                 setSelectedLanguage(found);
                             }}
                         />
+                        <Terminal
+                            ref={terminalRef}
+                            initialHeight={220}
+                            minHeight={120}
+                            maxHeightPx={800}
+                            editorSelector=".editor-area"
+                            className="editor-terminal"
+                        />
+
                     </div>
                 </div>
 
