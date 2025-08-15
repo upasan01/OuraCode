@@ -316,7 +316,7 @@ export default function App() {
 
 
     return (
-        <div className="relative h-screen bg-[#1e1e2e] text-[#cdd6f4] flex flex-col overflow-hidden">
+        <div className="relative h-screen bg-[#1e1e2e] text-[#cdd6f4] flex flex-col overflow-hidden ">
             <div className="fixed inset-0 w-full h-full z-0">
                 <BackgroundGradientAnimation />
             </div>
