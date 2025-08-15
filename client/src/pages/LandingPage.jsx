@@ -11,7 +11,7 @@ import TextType from "../components/ui/TextType";
 export default function GoonShareAILanding() {
 
   return (
-    <main className="relative min-h-screen w-full bg-gradient-to-br from-[#11111b] via-[#181825] to-[#1e1e2e] font-mono">
+    <main id="home" className="relative min-h-screen w-full bg-gradient-to-br from-[#11111b] via-[#181825] to-[#1e1e2e] font-mono">
       {/* Background */}
       <div className="fixed inset-0 w-full h-full z-10">
         <Particles />

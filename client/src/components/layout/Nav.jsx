@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, GitPullRequestCreate, Zap, Users, Settings, Code2, Terminal, FileText } from "lucide-react";
+import { Menu, X, GitPullRequestCreate, Zap, Users, Settings, Code2, Terminal, FileText, House } from "lucide-react";
 import { Button } from "../ui/button";
 
 const Nav = () => {
@@ -43,6 +43,10 @@ const Nav = () => {
           {/* Desktop Navigation (Centered) */}
           <div className="p-[2px] rounded-[90px] bg-gradient-to-r from-white/10 via-white/5 to-white/10">
             <nav className="hidden md:flex items-center space-x-8 rounded-[90px] border-b border-[#313244] bg-[#1e1e2e]/50 backdrop-blur supports-[backdrop-filter]:bg-[#1e1e2e]/60 px-6 py-4 font-bold">
+            <a href="#home" className='text-sm text-[#9399b2] hover:text-[#f9e2af] transition-colors font-mono flex items-center space-x-1'>
+              <House className="h-4 w-4" />
+              <span>{"home()"}</span>
+            </a>
               <a
                 href="#room"
                 className="text-sm text-[#9399b2] hover:text-[#89b4fa] transition-colors font-mono flex items-center space-x-1"
@@ -70,13 +74,6 @@ const Nav = () => {
               >
                 <Users className="h-4 w-4" />
                 <span>{"community.join()"}</span>
-              </a>
-              <a
-                href="#pricing"
-                className="text-sm text-[#9399b2] hover:text-[#f9e2af] transition-colors font-mono flex items-center space-x-1"
-              >
-                <Settings className="h-4 w-4" />
-                <span>{"pricing.view()"}</span>
               </a>
             </nav>
           </div>

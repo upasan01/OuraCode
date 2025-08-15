@@ -337,14 +337,14 @@ export default function App() {
                                         : 'opacity-100 rotate-0 scale-100'
                                 }`}
                             />
-                            <X 
+                            {/* <X 
                                 size={20} 
                                 className={`absolute transition-all duration-300 ${
                                     isSidebarOpen 
                                         ? 'opacity-100 rotate-0 scale-100' 
                                         : 'opacity-0 rotate-90 scale-75'
                                 }`}
-                            />
+                            /> */}
                         </div>
                     </Button>
                     

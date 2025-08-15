@@ -26,7 +26,7 @@ const CodeEditor = forwardRef(({
       ref={ref}
       className="flex-grow flex flex-col bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-2xl z-10 h-full"
     >
-      
+
       {/* Code Editor */}
       <div className="flex-grow px-2">
         <MonacoEditor
@@ -41,11 +41,18 @@ const CodeEditor = forwardRef(({
             fontSize: 16,
             fontFamily: 'Fira Mono, Menlo, Monaco, Consolas, monospace',
             automaticLayout: true,
-            scrollBeyondLastLine: false,
+            scrollBeyondLastLine: true,
             wordWrap: 'on',
             autoClosingBrackets: 'always',
             autoClosingQuotes: 'always',
             tabSize: 2,
+            insertSpaces: true,
+            cursorBlinking: 'smooth',
+            cursorStyle: 'line',
+            renderIndentGuides: true,
+            renderWhitespace: 'boundary',
+            smoothScrolling: true,
+            matchBrackets: 'always',
             renderLineHighlight: 'all',
             lineNumbers: 'on',
             formatOnType: true,
@@ -53,7 +60,10 @@ const CodeEditor = forwardRef(({
             suggestOnTriggerCharacters: true,
             quickSuggestions: true,
             contextmenu: true,
+            tabCompletion: 'on',
+            scrollbar: { verticalScrollbarSize: 10, horizontalScrollbarSize: 5 },
             folding: true,
+            padding: { top: 10, bottom: 50 },
           }}
         />
       </div>

@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { Play, ArrowRight, Copy, Shuffle } from "lucide-react";
+import { Play, ArrowRight, Copy } from "lucide-react";
 import { createRoom, joinRoom } from "../../api/roomApi";
 import { useNavigate } from "react-router-dom";
 import { LoadingIcon } from '../ui/Icons';
@@ -100,7 +100,7 @@ const CreateRoom = () => {
         navigator.clipboard.writeText(roomCode)
     }
     return (
-        <div id= "room" className="mx-auto max-w-2xl mb-12">
+        <div className="mx-auto max-w-2xl mb-12">
             <Card className="bg-[#313244]/50 border-[#45475a] backdrop-blur">
                 <CardHeader className="pb-4">
                     <CardTitle className="text-[#a6e3a1] text-lg font-mono">
