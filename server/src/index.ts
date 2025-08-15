@@ -13,7 +13,9 @@ connectDB()
 const server = http.createServer(app)
 const wss = new WebSocketServer ({ server })
 
-wss.on("connection", roomSocketHandler)
+wss.on("connection", (ws) => {
+    roomSocketHandler(ws as any, wss);
+});
 
 const PORT = process.env.PORT || 3000
 

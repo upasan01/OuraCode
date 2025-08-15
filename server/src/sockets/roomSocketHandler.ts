@@ -1,5 +1,11 @@
-// websocket logic
-import { WebSocket } from "ws";
+import { WebSocket, WebSocketServer } from "ws";
+import { redis } from "../lib/redis.js";
+
+interface ExtWebSocket extends WebSocket {
+    roomId?: string;
+    username?: string;
+    code?: string;
+}
 
 interface BaseMessage {
     type: string;
@@ -7,12 +13,6 @@ interface BaseMessage {
 
 interface JoinRoomMessage extends BaseMessage {
     type: "join_room";
-    roomId: string;
-    username: string;
-}
-
-interface LeaveRoomMessage extends BaseMessage {
-    type: "leave_room";
     roomId: string;
     username: string;
 }
@@ -31,50 +31,94 @@ interface CursorSyncMessage extends BaseMessage {
 
 type RoomSocketMessage =
     | JoinRoomMessage
-    | LeaveRoomMessage
     | CodeChangeMessage
     | CursorSyncMessage;
 
+export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
+    ws.on("error", (error) => console.error(error));
+    console.log("client connected");
 
-export const roomSocketHandler = (ws: WebSocket) => {
-    ws.on("error", (error) => console.error(error))
-    console.log("client connected")
-
-    ws.on("message", (msg) => {
+    ws.on("message", async (msg) => {
         let data: RoomSocketMessage;
 
         try {
-            data = JSON.parse(msg.toString())
+            data = JSON.parse(msg.toString());
         } catch (error) {
-            console.error("Invalid JSON: ", msg.toString())
-            return
+            console.error("Invalid JSON: ", msg.toString());
+            return;
         }
 
         switch (data.type) {
-            case "join_room":
-                console.log(`${data.username} joined room ${data.roomId}`)
-                break;
+            case "join_room": {
+                try {
+                    const { roomId, username } = data;
+                    ws.roomId = roomId;
+                    ws.username = username;
+                    console.log(`${username} joined room ${roomId}`);
 
-            case "code_change":
-                console.log("code changed")
-                break;
+                    const code = await redis.get(`room:${roomId}:code`)
 
-            case "cursor_sync":
-                console.log("cursor moved")
-                break;
+                    ws.send(JSON.stringify({
+                        type: "load_code",
+                        code: code || ""
+                    }))
 
-            case "leave_room":
-                console.log("left room")
-                break;
+                    // add brodcast
+                    brodcastToRoom(wss, roomId, {
+                        type: "user_joined",
+                        message: `${username} joined the room`,
+                        username
+                    }, ws)
+                } catch (err) {
+                    console.error("Join room failed:", err);
+                    ws.send(JSON.stringify({
+                        type: "error",
+                        message: "Failed to join room. Please try again."
+                    }));
+                }
 
-            default:
-                //@ts-ignore
-                console.warn("Unknown event type: ", data.type)
+                break;
+            }
+            case "code_change": {
+                // ws.code will be defined here
+                console.log(
+                    `code updated in room ${data.roomId}: ${data.code}`
+                );
+                break;
+            }
+            case "cursor_sync": {
+                console.log(
+                    `Cursor in room ${data.roomId} moved to line ${data.cursorPosition.line}, column ${data.cursorPosition.column}`
+                );
+                break;
+            }
         }
     });
 
-    ws.on("close", () => {
-        console.log("client disconnected")
+    ws.on("close", async () => {
+        console.log(`${ws.username} disconnected from ${ws.roomId}`);
 
+        if (ws.roomId && ws.username) {
+            try {
+                await redis.srem(`room:${ws.roomId}:users`, ws.username).catch(console.error)
+
+                if (typeof ws.code === "string") {
+                    await redis.set(`room:${ws.roomId}:code`, ws.code).catch(console.error)
+                }
+            }
+            catch (err) {
+                console.error("Error during closing", err)
+            }
+        }
+    });
+};
+
+function brodcastToRoom(wss: WebSocketServer, roomId: string, message: object, excludeWs?: WebSocket) {
+    const data = JSON.stringify(message)
+
+    wss.clients.forEach(client => {
+        if ((client as any).roomId === roomId && client.readyState === WebSocket.OPEN && client !== excludeWs) {
+            client.send(data)
+        }
     })
 }
