@@ -1,4 +1,3 @@
-// components/ui/Terminal.jsx
 import React, {
   forwardRef,
   useEffect,
@@ -28,13 +27,14 @@ const Terminal = forwardRef((
     "/assets/sounds/Goon-3.m4a",
     "/assets/sounds/Goon-4.m4a",
     "/assets/sounds/Goon-5.m4a",
-    
+    "/assets/sounds/Goon-6.m4a",
   ];
 
   const audioList = useRef(audioListProp || DEFAULT_AUDIO_LIST);
   const audioPoolRef = useRef([]);
   const currentAudioRef = useRef(null);
   const lastIndexRef = useRef(null);
+  const playQueueRef = useRef([]); // <<-- playlist shuffle queue
 
   const [isGoonPlaying, setIsGoonPlaying] = useState(false);
   const [currentTrack, setCurrentTrack] = useState(null);
@@ -79,7 +79,6 @@ const Terminal = forwardRef((
   // Robust scroll helper: ensures messagesEndRef and input are visible.
   const scrollToBottom = (opts = { smooth: true }) => {
     const smooth = !!opts.smooth;
-    // Use rAF to wait for DOM paint. Also add a tiny timeout fallback.
     try {
       requestAnimationFrame(() => {
         try {
@@ -87,7 +86,6 @@ const Terminal = forwardRef((
             messagesEndRef.current.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "end" });
           }
         } catch { }
-        // Also ensure input is in view (cursor)
         try {
           if (inputRef.current && typeof inputRef.current.scrollIntoView === "function") {
             inputRef.current.scrollIntoView({ behavior: "auto", block: "nearest" });
@@ -95,7 +93,6 @@ const Terminal = forwardRef((
         } catch { }
       });
 
-      // Fallback in case rAF isn't enough (some browsers)
       setTimeout(() => {
         try {
           if (messagesEndRef.current && typeof messagesEndRef.current.scrollIntoView === "function") {
@@ -169,7 +166,17 @@ const Terminal = forwardRef((
     };
   }, []);
 
-  // Play random track avoiding immediate repeat
+  // Shuffle helper (Fisher-Yates)
+  const shuffleArray = (arr) => {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+
+  // Play random track using a shuffled queue to avoid repeats
   const playRandomGoon = async () => {
     const list = audioList.current;
     if (!list || list.length === 0) {
@@ -181,17 +188,22 @@ const Terminal = forwardRef((
       try { currentAudioRef.current.pause(); currentAudioRef.current.currentTime = 0; } catch { }
     }
 
-    let idx;
-    if (list.length === 1) {
-      idx = 0;
-    } else {
-      let attempts = 0;
-      do {
-        idx = Math.floor(Math.random() * list.length);
-        attempts++;
-      } while (idx === lastIndexRef.current && attempts < 10);
-      if (idx === lastIndexRef.current) idx = (lastIndexRef.current + 1) % list.length;
+    // If queue empty, create a shuffled queue of indices
+    if (!playQueueRef.current || playQueueRef.current.length === 0) {
+      const indices = list.map((_, i) => i);
+      let shuffled = shuffleArray(indices);
+
+      // If the first would repeat lastIndex, rotate once (if possible)
+      if (lastIndexRef.current != null && shuffled[0] === lastIndexRef.current && shuffled.length > 1) {
+        // swap first two
+        [shuffled[0], shuffled[1]] = [shuffled[1], shuffled[0]];
+      }
+
+      playQueueRef.current = shuffled;
     }
+
+    // Pop next index from queue
+    const idx = playQueueRef.current.shift();
     lastIndexRef.current = idx;
 
     const src = list[idx];
@@ -205,7 +217,6 @@ const Terminal = forwardRef((
       await audio.play();
       const fileName = src.split("/").pop();
       addOutput(`Playing: ${fileName}`, "info");
-      // ensure visible immediately after message added
       scrollToBottom({ smooth: true });
 
       const onEnd = () => {
@@ -319,7 +330,6 @@ const Terminal = forwardRef((
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
       if (lastRaf) cancelAnimationFrame(lastRaf);
-      // ensure after resize the cursor/input is visible
       setTimeout(() => scrollToBottom({ smooth: false }), 30);
     };
 
@@ -415,7 +425,6 @@ const Terminal = forwardRef((
       if (h.length === 0) return;
       historyIndex.current = Math.max(0, (historyIndex.current === -1 ? h.length : historyIndex.current) - 1);
       setInput(h[historyIndex.current] || "");
-      // ensure that updated input and cursor remain visible
       setTimeout(() => scrollToBottom({ smooth: false }), 0);
       return;
     }
@@ -426,7 +435,6 @@ const Terminal = forwardRef((
       historyIndex.current = Math.min(h.length, (historyIndex.current === -1 ? h.length : historyIndex.current) + 1);
       if (historyIndex.current === h.length) setInput("");
       else setInput(h[historyIndex.current] || "");
-      // ensure that updated input and cursor remain visible
       setTimeout(() => scrollToBottom({ smooth: false }), 0);
       return;
     }
