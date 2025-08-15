@@ -13,17 +13,18 @@ export const joinRoom = async (req: Request, res: Response) => {
             })
         }
 
+        const roomInRedis = await redis.exists(`room:${roomId}:language`)
         const room = await Room.findOne({ roomId });
 
-        if (!room) {
+        if (!roomInRedis) {
             return res.status(404).json({
                 message: "Room not found",
                 code: 404
             });
         }
 
-        const userLimit = room.users.length
-        // console.log(userLimit)
+        const userLimit = await redis.scard(`room:${roomId}:users`)
+        console.log(userLimit)
         const MAX_USER_LIMITS = 2
 
         if (userLimit === MAX_USER_LIMITS) {
@@ -33,14 +34,19 @@ export const joinRoom = async (req: Request, res: Response) => {
             })
         }
 
-        if (room.users.includes(username)) {
+        const userExistsInRoom = await redis.sismember(`room:${roomId}:users`, username)
+        console.log(userExistsInRoom)
+
+        if (userExistsInRoom) {
             return res.status(409).json({
                 message: "Username already exists in this room",
                 code: 409
             });
         }
 
+        // @ts-ignore
         room.users.push(username);
+        //@ts-ignore
         await room.save();
         await redis.sadd(`room:${roomId}:users`, username);
         // have to add expire also here before prod
