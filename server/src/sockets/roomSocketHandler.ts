@@ -80,16 +80,37 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
                 break;
             }
             case "code_change": {
+                if (!ws.roomId) return
                 // ws.code will be defined here
-                console.log(
-                    `code updated in room ${data.roomId}: ${data.code}`
-                );
+                try {
+                    ws.code = data.code
+
+                    brodcastToRoom(wss, data.roomId, {
+                        type: "code_update",
+                        code: data.code,
+                        username: ws.username
+                    }, ws)
+                } catch (err) {
+                    console.error("Code change failed: ", err)
+                    ws.send(JSON.stringify({
+                        type: "error",
+                        message: "Failed to change the code."
+                    }))
+                }
                 break;
             }
             case "cursor_sync": {
-                console.log(
-                    `Cursor in room ${data.roomId} moved to line ${data.cursorPosition.line}, column ${data.cursorPosition.column}`
-                );
+                if (!ws.roomId) return
+
+                try {
+                    brodcastToRoom(wss, ws.roomId, {
+                        type: "cursor_update",
+                        username: ws.username,
+                        cursorPosition: data.cursorPosition
+                    }, ws);
+                } catch (err) {
+                    console.error(err)
+                }
                 break;
             }
         }
@@ -104,6 +125,7 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
 
                 if (typeof ws.code === "string") {
                     await redis.set(`room:${ws.roomId}:code`, ws.code).catch(console.error)
+                    console.log(ws.code)
                 }
             }
             catch (err) {
