@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Play, ArrowRight, Copy } from "lucide-react";
-import { createRoom, joinRoom } from "../../api/roomApi";
+import { createRoom, joinRoom } from "../../../server/api/roomApi";
 import { useNavigate } from "react-router-dom";
 import { LoadingIcon } from '../ui/Icons';
 
@@ -54,6 +54,7 @@ const CreateRoom = () => {
             navigate(`/room?roomId=${response.room.roomId}`, {
                 state: {
                     language: selectedLanguage,
+                    username: username,
                 }
             });
         } catch (error) {
@@ -80,7 +81,8 @@ const CreateRoom = () => {
             navigate(`/room?roomId=${roomCode}`, {
                 state: {
                     language: response.room.language, 
-                    roomData: response.room 
+                    username: username,
+                    roomData: response.room
                 }
             });
         } catch (error) {
