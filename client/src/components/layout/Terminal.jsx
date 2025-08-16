@@ -34,7 +34,7 @@ const Terminal = forwardRef((
   const audioPoolRef = useRef([]);
   const currentAudioRef = useRef(null);
   const lastIndexRef = useRef(null);
-  const playQueueRef = useRef([]); // <<-- playlist shuffle queue
+  const playQueueRef = useRef([]); //  playlist shuffle queue
 
   const [isGoonPlaying, setIsGoonPlaying] = useState(false);
   const [currentTrack, setCurrentTrack] = useState(null);
@@ -116,7 +116,7 @@ const Terminal = forwardRef((
   // Scroll when opening
   useEffect(() => {
     if (isOpen) {
-      const t = setTimeout(() => scrollToBottom({ smooth: false }), 80);
+      const t = setTimeout(() => scrollToBottom({ smooth: true }), 80);
       return () => clearTimeout(t);
     }
   }, [isOpen]);
@@ -148,7 +148,6 @@ const Terminal = forwardRef((
       });
       audioPoolRef.current = [];
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
