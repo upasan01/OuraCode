@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useCallback, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
+import { webSocketApi, MESSAGE_TYPES } from "../../server/api/webSocketApi";
 
-// UI Components
+// UI Components (the pretty stuff that makes users happy) ✨
 import { Button } from "../components/ui/button";
 import { ScrollArea } from "../components/ui/ScrollArea";
-import { Input } from "../components/ui/input";
 import { LoadingIcon, EnhanceIcon } from "../components/ui/Icons";
 import BackgroundGradientAnimation from "../components/ui/BackgroundGradientAnimation";
 import { SiJavascript, SiPython, SiCplusplus, SiC, SiTypescript, SiKotlin } from 'react-icons/si';
@@ -13,31 +13,28 @@ import { TbBrandCSharp } from "react-icons/tb"
 import { FaGolang } from "react-icons/fa6"
 import { DiRuby } from "react-icons/di";
 
-// App Components
+// App Components (our homemade goodies) 🏠
 import CodeEditor from "../components/layout/CodeEditor";
-import MarkdownRenderer from "../components/layout/MarkdownRenderer";
-import PromptTemplate from "../components/layout/PromptTemplate";
+import AiPanel from "../components/layout/AiPanel";
 import { toast } from "react-hot-toast";
-import { Terminal } from "../components/ui/Terminal";
+import { Terminal } from "../components/layout/Terminal";
 
-// Icons
+// Icons (because we love visual candy) 🍭
 import {
-    MessageCircle, X, Code2, ArrowUp, Copy, Check, DownloadIcon, Save, Menu, Terminal as TerminalIcon
+    MessageCircle, Code2, Copy, X, Check, DownloadIcon, Save, Menu, Terminal as TerminalIcon
 } from "lucide-react";
 
-// API
-import { downloadCode, saveCode, changeLanguage } from '../api/controllerApi';
-
-// Panel Configuration Constants
-const DEFAULT_PANEL_WIDTH = 600;
-const MIN_PANEL_WIDTH = 400;
-const MAX_PANEL_WIDTH = 800;
+// API (the backend communication squad) 📡
+import { downloadCode, saveCode, changeLanguage } from '../../server/api/controllerApi';
 
 export default function App() {
     const [searchParams] = useSearchParams();
     const roomId = searchParams.get("roomId");
     const location = useLocation();
-    const { language: initialLanguage } = location.state || {};
+    const {
+        language: initialLanguage,
+        username: passedUsername,
+    } = location.state || {};
 
     const languages = useMemo(
         () => [
@@ -63,6 +60,7 @@ export default function App() {
     const [code, setCode] = useState("");
 
     const [isCopied, setIsCopied] = useState(false);
+    // copy code handler (ctrl+c but with extra steps) 📋
     const handleCopyCode = async () => {
         try {
             await navigator.clipboard.writeText(code);
@@ -72,19 +70,21 @@ export default function App() {
             toast.error("Failed to copy code:", err);
         }
     };
-
-    const [error, setError] = useState(null);
+    // state management central command 🎮
     const [isLoading, setIsLoading] = useState(false);
-    const [chatHistory, setChatHistory] = useState([]);
-    const [chatInput, setChatInput] = useState("");
-    const [isChatLoading, setIsChatLoading] = useState(false);
+
+    // sidebar states (for that mobile responsive flex) 📱
     const [isSidebarCollapsed, setSidebarCollapsed] = useState(false)
     const [isSidebarOpen, setSidebarOpen] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
     const terminalRef = useRef(null);
 
+    // AI Panel State (where the magic happens) ✨
+    const [isChatOpen, setChatOpen] = useState(false);
+    const aiPanelRef = useRef(null);
 
-    // For handling mobile responsiveness and sidebar states
+
+    // mobile responsiveness handler (gotta look good on all screens) 📱💻
     useEffect(() => {
         const handleResize = () => {
             const mobile = window.innerWidth < 768
@@ -100,138 +100,29 @@ export default function App() {
         return () => window.removeEventListener("resize", handleResize)
     }, [])
 
-
-    // AI Panel States
-
-    const [isChatOpen, setChatOpen] = useState(false);
-    const [panelWidth, setPanelWidth] = useState(DEFAULT_PANEL_WIDTH);
-    const isResizing = useRef(false);
-    const chatContainerRef = useRef(null);
-
-    useEffect(() => {
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-        }
-    }, [chatHistory, isChatLoading]);
-
-    const handleMouseDown = (e) => {
-        e.preventDefault();
-        isResizing.current = true;
-        document.addEventListener("mousemove", handleMouseMove);
-        document.addEventListener("mouseup", handleMouseUp);
-    };
-
-    const handleMouseMove = (e) => {
-        if (!isResizing.current) return;
-
-        requestAnimationFrame(() => {
-            const newWidth = window.innerWidth - e.clientX;
-            const maxAllowedWidth = window.innerWidth - 256 - 400;
-            const clampedWidth = Math.max(MIN_PANEL_WIDTH, Math.min(newWidth, MAX_PANEL_WIDTH, maxAllowedWidth));
-            setPanelWidth(clampedWidth);
-        });
-    };
-
-    const handleMouseUp = () => {
-        isResizing.current = false;
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
-    };
-
-    // The ChatBot call 
-
-    const callGeminiAPI = async (prompt) => {
-        const apiKey = import.meta.env.VITE_GENAI_API_KEY;
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-        const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-
-        const response = await fetch(apiUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        });
-
-        if (!response.ok) {
-            const errorBody = await response.json().catch(() => ({}));
-            throw new Error(`API Error: ${response.status} - ${errorBody.error?.message || "Unknown error"}`);
-        }
-
-        const result = await response.json();
-        const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!text) throw new Error("Invalid response structure from API.");
-        return text;
-    };
-
-    const handleReview = async () => {
-        if (!code.trim()) {
-            setError("Please enter some code to review.");
-            if (!isChatOpen) setChatOpen(true);
-            return;
-        }
-
-        setIsLoading(true);
-        setError(null);
-        if (!isChatOpen) setChatOpen(true);
-
-        const prompt = PromptTemplate.getReviewPrompt(selectedLanguage.value, code);
-        setChatHistory((prev) => [...prev, { role: "user", text: `Please review the following ${selectedLanguage.name} code.` }, { role: "ai", text: "" }]);
-
-        try {
-            const resultText = await callGeminiAPI(prompt);
-            setChatHistory((prev) => {
-                const newHistory = [...prev];
-                newHistory[newHistory.length - 1] = { role: "ai", text: resultText };
-                return newHistory;
-            });
-        } catch (err) {
-            console.error(err);
-            setError(err.message);
-            setChatHistory((prev) => {
-                const newHistory = [...prev];
-                newHistory[newHistory.length - 1] = { role: "ai", text: `Error: ${err.message}` };
-                return newHistory;
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleChatSubmit = async (e) => {
-        e.preventDefault();
-        if (!chatInput.trim() || isChatLoading) return;
-
-        const newUserMessage = { role: "user", text: chatInput };
-        setChatHistory((prev) => [...prev, newUserMessage, { role: "ai", text: "" }]);
-        setIsChatLoading(true);
-        setChatInput("");
-
-        const prompt = PromptTemplate.getChatPrompt({
-            language: selectedLanguage.value, code, chatHistory: [...chatHistory, newUserMessage], chatInput,
-        });
-
-        try {
-            const resultText = await callGeminiAPI(prompt);
-            setChatHistory((prev) => {
-                const newHistory = [...prev];
-                newHistory[newHistory.length - 1] = { role: "ai", text: resultText };
-                return newHistory;
-            });
-        } catch (err) {
-            setChatHistory((prev) => {
-                const newHistory = [...prev];
-                newHistory[newHistory.length - 1] = { role: "ai", text: `Sorry, I encountered an error: ${err.message}` };
-                return newHistory;
-            });
-        } finally {
-            setIsChatLoading(false);
-        }
-    };
-
-    // Download states
+    // download state management (for when things go wrong) 💀
     const [downloadLoading, setDownloadLoading] = useState(false);
     const [downloadError, setDownloadError] = useState('');
 
-    // Download handler
+    // review handler that doesn't care about panel drama 🎭
+    const handleReview = async () => {
+        if (!code.trim()) {
+            toast.error("Please enter some code to review.");
+            return;
+        }
+        
+        // always make sure panel is vibing open
+        setChatOpen(true);
+        
+        // wait a hot sec for panel to open, then hit that review button
+        setTimeout(() => {
+            if (aiPanelRef.current) {
+                aiPanelRef.current.triggerReview();
+            }
+        }, isChatOpen ? 0 : 100); // no delay if already open, tiny delay if opening
+    };
+
+    // download handler (when you need that code offline) 💾
     const handleDownload = async () => {
         if (!code || !roomId) {
             toast.error('Missing code or room ID');
@@ -242,7 +133,7 @@ export default function App() {
             setDownloadLoading(true);
             setDownloadError('');
 
-            // Add timeout to prevent infinite loading
+            // timeout protection bc we ain't waiting forever
             const downloadPromise = downloadCode(code, roomId);
             const timeoutPromise = new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Download timeout - server may be unresponsive')), 30000)
@@ -258,7 +149,7 @@ export default function App() {
         }
     };
 
-    //Save code handler
+    // save code handler (ctrl+s but make it fancy) 💾✨
     const handleSaveCode = async () => {
         setIsLoading(true);
         try {
@@ -276,6 +167,7 @@ export default function App() {
         }
     };
 
+    // ctrl+s keyboard listener (because we're fancy like that) ⌨️
     useEffect(() => {
         const handleKeyDown = (event) => {
             if (event.ctrlKey && event.key === 's') {
@@ -291,7 +183,7 @@ export default function App() {
         };
     }, [roomId, code]);
 
-    // Language change handler
+    // language change handler (when you switch your coding vibe) 🔄
     useEffect(() => {
         if (!roomId || !selectedLanguage) return;
         const handleLanguageChange = async () => {
@@ -313,6 +205,133 @@ export default function App() {
         }
     }
 
+    // websocket connection state (real-time collab vibes) 🌐
+    const [wsConnected, setWsConnected] = useState(false);
+    const [currentUsername, setCurrentUsername] = useState('');
+    const wsInitialized = useRef(false);
+    const codeChangeTimeoutRef = useRef(null);
+
+
+    const username = useMemo(() => {
+        if (passedUsername) return passedUsername;
+        // store username in sessionStorage so it persists across refreshes (smart move)
+        const stored = sessionStorage.getItem('temp_username');
+        if (stored) return stored;
+
+        const generated = `User_${Math.random().toString(36).substr(2, 8)}`;
+        sessionStorage.setItem('temp_username', generated);
+        return generated;
+    }, [passedUsername]);
+
+
+    // websocket connection and event handling (the networking magic) 🎯
+    useEffect(() => {
+        if (!roomId || wsInitialized.current) return;
+
+        const initializeWebSocket = async () => {
+            try {
+                console.log('Initializing WebSocket connection...');
+                
+                // clear existing handlers to prevent chaos and duplicates
+                webSocketApi.clearHandlers();
+
+                // set up event handlers BEFORE connecting (order matters bestie)
+                webSocketApi.onConnect(() => {
+                    console.log('WebSocket connected, updating state...');
+                    setWsConnected(true);
+                    setCurrentUsername(username);
+                    toast.success('Connected to collaboration server');
+                });
+
+                webSocketApi.onDisconnect(() => {
+                    console.log('WebSocket disconnected, updating state...');
+                    setWsConnected(false);
+                    toast.error('Disconnected from collaboration server');
+                });
+
+                webSocketApi.onError((error) => {
+                    console.error('WebSocket error:', error);
+                    toast.error('Connection error occurred');
+                    setWsConnected(false);
+                });
+
+                // message handlers (the real-time communication squad)
+                webSocketApi.onMessage(MESSAGE_TYPES.LOAD_CODE, (data) => {
+                    console.log('Loading existing code:', data.code);
+                    setCode(data.code || '');
+                });
+
+                webSocketApi.onMessage(MESSAGE_TYPES.USER_JOINED, (data) => {
+                    console.log('User joined:', data);
+                    toast.success(data.message);
+                });
+
+                webSocketApi.onMessage(MESSAGE_TYPES.ERROR, (data) => {
+                    console.error('WebSocket error message:', data);
+                    toast.error(data.message || 'An error occurred');
+                });
+
+                webSocketApi.onMessage(MESSAGE_TYPES.CODE_UPDATE, (data) => {
+                    console.log('Received code update from:', data.username, data.code);
+                    setCode(data.code || '');
+                    toast.success(`Code updated by ${data.username}`);
+                });
+
+                // use the enhanced initialize method for better connection management
+                const connected = await webSocketApi.initialize('ws://localhost:3000', roomId, username);
+                
+                if (connected) {
+                    console.log('WebSocket initialized successfully');
+                    setWsConnected(true);
+                    setCurrentUsername(username);
+                } else {
+                    console.error('Failed to initialize WebSocket');
+                    setWsConnected(false);
+                    toast.error('Failed to connect to collaboration server');
+                }
+
+                wsInitialized.current = true;
+
+            } catch (error) {
+                console.error('Failed to initialize WebSocket:', error);
+                toast.error('Failed to connect to collaboration server');
+                setWsConnected(false);
+            }
+        };
+
+        initializeWebSocket();
+
+        // cleanup on unmount (good housekeeping vibes) 🧹
+        return () => {
+            if (wsInitialized.current) {
+                console.log('Cleaning up WebSocket connection');
+                webSocketApi.disconnect();
+                wsInitialized.current = false;
+                setWsConnected(false);
+            }
+        };
+    }, [roomId]);
+
+    // debounced code change handler for real-time sync (prevents server spam - we're considerate like that) 📡
+    const debouncedSendCodeChange = useCallback((newCode) => {
+        if (codeChangeTimeoutRef.current) {
+            clearTimeout(codeChangeTimeoutRef.current);
+        }
+
+        codeChangeTimeoutRef.current = setTimeout(() => {
+            if (wsConnected && roomId) {
+                console.log('Broadcasting code change to room:', roomId);
+                webSocketApi.sendCodeChange(roomId, newCode);
+            }
+        }, 500); // 500ms debounce to avoid server flooding
+    }, [wsConnected, roomId]);
+
+    // enhanced code change handler (the main character of real-time collab) ✨
+    const handleCodeChange = useCallback((newCode) => {
+        setCode(newCode);
+        debouncedSendCodeChange(newCode);
+    }, [debouncedSendCodeChange]);
+
 
 
     return (
@@ -323,7 +342,7 @@ export default function App() {
 
             <header className="h-16 bg-[#11111b] border-b border-[#313244] flex items-center justify-between px-6 z-10 flex-shrink-0">
                 <div className="flex items-center gap-4">
-                    {/* Mobile menu button */}
+                    {/* mobile menu button (hamburger menu but make it aesthetic) 🍔 */}
                     <Button
                         variant="ghost"
                         size="icon"
@@ -338,14 +357,6 @@ export default function App() {
                                     : 'opacity-100 rotate-0 scale-100'
                                     }`}
                             />
-                            {/* <X 
-                                size={20} 
-                                className={`absolute transition-all duration-300 ${
-                                    isSidebarOpen 
-                                        ? 'opacity-100 rotate-0 scale-100' 
-                                        : 'opacity-0 rotate-90 scale-75'
-                                }`}
-                            /> */}
                         </div>
                     </Button>
 
@@ -361,6 +372,17 @@ export default function App() {
                 </div>
 
                 <div className="flex items-center gap-2 z-10">
+                    {/* connection status indicator (so you know if you're vibing with the server) 📡 */}
+                    <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-slate-800/50 border border-slate-600/50">
+                        <div className={`w-2 h-2 rounded-full transition-all duration-300 ${wsConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'
+                            }`} />
+                        <span className="text-xs text-slate-300">
+                            {wsConnected
+                                ? `${username} • Connected`
+                                : `${username} • Disconnected`
+                            }
+                        </span>
+                    </div>
                     <Button
                         onClick={handleSaveCode}
                         variant="outline"
@@ -374,9 +396,9 @@ export default function App() {
                 </div>
             </header>
 
-
+           {/* Column 1: Sidebar (the language picker zone) 🗂️ */}
             <div className="flex-1 flex overflow-hidden">
-                {/* Mobile overlay */}
+                {/* mobile overlay (so the sidebar doesn't just float there awkwardly) */}
                 {isMobile && isSidebarOpen && (
                     <div
                         className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 animate-in fade-in-0"
@@ -449,7 +471,7 @@ export default function App() {
                     </ScrollArea>
                 </div>
 
-                {/* Column 2: Editor */}
+                {/* column 2: editor (where the coding magic happens) ⌨️ */}
                 <div className="flex-1 flex flex-col relative overflow-hidden">
                     <div className="h-14 bg-[#181825] border-b border-[#313244] flex items-center justify-between px-4 flex-shrink-0">
                         <div className="flex items-center gap-3">
@@ -463,7 +485,7 @@ export default function App() {
                                 onClick={() => terminalRef.current?.toggle?.()}
                                 variant="outline"
                                 size="icon"
-                                className={`border-[#313244] hover:bg-[#313244] ${/* no parent state here */ ""}`}
+                                className={`border-[#313244] hover:bg-[#313244] ${""}`}
                             >
                                 <TerminalIcon size={16} />
                             </Button>
@@ -493,16 +515,14 @@ export default function App() {
                             </Button>
                         </div>
                     </div>
+                    {/* code editor area (the main event) 🎯 */}
                     <div className="flex-1 p-4 h-full editor-area">
                         <CodeEditor
                             code={code}
-                            setCode={setCode}
+                            setCode={handleCodeChange}
                             language={selectedLanguage.id}
                             roomId={roomId}
-                            onLanguageChange={(val) => {
-                                const found = languages.find((l) => l.id === val) || selectedLanguage;
-                                setSelectedLanguage(found);
-                            }}
+                            wsConnected={wsConnected}   // Pass connection status
                         />
                         <Terminal
                             ref={terminalRef}
@@ -516,77 +536,16 @@ export default function App() {
                     </div>
                 </div>
 
-
-                {isChatOpen && (
-                    <div className="flex flex-shrink-0">
-                        <div onMouseDown={handleMouseDown} className="w-1 bg-[#313244] cursor-col-resize hover:bg-[#f38ba8] z-10 transition-colors" />
-                        <div className=" border-l border-[#313244] flex flex-col z-10" style={{ width: panelWidth }}>
-                            <div className="h-14 bg-[#181825] border-b border-[#313244] flex items-center justify-between px-4 flex-shrink-0">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-[#a6e3a1] rounded-full animate-pulse" />
-                                    <h3 className="font-semibold text-[#a6e3a1]">Goonology AI</h3>
-                                </div>
-                                <Button variant="ghost" size="icon" onClick={() => setChatOpen(false)} className="hover:bg-[#313244]">
-                                    <X size={16} />
-                                </Button>
-                            </div>
-                            <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto">
-                                {error && (
-                                    <div className="bg-red-900/50 text-red-300 p-4 rounded-md mb-4">
-                                        <p className="font-bold">An error occurred:</p>
-                                        <p className="mt-1 text-sm">{error}</p>
-                                    </div>
-                                )}
-                                {chatHistory.length === 0 && !isLoading && !error && (
-                                    <div className="flex justify-center items-center h-full text-center">
-                                        <p className="text-[#6c7086]">Analyze your code or start a conversation.</p>
-                                    </div>
-                                )}
-                                <div className="space-y-2">
-                                    {chatHistory.map((msg, idx) => (
-                                        <div key={idx} className={`py-3 px-4 ${msg.role === "user" ? "bg-transparent" : "bg-transparent"}`}>
-                                            <div className={`${msg.role === "user" ? "ml-auto max-w-[75%] bg-[#242431] text-[#ffffff] px-4 py-3 rounded-3xl" : "max-w-[85%] bg-[#1e1e2e] text-[#ffffff] px-4 py-3 rounded-3xl"}`}>
-                                                <p
-                                                    className={`text-xs opacity-90 mb-2 font-medium ${msg.role === "user" ? "text-gray-400" : "text-[#a6e3a1]"
-                                                        }`}
-                                                >
-                                                    {msg.role === "user" ? "You" : "GoonologyAI"}
-                                                </p>
-
-                                                {msg.text ? (
-                                                    <MarkdownRenderer text={msg.text} onUseCode={(newCode) => setCode(newCode)} />
-                                                ) : (
-                                                    <div className="text-[#a1a1a1] animate-pulse flex items-center gap-2">
-                                                        <div className="flex space-x-1">
-                                                            <div className="w-2 h-2 bg-[#a1a1a1] rounded-full animate-bounce"></div>
-                                                            <div className="w-2 h-2 bg-[#a1a1a1] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                                                            <div className="w-2 h-2 bg-[#a1a1a1] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                                                        </div>
-                                                        <span>Thinking...</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="p-4 border-t border-[#313244] flex-shrink-0 ">
-                                <form onSubmit={handleChatSubmit} className="flex gap-2">
-                                    <Input
-                                        value={chatInput}
-                                        onChange={(e) => setChatInput(e.target.value)}
-                                        placeholder="Ask about your code..."
-                                        className="bg-[#11111b] border-[#313244] rounded-lg text-[#cdd6f4] placeholder:text-[#6c7086]"
-                                        disabled={isChatLoading || isLoading}
-                                    />
-                                    <Button type="submit" size="icon" disabled={isChatLoading || isLoading || !chatInput.trim()} className="bg-[#f0f6ef] hover:bg-[#a6e3a1]/80 text-[#1e1e2e]">
-                                        <ArrowUp size={16} />
-                                    </Button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                {/*column 3: AI panel (where the goons live) 🤖 */}
+                <AiPanel
+                    ref={aiPanelRef}
+                    isOpen={isChatOpen}
+                    onClose={() => setChatOpen(false)}
+                    code={code}
+                    selectedLanguage={selectedLanguage}
+                    setCode={setCode}
+                    isLoading={isLoading}
+                />
             </div>
         </div>
     );
