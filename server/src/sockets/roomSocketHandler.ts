@@ -5,6 +5,7 @@ interface ExtWebSocket extends WebSocket {
     roomId?: string;
     username?: string;
     code?: string;
+    language?: string;
 }
 
 interface BaseMessage {
@@ -29,10 +30,17 @@ interface CursorSyncMessage extends BaseMessage {
     cursorPosition: { line: number; column: number };
 }
 
+interface LanguageChangeMessage extends BaseMessage {
+    type: "language_change";
+    roomId: string;
+    language: string
+}
+
 type RoomSocketMessage =
     | JoinRoomMessage
     | CodeChangeMessage
-    | CursorSyncMessage;
+    | CursorSyncMessage
+    | LanguageChangeMessage;
 
 export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
     ws.on("error", (error) => console.error(error));
@@ -112,6 +120,27 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
                     console.error(err)
                 }
                 break;
+            }
+            case "language_change": {
+                if (!ws.roomId) return
+
+                try{
+                    ws.language = data.language
+
+                    await redis.set(`room:${ws.roomId}:language`, ws.language)
+
+                    brodcastToRoom(wss, ws.roomId, {
+                        type: "language_changed",
+                        username: ws.username,
+                        language: ws.language
+                    }, ws)
+                }catch(err){
+                    console.error("Failed to change language: ", err)
+                    ws.send(JSON.stringify({
+                        type: "error",
+                        message: "Failed to change language"
+                    }))
+                }
             }
         }
     });
