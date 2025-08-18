@@ -1,39 +1,65 @@
-import React, { forwardRef, useRef, useImperativeHandle } from 'react';
+import React, { useRef, useImperativeHandle, forwardRef } from 'react';
 import MonacoEditor from '@monaco-editor/react';
 
 const CodeEditor = forwardRef(({
   code,
   setCode,
   language,
+  onEditorMount,
+  onCursorChange,
 }, ref) => {
   const editorRef = useRef(null);
+  const isApplyingRemoteChange = useRef(false);
 
   useImperativeHandle(ref, () => ({
-    focus: () => {
+    applyRemoteUpdate: (newCode) => {
       if (editorRef.current) {
-        editorRef.current.focus();
+        // Set the flag to true before making a programmatic change
+        isApplyingRemoteChange.current = true;
+
+        const viewState = editorRef.current.saveViewState();
+        editorRef.current.setValue(newCode);
+        if (viewState) {
+          editorRef.current.restoreViewState(viewState);
+        }
+
+        // Unset the flag after the change is complete
+        isApplyingRemoteChange.current = false;
       }
     }
   }));
+
   const handleEditorDidMount = (editor) => {
     editorRef.current = editor;
     editor.focus();
+
+    if (onEditorMount) {
+      onEditorMount(editor);
+    }
+    
+    if (onCursorChange) {
+      editor.onDidChangeCursorPosition(event => {
+        onCursorChange(event.position);
+      });
+    }
+  };
+
+  const handleEditorChange = (value) => {
+    // Only call setCode if the change was made by the local user
+    if (!isApplyingRemoteChange.current) {
+      setCode(value || '');
+    }
   };
 
   return (
-    <div
-      ref={ref}
-      className="flex-grow flex flex-col bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-2xl z-10 h-full"
-    >
-      
-      {/* Code Editor */}
+    <div className="flex-grow flex flex-col bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-2xl z-10 h-full">
       <div className="flex-grow px-2">
         <MonacoEditor
           width="100%"
           height="100%"
-          value={code}
+          defaultValue={code}
           language={language || 'javascript'}
-          onChange={(value) => setCode(value || '')}
+          onChange={handleEditorChange}
           theme="vs-dark"
           onMount={handleEditorDidMount}
           options={{

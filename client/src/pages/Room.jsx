@@ -61,6 +61,8 @@ export default function App() {
     const defaultLang = languages.find((l) => l.value === initialLanguage) || languages[0];
     const [selectedLanguage, setSelectedLanguage] = useState(defaultLang);
     const [code, setCode] = useState("");
+    const codeEditorRef = useRef(null);
+    const [remoteCursors, setRemoteCursors] = useState(() => new Map());
 
     const [isCopied, setIsCopied] = useState(false);
     // copy code handler (ctrl+c but with extra steps) 📋
@@ -170,7 +172,7 @@ export default function App() {
         }
     };
 
-    // ctrl+s keyboard listener (because we're fancy like that) ⌨
+    // ctrl+s keyboard listener (because we're fancy like that) 
     useEffect(() => {
         const handleKeyDown = (event) => {
             if (event.ctrlKey && event.key === 's') {
@@ -213,51 +215,59 @@ export default function App() {
             },
             onLoadCode: (loadedCode) => {
                 setCode(loadedCode);
+                codeEditorRef.current?.applyRemoteUpdate(loadedCode);
             },
 
             onCodeUpdate: (newcode, fromUsername) => {
                 if (fromUsername !== username) {
-                    setCode(newcode);
+                    codeEditorRef.current?.applyRemoteUpdate(newcode);
                 }
             },
-                onUserJoined: (message) => {
-                    if (message.username !== username) {
-                        toast(message.message);
+
+            onCursorUpdate: (fromUsername, cursorPosition) => {
+                // First, ensure the message is from another user
+                if (fromUsername !== username) {
+                    setRemoteCursors(prev => {
+                        const next = new Map(prev);
+                        next.set(fromUsername, cursorPosition);
+                        return next;
+                    });
+                }
+            },
+
+            onUserJoined: (message) => {
+                if (message.username !== username) {
+                    toast(message.message);
+                }
+            },
+            onLanguageChanged: (newLanguage, fromUsername) => {
+                if (fromUsername !== username) {
+                    const langObj = languages.find(l => l.id === newLanguage || l.value === newLanguage);
+                    if (langObj) {
+                        setSelectedLanguage(langObj);
+                        toast(`${fromUsername} changed language to ${langObj.name} 🔄`);
                     }
-                },
-                    onLanguageChanged: (newLanguage, fromUsername) => {
-                        if (fromUsername !== username) {
-                            const langObj = languages.find(l => l.id === newLanguage || l.value === newLanguage);
-                            if (langObj) {
-                                setSelectedLanguage(langObj);
-                                toast(`${fromUsername} changed language to ${langObj.name} 🔄`);
-                            }
-                        }
-                    },
-                        onError: (error) => {
-                            toast.error(error.message)
-                        }
-            });
+                }
+            },
+            onError: (error) => {
+                toast.error(error.message)
+            }
+        });
         return () => {
             webSocketApi.disconnect();
         };
     }, [roomId, username]);
 
     // language change handler (when you switch your coding vibe) 
-const handleLanguageChange = (language) => {
-    // 1. Update the local UI state immediately
-    setSelectedLanguage(language);
-
-    // 2. Send the message to other clients
-    if (wsConnected) {
-        webSocketApi.sendLanguageChange(roomId, language.value);
-    }
-
-    // 3. Close the sidebar on mobile
-    if (isMobile) {
-        setSidebarOpen(false);
-    }
-};
+    const handleLanguageChange = (language) => {
+        setSelectedLanguage(language);
+        if (wsConnected) {
+            webSocketApi.sendLanguageChange(roomId, language.value);
+        }
+        if (isMobile) {
+            setSidebarOpen(false);
+        }
+    };
 
     //debounce code updates to avoid spamming the server
     useEffect(() => {
@@ -265,7 +275,7 @@ const handleLanguageChange = (language) => {
 
         const timeoutId = setTimeout(() => {
             webSocketApi.sendCodeChange(roomId, code);
-        }, 500);
+        }, 100);
         return () => clearTimeout(timeoutId);
     }, [code, wsConnected, roomId]);
 
@@ -309,7 +319,7 @@ const handleLanguageChange = (language) => {
                 </div>
 
                 <div className="flex items-center gap-2 z-10">
-                    {/* connection status indicator (so you know if you're vibing with the server) 📡 */}
+                    {/* connection status indicator (so you know if you're vibing with the server)  */}
                     <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-slate-800/50 border border-slate-600/50">
                         <div className={`w-2 h-2 rounded-full transition-all duration-300 ${wsConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'
                             }`} />
@@ -452,9 +462,11 @@ const handleLanguageChange = (language) => {
                     {/* code editor area (the main event) 🎯 */}
                     <div className="flex-1 p-4 h-full editor-area">
                         <CodeEditor
+                            ref={codeEditorRef}
                             code={code}
                             setCode={setCode}
                             language={selectedLanguage.id}
+
                         />
                         <Terminal
                             ref={terminalRef}
