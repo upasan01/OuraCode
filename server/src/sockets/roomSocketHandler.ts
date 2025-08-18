@@ -62,7 +62,9 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
                     const { roomId, username } = data;
                     ws.roomId = roomId;
                     ws.username = username;
-                    console.log(`${username} joined room ${roomId}`);
+                    console.log(`${username} joined room ${roomId}`)
+                    // this makes it sure that redis dosent loses user on refresh
+                    await redis.sadd(`room:${roomId}:users`, username);
 
                     const code = await redis.get(`room:${roomId}:code`)
 
@@ -124,7 +126,7 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
             case "language_change": {
                 if (!ws.roomId) return
 
-                try{
+                try {
                     ws.language = data.language
 
                     await redis.set(`room:${ws.roomId}:language`, ws.language)
@@ -134,7 +136,7 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
                         username: ws.username,
                         language: ws.language
                     }, ws)
-                }catch(err){
+                } catch (err) {
                     console.error("Failed to change language: ", err)
                     ws.send(JSON.stringify({
                         type: "error",
