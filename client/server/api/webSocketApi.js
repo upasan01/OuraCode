@@ -18,7 +18,7 @@ class WebSocketManager {
         this.setupEventListeners();
     }
 
-    // event listener setup (teaching our socket how to behave) 🎭📡
+    // event listener setup (teaching our socket how to behave)
     setupEventListeners() {
         this.socket.onopen = () => {
             this.connected = true;
@@ -37,12 +37,12 @@ class WebSocketManager {
         };
 
         this.socket.onerror = (error) => {
-            console.error('WebSocket error:', error); // not the vibe we wanted 😔
+            console.error('WebSocket error:', error); // not the vibe we wanted 
             this.callbacks.onError?.(error);
         };
     }
     
-    // incoming message handler (we're basically the message therapist) 📨💬
+    // incoming message handler (we're basically the message therapist) 
     handleMessage(message) {
         switch (message.type) {
             case 'load_code':
@@ -71,7 +71,7 @@ class WebSocketManager {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(JSON.stringify(message));
         } else {
-            console.warn('WebSocket not connected, message not sent:', message); // connection said "nah fam" 🚫
+            console.warn('WebSocket not connected, message not sent:', message); // connection said "nah fam" 
         }
     }
 
@@ -84,7 +84,7 @@ class WebSocketManager {
         });
     }
 
-    // send code changes (sharing the coding tea) ☕💻
+    // send code changes (sharing the coding tea)
     sendCodeChange(roomId, code) {
         this.sendMessage({
             type: 'code_change',
@@ -93,7 +93,7 @@ class WebSocketManager {
         });
     }
 
-    // cursor sync (showing where the magic happens) ✨👆
+    // cursor sync (showing where the magic happens) 
     sendCursorSync(roomId, cursorPosition) {
         this.sendMessage({
             type: 'cursor_sync',
@@ -126,10 +126,10 @@ class WebSocketManager {
     }
 }
 
-// singleton instance (one websocket manager to rule them all) 💍👑
+// singleton instance (one websocket manager to rule them all) 
 const webSocketManager = new WebSocketManager();
 
-// exported API (the main character energy) ⭐🎭
+// exported API (the main character energy) 
 export const webSocketApi = {
     connect: (roomId, username, callbacks) => webSocketManager.connect(roomId, username, callbacks),
     disconnect: () => webSocketManager.disconnect(),

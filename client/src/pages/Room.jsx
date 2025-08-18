@@ -244,20 +244,20 @@ export default function App() {
     }, [roomId, username]);
 
     // language change handler (when you switch your coding vibe) 
-    useEffect(() => {
-        if (!roomId || !selectedLanguage) return;
-        const handleLanguageChange = async () => {
-            try {
-                if (wsConnected) {
-                    webSocketApi.sendLanguageChange(roomId, selectedLanguage.value);
-                }
+const handleLanguageChange = (language) => {
+    // 1. Update the local UI state immediately
+    setSelectedLanguage(language);
 
-            } catch (error) {
-                toast.error(`Error changing language: ${error.message || error}`);
-            }
-        };
-        handleLanguageChange();
-    }, [selectedLanguage, roomId, wsConnected]);
+    // 2. Send the message to other clients
+    if (wsConnected) {
+        webSocketApi.sendLanguageChange(roomId, language.value);
+    }
+
+    // 3. Close the sidebar on mobile
+    if (isMobile) {
+        setSidebarOpen(false);
+    }
+};
 
     //debounce code updates to avoid spamming the server
     useEffect(() => {
@@ -385,10 +385,7 @@ export default function App() {
                                 return (
                                     <button
                                         key={language.id}
-                                        onClick={() => {
-                                            setSelectedLanguage(language)
-                                            if (isMobile) setSidebarOpen(false)
-                                        }}
+                                        onClick={() => handleLanguageChange(language)}
                                         className={`w-full flex items-center rounded-lg transition-all duration-300 hover:bg-[#313244] hover:scale-[1.02] active:scale-[0.98] ${selectedLanguage.id === language.id ? "bg-[#313244] border border-[#f38ba8] shadow-lg shadow-[#f38ba8]/20" : ""
                                             } ${isSidebarCollapsed ? "justify-center p-2" : "gap-3 p-3"}`}
                                         title={isSidebarCollapsed ? language.name : ""}
