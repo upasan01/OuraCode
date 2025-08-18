@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useCallback, useRef, useState, use } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
-import { webSocketApi, MESSAGE_TYPES } from "../../server/api/webSocketApi";
+import { webSocketApi } from "../../server/api/webSocketApi";
 
 // UI Components (the pretty stuff that makes users happy) ✨
 import { Button } from "../components/ui/button";
@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 
 // API (the backend communication squad) 📡
-import { downloadCode, saveCode, changeLanguage } from '../../server/api/controllerApi';
+import { downloadCode, saveCode } from '../../server/api/controllerApi';
 
 export default function App() {
     const [searchParams] = useSearchParams();
@@ -186,18 +186,6 @@ export default function App() {
         };
     }, [roomId, code]);
 
-    // language change handler (when you switch your coding vibe) 
-    useEffect(() => {
-        if (!roomId || !selectedLanguage) return;
-        const handleLanguageChange = async () => {
-            try {
-                await changeLanguage(selectedLanguage.value, roomId);
-            } catch (error) {
-                toast.error(`Error changing language: ${error.message || error}`);
-            }
-        };
-        handleLanguageChange();
-    }, [selectedLanguage, roomId]);
 
 
     const toggleSidebar = () => {
@@ -226,24 +214,50 @@ export default function App() {
             onLoadCode: (loadedCode) => {
                 setCode(loadedCode);
             },
-            onCodeUpdate: (newcode, fromUsername) => { 
+
+            onCodeUpdate: (newcode, fromUsername) => {
                 if (fromUsername !== username) {
                     setCode(newcode);
                 }
             },
-            onUserJoined: (message) => {
-                if (message.username !== username) {
-                    toast(message.message);
-                }
-            },
-            onError: (error) => {
-                toast.error(error.message)
-            }
-        });
+                onUserJoined: (message) => {
+                    if (message.username !== username) {
+                        toast(message.message);
+                    }
+                },
+                    onLanguageChanged: (newLanguage, fromUsername) => {
+                        if (fromUsername !== username) {
+                            const langObj = languages.find(l => l.id === newLanguage || l.value === newLanguage);
+                            if (langObj) {
+                                setSelectedLanguage(langObj);
+                                toast(`${fromUsername} changed language to ${langObj.name} 🔄`);
+                            }
+                        }
+                    },
+                        onError: (error) => {
+                            toast.error(error.message)
+                        }
+            });
         return () => {
             webSocketApi.disconnect();
         };
     }, [roomId, username]);
+
+    // language change handler (when you switch your coding vibe) 
+    useEffect(() => {
+        if (!roomId || !selectedLanguage) return;
+        const handleLanguageChange = async () => {
+            try {
+                if (wsConnected) {
+                    webSocketApi.sendLanguageChange(roomId, selectedLanguage.value);
+                }
+
+            } catch (error) {
+                toast.error(`Error changing language: ${error.message || error}`);
+            }
+        };
+        handleLanguageChange();
+    }, [selectedLanguage, roomId, wsConnected]);
 
     //debounce code updates to avoid spamming the server
     useEffect(() => {
@@ -251,223 +265,223 @@ export default function App() {
 
         const timeoutId = setTimeout(() => {
             webSocketApi.sendCodeChange(roomId, code);
-        }, 50);
+        }, 500);
         return () => clearTimeout(timeoutId);
     }, [code, wsConnected, roomId]);
 
 
 
-        return (
-            <div className="relative h-screen bg-[#1e1e2e] text-[#cdd6f4] flex flex-col overflow-hidden ">
-                <div className="fixed inset-0 w-full h-full z-0">
-                    <BackgroundGradientAnimation />
+    return (
+        <div className="relative h-screen bg-[#1e1e2e] text-[#cdd6f4] flex flex-col overflow-hidden ">
+            <div className="fixed inset-0 w-full h-full z-0">
+                <BackgroundGradientAnimation />
+            </div>
+
+            <header className="h-16 bg-[#11111b] border-b border-[#313244] flex items-center justify-between px-6 z-10 flex-shrink-0">
+                <div className="flex items-center gap-4">
+                    {/* mobile menu button (hamburger menu but make it aesthetic)  */}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={toggleSidebar}
+                        className={`${isMobile ? 'flex' : 'hidden'} hover:bg-[#313244] text-[#cdd6f4] p-2 transition-all duration-300`}
+                    >
+                        <div className="relative w-5 h-5 flex items-center justify-center">
+                            <Menu
+                                size={20}
+                                className={`absolute transition-all duration-300 ${isSidebarOpen
+                                    ? 'opacity-0 rotate-90 scale-75'
+                                    : 'opacity-100 rotate-0 scale-100'
+                                    }`}
+                            />
+                        </div>
+                    </Button>
+
+                    <div className="flex items-center space-x-3 z-10 mb-2">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#a6e3a1] to-[#89b4fa]">
+                            <Code2 className="h-6 w-6 text-[#1e1e2e]" />
+                        </div>
+                        <div>
+                            <span className="text-2xl font-bold text-[#a6e3a1]">{"<GoonShareAI/>"}</span>
+                            <div className="text-xs text-[#7b7d87]">{"// v1.1.0-stable"}</div>
+                        </div>
+                    </div>
                 </div>
 
-                <header className="h-16 bg-[#11111b] border-b border-[#313244] flex items-center justify-between px-6 z-10 flex-shrink-0">
-                    <div className="flex items-center gap-4">
-                        {/* mobile menu button (hamburger menu but make it aesthetic)  */}
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={toggleSidebar}
-                            className={`${isMobile ? 'flex' : 'hidden'} hover:bg-[#313244] text-[#cdd6f4] p-2 transition-all duration-300`}
-                        >
-                            <div className="relative w-5 h-5 flex items-center justify-center">
-                                <Menu
-                                    size={20}
-                                    className={`absolute transition-all duration-300 ${isSidebarOpen
-                                        ? 'opacity-0 rotate-90 scale-75'
-                                        : 'opacity-100 rotate-0 scale-100'
-                                        }`}
-                                />
-                            </div>
-                        </Button>
-
-                        <div className="flex items-center space-x-3 z-10 mb-2">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#a6e3a1] to-[#89b4fa]">
-                                <Code2 className="h-6 w-6 text-[#1e1e2e]" />
-                            </div>
-                            <div>
-                                <span className="text-2xl font-bold text-[#a6e3a1]">{"<GoonShareAI/>"}</span>
-                                <div className="text-xs text-[#7b7d87]">{"// v1.1.0-stable"}</div>
-                            </div>
-                        </div>
+                <div className="flex items-center gap-2 z-10">
+                    {/* connection status indicator (so you know if you're vibing with the server) 📡 */}
+                    <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-slate-800/50 border border-slate-600/50">
+                        <div className={`w-2 h-2 rounded-full transition-all duration-300 ${wsConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'
+                            }`} />
+                        <span className="text-xs text-slate-300">
+                            {wsConnected
+                                ? `${username} • Connected`
+                                : `${username} • Disconnected`
+                            }
+                        </span>
                     </div>
+                    <Button
+                        onClick={handleSaveCode}
+                        variant="outline"
+                        size="sm"
+                        className="border-[#313244] hover:bg-[#313244] text-[#cdd6f4] bg-transparent"
+                        title="Save (Ctrl+S)"
+                    >
+                        {isLoading ? <LoadingIcon className="w-5 h-5 mx-2" /> : <Save size={16} className="mr-2" />}
+                        Save
+                    </Button>
+                </div>
+            </header>
 
-                    <div className="flex items-center gap-2 z-10">
-                        {/* connection status indicator (so you know if you're vibing with the server) 📡 */}
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-slate-800/50 border border-slate-600/50">
-                            <div className={`w-2 h-2 rounded-full transition-all duration-300 ${wsConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'
-                                }`} />
-                            <span className="text-xs text-slate-300">
-                                {wsConnected
-                                    ? `${username} • Connected`
-                                    : `${username} • Disconnected`
-                                }
-                            </span>
-                        </div>
-                        <Button
-                            onClick={handleSaveCode}
-                            variant="outline"
-                            size="sm"
-                            className="border-[#313244] hover:bg-[#313244] text-[#cdd6f4] bg-transparent"
-                            title="Save (Ctrl+S)"
-                        >
-                            {isLoading ? <LoadingIcon className="w-5 h-5 mx-2" /> : <Save size={16} className="mr-2" />}
-                            Save
-                        </Button>
-                    </div>
-                </header>
-
-                {/* Column 1: Sidebar (the language picker zone) 🗂️ */}
-                <div className="flex-1 flex overflow-hidden">
-                    {/* mobile overlay (so the sidebar doesn't just float there awkwardly) */}
-                    {isMobile && isSidebarOpen && (
-                        <div
-                            className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 animate-in fade-in-0"
-                            onClick={() => setSidebarOpen(false)}
-                        />
-                    )}
-
+            {/* Column 1: Sidebar (the language picker zone) 🗂️ */}
+            <div className="flex-1 flex overflow-hidden">
+                {/* mobile overlay (so the sidebar doesn't just float there awkwardly) */}
+                {isMobile && isSidebarOpen && (
                     <div
-                        className={`
+                        className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 animate-in fade-in-0"
+                        onClick={() => setSidebarOpen(false)}
+                    />
+                )}
+
+                <div
+                    className={`
             ${isMobile ? "fixed left-0 top-16 bottom-0 z-50" : "relative"}
             ${isMobile && !isSidebarOpen ? "-translate-x-full" : "translate-x-0"}
             ${!isMobile && isSidebarCollapsed ? "w-16" : "w-64"}
             bg-[#181825] border-r border-[#313244] flex flex-col transition-all duration-500 ease-in-out
             ${isMobile ? 'shadow-2xl' : ''}
           `}
-                    >
-                        <div className="p-4 border-b border-[#313244] flex items-center justify-between">
-                            <div className={`transition-all duration-500 overflow-hidden ${!isSidebarCollapsed ? 'opacity-100 max-w-full' : 'opacity-0 max-w-0'}`}>
-                                <div className={`transition-all duration-300 ${!isSidebarCollapsed ? 'translate-x-0' : 'translate-x-4'}`}>
-                                    <h2 className="text-lg font-semibold text-[#f38ba8] mb-2">Languages</h2>
-                                </div>
+                >
+                    <div className="p-4 border-b border-[#313244] flex items-center justify-between">
+                        <div className={`transition-all duration-500 overflow-hidden ${!isSidebarCollapsed ? 'opacity-100 max-w-full' : 'opacity-0 max-w-0'}`}>
+                            <div className={`transition-all duration-300 ${!isSidebarCollapsed ? 'translate-x-0' : 'translate-x-4'}`}>
+                                <h2 className="text-lg font-semibold text-[#f38ba8] mb-2">Languages</h2>
                             </div>
-                            <Button variant="ghost" size="icon" onClick={toggleSidebar} className="hover:bg-[#313244] text-[#cdd6f4] p-2 transition-all duration-300">
-                                <div className="relative w-5 h-5 flex items-center justify-center">
-                                    <Menu
-                                        size={20}
-                                        className={`absolute transition-all duration-300 ${(isMobile && isSidebarOpen) || (!isMobile && !isSidebarCollapsed)
-                                            ? 'opacity-0 rotate-90 scale-75'
-                                            : 'opacity-100 rotate-0 scale-100'
-                                            }`}
-                                    />
-                                    <X
-                                        size={20}
-                                        className={`absolute transition-all duration-300 ${(isMobile && isSidebarOpen) || (!isMobile && !isSidebarCollapsed)
-                                            ? 'opacity-100 rotate-0 scale-100'
-                                            : 'opacity-0 rotate-90 scale-75'
-                                            }`}
-                                    />
-                                </div>
+                        </div>
+                        <Button variant="ghost" size="icon" onClick={toggleSidebar} className="hover:bg-[#313244] text-[#cdd6f4] p-2 transition-all duration-300">
+                            <div className="relative w-5 h-5 flex items-center justify-center">
+                                <Menu
+                                    size={20}
+                                    className={`absolute transition-all duration-300 ${(isMobile && isSidebarOpen) || (!isMobile && !isSidebarCollapsed)
+                                        ? 'opacity-0 rotate-90 scale-75'
+                                        : 'opacity-100 rotate-0 scale-100'
+                                        }`}
+                                />
+                                <X
+                                    size={20}
+                                    className={`absolute transition-all duration-300 ${(isMobile && isSidebarOpen) || (!isMobile && !isSidebarCollapsed)
+                                        ? 'opacity-100 rotate-0 scale-100'
+                                        : 'opacity-0 rotate-90 scale-75'
+                                        }`}
+                                />
+                            </div>
+                        </Button>
+                    </div>
+
+                    <ScrollArea className="flex-1 p-2">
+                        <div className="space-y-1">
+                            {languages.map((language) => {
+                                const IconComponent = language.icon
+                                return (
+                                    <button
+                                        key={language.id}
+                                        onClick={() => {
+                                            setSelectedLanguage(language)
+                                            if (isMobile) setSidebarOpen(false)
+                                        }}
+                                        className={`w-full flex items-center rounded-lg transition-all duration-300 hover:bg-[#313244] hover:scale-[1.02] active:scale-[0.98] ${selectedLanguage.id === language.id ? "bg-[#313244] border border-[#f38ba8] shadow-lg shadow-[#f38ba8]/20" : ""
+                                            } ${isSidebarCollapsed ? "justify-center p-2" : "gap-3 p-3"}`}
+                                        title={isSidebarCollapsed ? language.name : ""}
+                                    >
+                                        <div className={`p-2 rounded-md ${language.color} flex-shrink-0 transition-all duration-300`}>
+                                            <IconComponent size={16} />
+                                        </div>
+                                        {!isSidebarCollapsed && (
+                                            <span className="font-medium transition-all duration-300 opacity-100 translate-x-0">
+                                                {language.name}
+                                            </span>
+                                        )}
+                                    </button>
+                                )
+                            })}
+                        </div>
+                    </ScrollArea>
+                </div>
+
+                {/* column 2: editor (where the coding magic happens) ⌨️ */}
+                <div className="flex-1 flex flex-col relative overflow-hidden">
+                    <div className="h-14 bg-[#181825] border-b border-[#313244] flex items-center justify-between px-4 flex-shrink-0">
+                        <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-md ${selectedLanguage.color}`}>
+                                <selectedLanguage.icon size={20} />
+                            </div>
+                            <h1 className="text-xl font-semibold">{selectedLanguage.name} Editor</h1>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                onClick={() => terminalRef.current?.toggle?.()}
+                                variant="outline"
+                                size="icon"
+                                className={`border-[#313244] hover:bg-[#313244] ${""}`}
+                            >
+                                <TerminalIcon size={16} />
+                            </Button>
+                            <Button onClick={handleCopyCode} variant="outline" size="sm" className=" hover:bg-[#313244] text-[#cdd6f4] bg-transparent"
+                                disabled={!code}>
+
+                                {isCopied ? <Check size={16} className="mr-2" /> : <Copy size={16} />}
+                                {isCopied ? "Copied!" : ''}
+                            </Button>
+
+                            <Button
+                                onClick={handleDownload} variant="outline" size="sm"
+                                disabled={downloadLoading || !code}
+                                className={`hover:bg-[#313244] text-[#cdd6f4] bg-transparent transition-colors duration-200 disabled:opacity-50 flex items-center gap-2 ${downloadError ? "bg-red-900/50" : ""}`}
+                                title={downloadError || 'Download code'}
+                            >
+                                {downloadLoading ? <LoadingIcon className="w-5 h-5" /> : <DownloadIcon className="w-5 h-5" />}
+                                {downloadError ? <span className="text-xs text-red-400 ml-2">{downloadError}</span> : null}
+                            </Button>
+
+                            <Button onClick={handleReview} className="bg-[#f38ba8] hover:bg-[#f38ba8]/80 text-[#1e1e2e] font-semibold" disabled={isLoading}>
+                                <EnhanceIcon size={16} className="mr-2" />
+                                Goon
+                            </Button>
+                            <Button variant="outline" size="icon" onClick={() => setChatOpen((v) => !v)} className="border-[#313244] hover:bg-[#313244]">
+                                <MessageCircle size={16} />
                             </Button>
                         </div>
-
-                        <ScrollArea className="flex-1 p-2">
-                            <div className="space-y-1">
-                                {languages.map((language) => {
-                                    const IconComponent = language.icon
-                                    return (
-                                        <button
-                                            key={language.id}
-                                            onClick={() => {
-                                                setSelectedLanguage(language)
-                                                if (isMobile) setSidebarOpen(false)
-                                            }}
-                                            className={`w-full flex items-center rounded-lg transition-all duration-300 hover:bg-[#313244] hover:scale-[1.02] active:scale-[0.98] ${selectedLanguage.id === language.id ? "bg-[#313244] border border-[#f38ba8] shadow-lg shadow-[#f38ba8]/20" : ""
-                                                } ${isSidebarCollapsed ? "justify-center p-2" : "gap-3 p-3"}`}
-                                            title={isSidebarCollapsed ? language.name : ""}
-                                        >
-                                            <div className={`p-2 rounded-md ${language.color} flex-shrink-0 transition-all duration-300`}>
-                                                <IconComponent size={16} />
-                                            </div>
-                                            {!isSidebarCollapsed && (
-                                                <span className="font-medium transition-all duration-300 opacity-100 translate-x-0">
-                                                    {language.name}
-                                                </span>
-                                            )}
-                                        </button>
-                                    )
-                                })}
-                            </div>
-                        </ScrollArea>
                     </div>
+                    {/* code editor area (the main event) 🎯 */}
+                    <div className="flex-1 p-4 h-full editor-area">
+                        <CodeEditor
+                            code={code}
+                            setCode={setCode}
+                            language={selectedLanguage.id}
+                        />
+                        <Terminal
+                            ref={terminalRef}
+                            initialHeight={220}
+                            minHeight={120}
+                            maxHeightPx={800}
+                            editorSelector=".editor-area"
+                            className="editor-terminal"
+                        />
 
-                    {/* column 2: editor (where the coding magic happens) ⌨️ */}
-                    <div className="flex-1 flex flex-col relative overflow-hidden">
-                        <div className="h-14 bg-[#181825] border-b border-[#313244] flex items-center justify-between px-4 flex-shrink-0">
-                            <div className="flex items-center gap-3">
-                                <div className={`p-2 rounded-md ${selectedLanguage.color}`}>
-                                    <selectedLanguage.icon size={20} />
-                                </div>
-                                <h1 className="text-xl font-semibold">{selectedLanguage.name} Editor</h1>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Button
-                                    onClick={() => terminalRef.current?.toggle?.()}
-                                    variant="outline"
-                                    size="icon"
-                                    className={`border-[#313244] hover:bg-[#313244] ${""}`}
-                                >
-                                    <TerminalIcon size={16} />
-                                </Button>
-                                <Button onClick={handleCopyCode} variant="outline" size="sm" className=" hover:bg-[#313244] text-[#cdd6f4] bg-transparent"
-                                    disabled={!code}>
-
-                                    {isCopied ? <Check size={16} className="mr-2" /> : <Copy size={16} />}
-                                    {isCopied ? "Copied!" : ''}
-                                </Button>
-
-                                <Button
-                                    onClick={handleDownload} variant="outline" size="sm"
-                                    disabled={downloadLoading || !code}
-                                    className={`hover:bg-[#313244] text-[#cdd6f4] bg-transparent transition-colors duration-200 disabled:opacity-50 flex items-center gap-2 ${downloadError ? "bg-red-900/50" : ""}`}
-                                    title={downloadError || 'Download code'}
-                                >
-                                    {downloadLoading ? <LoadingIcon className="w-5 h-5" /> : <DownloadIcon className="w-5 h-5" />}
-                                    {downloadError ? <span className="text-xs text-red-400 ml-2">{downloadError}</span> : null}
-                                </Button>
-
-                                <Button onClick={handleReview} className="bg-[#f38ba8] hover:bg-[#f38ba8]/80 text-[#1e1e2e] font-semibold" disabled={isLoading}>
-                                    <EnhanceIcon size={16} className="mr-2" />
-                                    Goon
-                                </Button>
-                                <Button variant="outline" size="icon" onClick={() => setChatOpen((v) => !v)} className="border-[#313244] hover:bg-[#313244]">
-                                    <MessageCircle size={16} />
-                                </Button>
-                            </div>
-                        </div>
-                        {/* code editor area (the main event) 🎯 */}
-                        <div className="flex-1 p-4 h-full editor-area">
-                            <CodeEditor
-                                code={code}
-                                setCode={setCode}
-                                language={selectedLanguage.id}
-                            />
-                            <Terminal
-                                ref={terminalRef}
-                                initialHeight={220}
-                                minHeight={120}
-                                maxHeightPx={800}
-                                editorSelector=".editor-area"
-                                className="editor-terminal"
-                            />
-
-                        </div>
                     </div>
-
-                    {/*column 3: AI panel (where the goons live) 🤖 */}
-                    <AiPanel
-                        ref={aiPanelRef}
-                        isOpen={isChatOpen}
-                        onClose={() => setChatOpen(false)}
-                        code={code}
-                        selectedLanguage={selectedLanguage}
-                        setCode={setCode}
-                        isLoading={isLoading}
-                    />
                 </div>
+
+                {/*column 3: AI panel (where the goons live) 🤖 */}
+                <AiPanel
+                    ref={aiPanelRef}
+                    isOpen={isChatOpen}
+                    onClose={() => setChatOpen(false)}
+                    code={code}
+                    selectedLanguage={selectedLanguage}
+                    setCode={setCode}
+                    isLoading={isLoading}
+                />
             </div>
-        );
-    }
+        </div>
+    );
+}
