@@ -12,11 +12,5 @@ full fill `.env` according to `.env.example`
 npm run dev
 ```
 
-This is how a typical ws client side payload logic looks like:
-```bash
-ws.send(JSON.stringify({
-  type: "join_room",
-  roomId: "123",
-  username: "John"
-}));
-```
+### INSTALL docker and docker compose
+then run: ``` bash docker build -t custom-compiler . ```

@@ -1,0 +1,20 @@
+# Base image
+FROM ubuntu:24.04
+
+# Install required compilers/interpreters
+RUN apt-get update && apt-get install -y \
+    python3 python3-pip \         
+    openjdk-17-jdk \                
+    gcc g++ make \                  
+    nodejs npm \                   
+    golang \
+    mono-complete \                 
+    bash \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory for code execution
+WORKDIR /code
+
+# Default command (container waits; actual commands run via `docker run`)
+CMD ["tail", "-f", "/dev/null"]
