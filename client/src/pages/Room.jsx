@@ -215,7 +215,10 @@ export default function App() {
             },
             onLoadCode: (loadedCode) => {
                 setCode(loadedCode);
-                codeEditorRef.current?.applyRemoteUpdate(loadedCode);
+                // set timeout ensures monaco mounted before rendering the code
+                setTimeout(() => {
+                    codeEditorRef.current?.applyRemoteUpdate(loadedCode);
+                }, 50);
             },
 
             onCodeUpdate: (newcode, fromUsername) => {
@@ -254,7 +257,7 @@ export default function App() {
             }
         });
         return () => {
-            webSocketApi.disconnect();
+            webSocketApi.disconnect(code); // sending the code on disconnect
         };
     }, [roomId, username]);
 

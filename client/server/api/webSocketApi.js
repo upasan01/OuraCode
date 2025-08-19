@@ -41,7 +41,7 @@ class WebSocketManager {
             this.callbacks.onError?.(error);
         };
     }
-    
+
     // incoming message handler (we're basically the message therapist) 
     handleMessage(message) {
         switch (message.type) {
@@ -65,7 +65,7 @@ class WebSocketManager {
                 break;
         }
     }
-    
+
     // send message to server (sliding into backend's DMs) 📱✨
     sendMessage(message) {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
@@ -117,8 +117,12 @@ class WebSocketManager {
     }
 
     // disconnect method (time to ghost the server) 
-    disconnect() {
-        if (this.socket) {
+    disconnect(latestCode) {
+        if (this.socket && this.connected) {
+            // sending latest code before closing, less goon 
+            if (latestCode) {
+                this.sendCodeChange(this.roomId, latestCode);
+            }
             this.socket.close();
             this.socket = null;
             this.connected = false;

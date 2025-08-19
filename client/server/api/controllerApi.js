@@ -88,7 +88,8 @@ export const saveCode = async (roomId, code) => {
     }
 };
 
-export const changeLanguage = async (language, roomId) => {
+// currently not in use, maybe will not use it ever
+/*export const changeLanguage = async (language, roomId) => {
     try{
         const response = await axios.post(
             `${API_BASE_URL}/change?roomId=${roomId}`,
@@ -108,6 +109,6 @@ export const changeLanguage = async (language, roomId) => {
         console.error("Error changing language:", errorMsg);
         throw new Error(errorMsg);
     }
-};
+};*/
 
 

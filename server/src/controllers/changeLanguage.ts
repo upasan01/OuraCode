@@ -1,4 +1,5 @@
-import { Request, Response } from "express";
+// maybe will not use it again
+/*import { Request, Response } from "express";
 import { redis } from "../lib/redis.js";
 
 export const changeLanguage = async (req: Request, res: Response) => {
@@ -17,4 +18,4 @@ export const changeLanguage = async (req: Request, res: Response) => {
             code: 500
         })
     }
-}
+}*/
