@@ -36,13 +36,15 @@ const CodeEditor = forwardRef(({
     if (onEditorMount) {
       onEditorMount(editor);
     }
-    
+
     if (onCursorChange) {
+      console.log("Cursor moved to:", event.position); // should log now
       editor.onDidChangeCursorPosition(event => {
         onCursorChange(event.position);
       });
     }
   };
+
 
   const handleEditorChange = (value) => {
     // Only call setCode if the change was made by the local user

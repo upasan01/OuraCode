@@ -21,11 +21,11 @@ import { Terminal } from "../components/layout/Terminal";
 
 // Icons (because we love visual candy) 🍭
 import {
-    MessageCircle, Code2, Copy, X, Check, DownloadIcon, Save, Menu, Terminal as TerminalIcon
+    MessageCircle, Code2, Copy, X, Check, DownloadIcon, Save, Menu, Terminal as TerminalIcon, Play
 } from "lucide-react";
 
 // API (the backend communication squad) 📡
-import { downloadCode, saveCode } from '../../server/api/controllerApi';
+import { downloadCode, saveCode, runCode } from '../../server/api/controllerApi';
 
 export default function App() {
     const [searchParams] = useSearchParams();
@@ -77,6 +77,7 @@ export default function App() {
     };
     // state management central command 🎮
     const [isLoading, setIsLoading] = useState(false);
+    const [isRunning, setIsRunning] = useState(false);
 
     // sidebar states (for that mobile responsive flex) 📱
     const [isSidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -172,12 +173,48 @@ export default function App() {
         }
     };
 
+    // handle running code
+    const handleRunCode = async () => {
+        if (!code.trim()) {
+            toast.error("Please enter some code to run.");
+            return;
+        }
+
+        try {
+            setIsRunning(true);
+            terminalRef.current?.open?.();
+            terminalRef.current?.addOutput?.(`Running code in ${selectedLanguage.name}...`, "info");
+            const result = await runCode(code, roomId);
+            if (result.success) {
+                if (result.output) {
+                    terminalRef.current?.addOutput?.(result.output, "output");
+                }
+                if (result.error) {
+                    terminalRef.current?.addOutput?.(result.error, "error");
+                }
+                if (!result.output && !result.error) {
+                    terminalRef.current?.addOutput?.("No output or error returned from the server.", "info");
+                }
+            }
+        } catch (error) {
+            console.error('Run code error:', error);
+            terminalRef.current?.addOutput?.(`Error running code: ${error.message || error}`, "error");
+            toast.error(error.response?.message || error.message || 'Failed to run code.');
+        } finally {
+            setIsRunning(false);
+        }
+    };
+
     // ctrl+s keyboard listener (because we're fancy like that) 
     useEffect(() => {
         const handleKeyDown = (event) => {
             if (event.ctrlKey && event.key === 's') {
                 event.preventDefault();
                 handleSaveCode();
+            }
+            if (event.ctrlKey && event.key === 'r') {
+                event.preventDefault();
+                handleRunCode();
             }
         };
 
@@ -343,6 +380,16 @@ export default function App() {
                         {isLoading ? <LoadingIcon className="w-5 h-5 mx-2" /> : <Save size={16} className="mr-2" />}
                         Save
                     </Button>
+
+                    <Button
+                        onClick={handleDownload} variant="outline" size="sm"
+                        disabled={downloadLoading || !code}
+                        className={`hover:bg-[#313244] text-[#cdd6f4] bg-transparent transition-colors duration-200 disabled:opacity-50 flex items-center gap-2 ${downloadError ? "bg-red-900/50" : ""}`}
+                        title={downloadError || 'Download code'}
+                    >
+                        {downloadLoading ? <LoadingIcon className="w-5 h-5" /> : <DownloadIcon className="w-5 h-5" />}
+                        {downloadError ? <span className="text-xs text-red-400 ml-2">{downloadError}</span> : null}
+                    </Button>
                 </div>
             </header>
 
@@ -429,6 +476,25 @@ export default function App() {
                         </div>
                         <div className="flex items-center gap-2">
                             <Button
+                                onClick={handleRunCode}
+                                variant="outline"
+                                size="sm"
+                                disabled={isRunning || !code.trim()}
+                                className="bg-[#a6e3a1] hover:bg-[#94e2d5] text-[#1e1e2e] hover:text-[#6363f6] font-semibold disabled:opacity-50"
+                            >
+                                {isRunning ? (
+                                    <>
+                                        <LoadingIcon size={16} className="mr-2" />
+                                        Running...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Play size={16} className="mr-2" />
+                                        Run
+                                    </>
+                                )}
+                            </Button>
+                            <Button
                                 onClick={() => terminalRef.current?.toggle?.()}
                                 variant="outline"
                                 size="icon"
@@ -441,16 +507,6 @@ export default function App() {
 
                                 {isCopied ? <Check size={16} className="mr-2" /> : <Copy size={16} />}
                                 {isCopied ? "Copied!" : ''}
-                            </Button>
-
-                            <Button
-                                onClick={handleDownload} variant="outline" size="sm"
-                                disabled={downloadLoading || !code}
-                                className={`hover:bg-[#313244] text-[#cdd6f4] bg-transparent transition-colors duration-200 disabled:opacity-50 flex items-center gap-2 ${downloadError ? "bg-red-900/50" : ""}`}
-                                title={downloadError || 'Download code'}
-                            >
-                                {downloadLoading ? <LoadingIcon className="w-5 h-5" /> : <DownloadIcon className="w-5 h-5" />}
-                                {downloadError ? <span className="text-xs text-red-400 ml-2">{downloadError}</span> : null}
                             </Button>
 
                             <Button onClick={handleReview} className="bg-[#f38ba8] hover:bg-[#f38ba8]/80 text-[#1e1e2e] font-semibold" disabled={isLoading}>
@@ -478,6 +534,7 @@ export default function App() {
                             maxHeightPx={800}
                             editorSelector=".editor-area"
                             className="editor-terminal"
+                            isCodeRunning={isRunning}
                         />
 
                     </div>

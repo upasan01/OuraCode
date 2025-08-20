@@ -18,6 +18,7 @@ const Terminal = forwardRef((
     className = "",
     onClose,
     audioList: audioListProp = null,
+    isCodeRunning = false,
   },
   ref
 ) => {
@@ -34,7 +35,7 @@ const Terminal = forwardRef((
   const audioPoolRef = useRef([]);
   const currentAudioRef = useRef(null);
   const lastIndexRef = useRef(null);
-  const playQueueRef = useRef([]); //  playlist shuffle queue
+  const playQueueRef = useRef([]); // fr fr no cap playlist shuffle queue bestie 💀
 
   const [isGoonPlaying, setIsGoonPlaying] = useState(false);
   const [currentTrack, setCurrentTrack] = useState(null);
@@ -68,7 +69,7 @@ const Terminal = forwardRef((
   const inputRef = useRef(null);
   const messagesEndRef = useRef(null);
 
-  // Persist state
+  // Persist state (keeping that data fresh ✨)
   useEffect(() => {
     try { localStorage.setItem("goon_terminal_height", String(height)); } catch { }
   }, [height]);
@@ -76,7 +77,7 @@ const Terminal = forwardRef((
     try { localStorage.setItem("goon_volume", String(goonVolume)); } catch { }
   }, [goonVolume]);
 
-  // Robust scroll helper: ensures messagesEndRef and input are visible.
+  // Robust scroll helper: ensures messagesEndRef and input are visible (no cap scrolling hits different 📱)
   const scrollToBottom = (opts = { smooth: true }) => {
     const smooth = !!opts.smooth;
     try {
@@ -108,12 +109,12 @@ const Terminal = forwardRef((
     } catch { }
   };
 
-  // Auto-scroll when output changes
+  // Auto-scroll when output changes (keeping it real smooth 🎯)
   useEffect(() => {
     scrollToBottom({ smooth: true });
   }, [output]);
 
-  // Scroll when opening
+  // Scroll when opening (gotta see that terminal content periodt 📜)
   useEffect(() => {
     if (isOpen) {
       const t = setTimeout(() => scrollToBottom({ smooth: true }), 80);
@@ -121,12 +122,12 @@ const Terminal = forwardRef((
     }
   }, [isOpen]);
 
-  // Helper to add output lines
+  // Helper to add output lines (serving fresh terminal content 📝)
   const addOutput = (content, type = "output") => {
     setOutput((prev) => [...prev, { type, content }]);
   };
 
-  // Preload audio pool
+  // Preload audio pool (loading up the bops for later fr 🎵)
   useEffect(() => {
     audioPoolRef.current = audioList.current
       .map((src) => {
@@ -165,7 +166,7 @@ const Terminal = forwardRef((
     };
   }, []);
 
-  // Shuffle helper (Fisher-Yates)
+  // Shuffle helper (Fisher-Yates) (randomizing that playlist like it's 2019 shufflemode 🔀)
   const shuffleArray = (arr) => {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -175,7 +176,7 @@ const Terminal = forwardRef((
     return a;
   };
 
-  // Play random track using a shuffled queue to avoid repeats
+  // Play random track using a shuffled queue to avoid repeats (anti-skip vibes only 🎶)
   const playRandomGoon = async () => {
     const list = audioList.current;
     if (!list || list.length === 0) {
@@ -187,21 +188,21 @@ const Terminal = forwardRef((
       try { currentAudioRef.current.pause(); currentAudioRef.current.currentTime = 0; } catch { }
     }
 
-    // If queue empty, create a shuffled queue of indices
+    // If queue empty, create a shuffled queue of indices (restocking the playlist queue bestie 📋)
     if (!playQueueRef.current || playQueueRef.current.length === 0) {
       const indices = list.map((_, i) => i);
       let shuffled = shuffleArray(indices);
 
-      // If the first would repeat lastIndex, rotate once (if possible)
+      // If the first would repeat lastIndex, rotate once (if possible) (no repeats allowed periodt 🚫)
       if (lastIndexRef.current != null && shuffled[0] === lastIndexRef.current && shuffled.length > 1) {
-        // swap first two
+        // swap first two (switching it up real quick ✨)
         [shuffled[0], shuffled[1]] = [shuffled[1], shuffled[0]];
       }
 
       playQueueRef.current = shuffled;
     }
 
-    // Pop next index from queue
+    // Pop next index from queue (getting the next banger ready 🎤)
     const idx = playQueueRef.current.shift();
     lastIndexRef.current = idx;
 
@@ -258,7 +259,7 @@ const Terminal = forwardRef((
     scrollToBottom({ smooth: true });
   };
 
-  // Global keyboard shortcuts
+  // Global keyboard shortcuts (hotkeys for the win fr 🔥⌨️)
   useEffect(() => {
     const handler = (e) => {
       if (e.ctrlKey && e.key === "`") {
@@ -274,7 +275,7 @@ const Terminal = forwardRef((
     return () => document.removeEventListener("keydown", handler);
   }, [isOpen]);
 
-  // Focus input when terminal opens
+  // Focus input when terminal opens (putting that cursor where it needs to be ✨)
   useEffect(() => {
     if (isOpen && inputRef.current) {
       const tid = setTimeout(() => {
@@ -290,6 +291,10 @@ const Terminal = forwardRef((
     close: () => setIsOpen(false),
     toggle: () => setIsOpen((v) => !v),
     setHeight: (h) => setHeight(h),
+    addOutput: (content, type = "output") => {
+      setOutput((prev) => [...prev, { type, content }]);
+      setTimeout(() => scrollToBottom({ smooth: true }), 50);
+    },
   }));
 
   const prevOpenRef = useRef(isOpen);
@@ -300,7 +305,7 @@ const Terminal = forwardRef((
     prevOpenRef.current = isOpen;
   }, [isOpen, onClose]);
 
-  // Resizing: ensure we scroll to bottom after resize end
+  // Resizing: ensure we scroll to bottom after resize end (keeping that scroll game strong 📏)
   useEffect(() => {
     let lastRaf = null;
     const onMove = (e) => {
@@ -352,7 +357,7 @@ const Terminal = forwardRef((
     };
   }, [isResizing, editorSelector, minHeight, maxHeightPx]);
 
-  // Command submit + history navigation
+  // Command submit + history navigation (handling that terminal business 💼)
   const handleSubmit = (e) => {
     e?.preventDefault();
     const cmd = input.trim();
@@ -401,7 +406,7 @@ const Terminal = forwardRef((
         addOutput("  cd <dir>      - Change directory (simulated)");
         scrollToBottom({ smooth: true });
       } else if (cmd.startsWith("cd ")) {
-        // simulated cd — no added output
+        // simulated cd — no added output (fake directory changes hit different 📁)
       } else {
         addOutput(`bash: ${cmd}: command not found`, "error");
         scrollToBottom({ smooth: true });
@@ -439,7 +444,7 @@ const Terminal = forwardRef((
     }
   };
 
-  // ensure input focus scrolls into view (user clicks the input)
+  // ensure input focus scrolls into view (user clicks the input) (making sure that input stays visible bestie 👀)
   useEffect(() => {
     const el = inputRef.current;
     if (!el) return;
@@ -457,7 +462,7 @@ const Terminal = forwardRef((
       className={`absolute bottom-0 left-0 right-0 bg-[#1e1e2e] border-t border-[#313244] font-mono flex flex-col shadow-[0_-4px_20px_rgba(0,0,0,0.3)] z-50 ${className}`}
       style={{ height: `${height}px`, minHeight: `${minHeight}px` }}
     >
-      {/* Drag handle */}
+      {/* Drag handle (that resize grip hits different ↕️) */}
       <div className="h-1 cursor-row-resize hover:bg-[#a6e3a1] bg-[#313244] transition-colors relative group" onMouseDown={() => setIsResizing(true)}
         onTouchStart={() => setIsResizing(true)}
         aria-hidden >
@@ -466,7 +471,7 @@ const Terminal = forwardRef((
         </div>
       </div>
 
-      {/* Header */}
+      {/* Header (the terminal drip at the top fr 💻) */}
       <div className="h-8 border-b border-[#313244] flex items-center px-3 bg-[#181825] text-xs">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-3 py-1 bg-[#1e1e2e] border-r border-[#313244] rounded-t-sm">
@@ -510,20 +515,24 @@ const Terminal = forwardRef((
 
             {/* Input prompt line */}
             <div className="flex items-center mt-1 group">
-              <span className="text-[#89b4fa] font-medium mr-2 font-mono select-none">~</span>
-              <span className="text-[#a6e3a1] font-bold mr-2 font-mono select-none">$</span>
-              <form onSubmit={handleSubmit} className="flex-1">
-                <input
-                  ref={inputRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={onKeyDownInput}
-                  className="w-full bg-transparent text-[#cdd6f4] outline-none caret-[#a6e3a1] text-sm font-mono placeholder:text-[#6c7086]"
-                  placeholder="Type a command..."
-                  autoComplete="off"
-                  spellCheck="false"
-                />
-              </form>
+              {!isCodeRunning && (
+                <>
+                  <span className="text-[#89b4fa] font-medium mr-2 font-mono select-none">~</span>
+                  <span className="text-[#a6e3a1] font-bold mr-2 font-mono select-none">$</span>
+                  <form onSubmit={handleSubmit} className="flex-1">
+                    <input
+                      ref={inputRef}
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={onKeyDownInput}
+                      className="w-full bg-transparent text-[#cdd6f4] outline-none caret-[#a6e3a1] text-sm font-mono placeholder:text-[#6c7086]"
+                      placeholder="Type a command..."
+                      autoComplete="off"
+                      spellCheck="false"
+                    />
+                  </form>
+                </>
+              )}
             </div>
           </div>
         </ScrollArea>

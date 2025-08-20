@@ -111,4 +111,39 @@ export const saveCode = async (roomId, code) => {
     }
 };*/
 
+export const runCode = async (code, roomId) => {
+    try {
+        const response = await axios.post(
+            `${API_BASE_URL}/run?roomId=${roomId}`,
+            { code },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                timeout: 30000
+            });
+        return {
+            success: true,
+            output: response?.data.output,
+            error: response?.data.error
+        };
+    } catch (error) {
+        console.error('Run code error:', error);
+
+        if (error.code === 'ECONNABORTED') {
+            throw new Error('Code execution timeout - process took too long');
+        }
+
+        if (error.response?.data) {
+            throw new Error(error.response.data.message || 'Code execution failed');
+        }
+
+        if (error.request) {
+            throw new Error('No response from server - check if backend is running');
+        }
+
+        throw new Error(error.message || 'Code execution failed');
+    }
+};
+
 
