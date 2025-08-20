@@ -36,11 +36,18 @@ interface LanguageChangeMessage extends BaseMessage {
     language: string
 }
 
+interface AllUserMessage extends BaseMessage {
+    type: "all_user";
+    roomId: string;
+    users: [];
+}
+
 type RoomSocketMessage =
     | JoinRoomMessage
     | CodeChangeMessage
     | CursorSyncMessage
-    | LanguageChangeMessage;
+    | LanguageChangeMessage
+    | AllUserMessage;
 
 export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
     ws.on("error", (error) => console.error(error));
@@ -143,6 +150,24 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
                         message: "Failed to change language"
                     }))
                 }
+                break;
+            }
+            case "all_user": {
+                if (!ws.roomId) return
+                try {
+                    const users = await redis.smembers(`room:${ws.roomId}:users`)
+                    ws.send(JSON.stringify({
+                        type: "all_users_sent",
+                        users
+                    }));
+                } catch (err) {
+                    console.error("Failed to get all users: ", err)
+                    ws.send(JSON.stringify({
+                        type: "error",
+                        message: "Failed to get all users"
+                    }))
+                }
+                break;
             }
         }
     });
