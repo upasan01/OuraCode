@@ -20,8 +20,8 @@ export const runCode = async (req: Request, res: Response) => {
         const { code } = req.body
         const { roomId } = req.query
 
-        // const language = await redis.get(`room:${roomId}:language`)
-        const language = "py" // for testing
+        const language = await redis.get(`room:${roomId}:language`)
+        //const language = "py" // for testing
         console.log(language)
 
         // @ts-ignore
