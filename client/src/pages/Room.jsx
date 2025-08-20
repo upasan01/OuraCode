@@ -302,6 +302,24 @@ export default function App() {
                     toast(message.message);
                 }
             },
+            onUserLeft: (message) => {
+                if (message.username !== username) {
+                    console.log(`User left: ${message.username}`);
+                    
+                    // Remove the user's cursor from remote cursors
+                    setRemoteCursors(prev => {
+                        const next = new Map(prev);
+                        next.delete(message.username);
+                        console.log(`Removed cursor for ${message.username}`);
+                        return next;
+                    });
+
+                    // Remove the user's color assignment to free it up for reuse
+                    userColors.current.delete(message.username);
+                    
+                    toast(`${message.username} has left the room `);
+                }
+            },
             onLanguageChanged: (newLanguage, fromUsername) => {
                 if (fromUsername !== username) {
                     const langObj = languages.find(l => l.id === newLanguage || l.value === newLanguage);
@@ -335,15 +353,13 @@ export default function App() {
     // handle cursor change (when the user moves their cursor)
     const handleCursorChange = useCallback((position) => {
         if (webSocketApi.isConnected()) {
-            // Clear any existing timeout
-            if (cursorTimeoutRef.current) {
-                clearTimeout(cursorTimeoutRef.current);
-            }
-
-            // Set a new timeout to debounce cursor updates
+            // // To be thought if actually needed
+            // if (cursorTimeoutRef.current) {
+            //     clearTimeout(cursorTimeoutRef.current);
+            // }
             cursorTimeoutRef.current = setTimeout(() => {
                 webSocketApi.sendCursorSync(roomId, position);
-            }, 100); // 100ms delay
+            }, 100); // 100ms delay too prevent race condition with change code
         }
     }, [roomId]);
 

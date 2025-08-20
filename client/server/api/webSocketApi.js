@@ -51,6 +51,9 @@ class WebSocketManager {
             case 'user_joined':
                 this.callbacks.onUserJoined?.(message);
                 break;
+            case 'room_left':
+                this.callbacks.onUserLeft?.(message);
+                break;
             case 'code_update':
                 this.callbacks.onCodeUpdate?.(message.code, message.username);
                 break;

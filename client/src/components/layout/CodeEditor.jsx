@@ -11,7 +11,7 @@ function getOrCreateCursorStyleSheet() {
     styleSheet.id = styleSheetId;
     document.head.appendChild(styleSheet);
   }
-  return styleSheet.sheet; // Return the CSSStyleSheet object
+  return styleSheet.sheet;
 }
 
 const CodeEditor = forwardRef(({
@@ -63,7 +63,7 @@ const CodeEditor = forwardRef(({
   };
 
   useEffect(() => {
-    
+
     if (!editorRef.current || !remoteCursors || !monaco) return;
 
     const editor = editorRef.current;

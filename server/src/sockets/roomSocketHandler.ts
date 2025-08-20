@@ -186,7 +186,8 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
 
                 brodcastToRoom(wss, ws.roomId, {
                     type: "room_left",
-                    username: ws.username
+                    username: ws.username,
+                    message : `${ws.username} left the room` // added message for client
                 })
             }
             catch (err) {
