@@ -158,6 +158,11 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
                     await redis.set(`room:${ws.roomId}:code`, ws.code).catch(console.error)
                     console.log(ws.code)
                 }
+
+                brodcastToRoom(wss, ws.roomId, {
+                    type: "room_left",
+                    username: ws.username
+                })
             }
             catch (err) {
                 console.error("Error during closing", err)
