@@ -38,6 +38,14 @@ export default function App() {
 
     sessionStorage.setItem("storedusername", passedUsername);
 
+    // In Room.jsx
+
+    // A nice, vibrant color palette for cursors
+    const CURSOR_COLORS = [
+        '#00FFFF', '#FF00FF', '#FFFF00', '#00FF00', '#FF3300',
+        '#3300FF', '#FF6600', '#66FF00', '#FF0066', '#0066FF',
+        '#CCFF00', '#FF00CC', '#00CCFF', '#FF9900', '#9900FF'
+    ];
     const languages = useMemo(
         () => [
             { id: "c", value: "c", name: "C", icon: SiC, color: "bg-gray-500/20 text-gray-300" },
@@ -63,6 +71,7 @@ export default function App() {
     const [code, setCode] = useState("");
     const codeEditorRef = useRef(null);
     const [remoteCursors, setRemoteCursors] = useState(() => new Map());
+    const userColors = useRef(new Map());
 
     const [isCopied, setIsCopied] = useState(false);
     // copy code handler (ctrl+c but with extra steps) 📋
@@ -212,7 +221,7 @@ export default function App() {
                 event.preventDefault();
                 handleSaveCode();
             }
-            if (event.ctrlKey && event.key === 'r') {
+            if (event.ctrlKey && event.key === 'g') {
                 event.preventDefault();
                 handleRunCode();
             }
@@ -264,12 +273,25 @@ export default function App() {
                 }
             },
 
+
             onCursorUpdate: (fromUsername, cursorPosition) => {
-                // First, ensure the message is from another user
                 if (fromUsername !== username) {
+                    console.log(`Cursor update from ${fromUsername}:`, cursorPosition);
+                    // Check if we have a color for this user. If not, assign one.
+                    if (!userColors.current.has(fromUsername)) {
+                        const colorIndex = userColors.current.size % CURSOR_COLORS.length;
+                        userColors.current.set(fromUsername, CURSOR_COLORS[colorIndex]);
+                    }
+
+                    const userColor = userColors.current.get(fromUsername);
+
                     setRemoteCursors(prev => {
                         const next = new Map(prev);
-                        next.set(fromUsername, cursorPosition);
+                        // Store the position AND the color
+                        next.set(fromUsername, {
+                            position: cursorPosition,
+                            color: userColor
+                        });
                         return next;
                     });
                 }
@@ -308,6 +330,31 @@ export default function App() {
             setSidebarOpen(false);
         }
     };
+    const cursorTimeoutRef = useRef(null);
+
+    // handle cursor change (when the user moves their cursor)
+    const handleCursorChange = useCallback((position) => {
+        if (webSocketApi.isConnected()) {
+            // Clear any existing timeout
+            if (cursorTimeoutRef.current) {
+                clearTimeout(cursorTimeoutRef.current);
+            }
+
+            // Set a new timeout to debounce cursor updates
+            cursorTimeoutRef.current = setTimeout(() => {
+                webSocketApi.sendCursorSync(roomId, position);
+            }, 100); // 100ms delay
+        }
+    }, [roomId]);
+
+    // Add cleanup (somewhere after your existing useEffects)
+    useEffect(() => {
+        return () => {
+            if (cursorTimeoutRef.current) {
+                clearTimeout(cursorTimeoutRef.current);
+            }
+        };
+    }, []);
 
     //debounce code updates to avoid spamming the server
     useEffect(() => {
@@ -315,7 +362,7 @@ export default function App() {
 
         const timeoutId = setTimeout(() => {
             webSocketApi.sendCodeChange(roomId, code);
-        }, 100);
+        }, 50);
         return () => clearTimeout(timeoutId);
     }, [code, wsConnected, roomId]);
 
@@ -525,8 +572,12 @@ export default function App() {
                             code={code}
                             setCode={setCode}
                             language={selectedLanguage.id}
-
+                            onCursorChange={handleCursorChange}
+                            remoteCursors={remoteCursors}
+                            myUserName={username}
                         />
+
+                        {/* Terminal Section */}
                         <Terminal
                             ref={terminalRef}
                             initialHeight={220}

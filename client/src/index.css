@@ -1,10 +1,11 @@
 @import "tailwindcss";
 
 
-@theme{
-    --font-bitcount: 'Bitcount', cursive;
-    --font-playwrite: 'Playwrite HU', sans-serif;
+@theme {
+  --font-bitcount: 'Bitcount', cursive;
+  --font-playwrite: 'Playwrite HU', sans-serif;
 }
+
 @layer base {
   :root {
     --background: #1e1e2e;
@@ -126,9 +127,11 @@
     0% {
       transform: translateX(-50%) translateY(-10%);
     }
+
     50% {
       transform: translateX(50%) translateY(10%);
     }
+
     100% {
       transform: translateX(-50%) translateY(-10%);
     }
@@ -138,9 +141,11 @@
     0% {
       transform: rotate(0deg);
     }
+
     50% {
       transform: rotate(180deg);
     }
+
     100% {
       transform: rotate(360deg);
     }
@@ -150,9 +155,11 @@
     0% {
       transform: translateY(-50%);
     }
+
     50% {
       transform: translateY(50%);
     }
+
     100% {
       transform: translateY(-50%);
     }
@@ -163,6 +170,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -185,4 +193,37 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #45475a;
+}
+
+/* Remote cursor line style */
+.remote-cursor-line {
+  position: absolute;
+}
+
+/* Base style for the remote cursor line pseudo-element */
+.remote-cursor-line::before {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 100%;
+  /* The background-color will be set dynamically */
+}
+
+/* Base style for the username label in the glyph margin */
+.remote-cursor-label {
+  position: absolute;
+}
+
+/* Style for the username label pseudo-element */
+.remote-cursor-label::after {
+  position: absolute;
+  top: -1.4em; /* Position it above the cursor line */
+  left: -2px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: white;
+  font-size: 12px;
+  font-family: sans-serif;
+  white-space: nowrap;
+  /* The background-color and content will be set dynamically */
 }
