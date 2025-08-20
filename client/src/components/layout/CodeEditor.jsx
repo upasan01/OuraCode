@@ -65,22 +65,49 @@ const CodeEditor = forwardRef(({
   useEffect(() => {
 
     if (!editorRef.current || !remoteCursors || !monaco) return;
-
+    //Like shit I know what is happening here
     const editor = editorRef.current;
     const newDecorations = [];
     const styleSheet = getOrCreateCursorStyleSheet();
+
+    // Register hover provider for cursor tooltips cause nothing else works
+    const hoverProvider = monaco.languages.registerHoverProvider('*', {
+      provideHover: (model, position) => {
+        // Check if hover position matches any remote cursor
+        for (const [username, cursor] of remoteCursors) {
+          if (username !== myUserName && cursor.position) {
+            const { lineNumber, column } = cursor.position;
+            if (position.lineNumber === lineNumber && position.column === column) {
+              return {
+                range: new monaco.Range(lineNumber, column, lineNumber, column),
+                contents: [
+                  {
+                    value: `**${username}**`,
+                    isTrusted: true
+                  }
+                ]
+              };
+            }
+          }
+        }
+        return null;
+      }
+    });
 
     remoteCursors.forEach((cursor, username) => {
       if (username !== myUserName && cursor.position) {
         const { lineNumber, column } = cursor.position;
         const uniqueClassName = `remote-cursor-user-${username.replace(/[^a-zA-Z0-9]/g, '-')}`;
-        const uniqueLabelClassName = `remote-cursor-label-user-${username.replace(/[^a-zA-Z0-9]/g, '-')}`;
 
         if (!knownUsers.current.has(username)) {
           try {
-            // Using a border is more reliable than a pseudo-element for height
-            styleSheet.insertRule(`.${uniqueClassName} { border-left: 2px solid ${cursor.color}; }`, styleSheet.cssRules.length);
-            styleSheet.insertRule(`.${uniqueLabelClassName}::after { background-color: ${cursor.color}; content: '${username}'; }`, styleSheet.cssRules.length);
+            // Simple cursor line style - no hover effects here
+            styleSheet.insertRule(`.${uniqueClassName} { 
+              border-left: 3px solid ${cursor.color};
+              cursor: pointer;
+              position: relative;
+            }`, styleSheet.cssRules.length);
+
             knownUsers.current.add(username);
           } catch (e) {
             console.error("Failed to insert CSS rule:", e);
@@ -91,7 +118,7 @@ const CodeEditor = forwardRef(({
           range: new monaco.Range(lineNumber, column, lineNumber, column),
           options: {
             className: `remote-cursor ${uniqueClassName}`,
-            glyphMarginClassName: `remote-cursor-label ${uniqueLabelClassName}`,
+            stickiness: 9,
           },
         });
       }
@@ -102,10 +129,15 @@ const CodeEditor = forwardRef(({
       newDecorations
     );
 
+    // Cleanup function to dispose hover provider
+    return () => {
+      hoverProvider.dispose();
+    };
+
   }, [monaco, myUserName, remoteCursors]);
 
 
-  // This cleanup effect now ONLY handles unmounting
+  // This cleanup effect now ONLY handles unmounting(wasn't really necesssary)
   useEffect(() => {
     return () => {
       // Capture current values in the cleanup, not at effect creation time

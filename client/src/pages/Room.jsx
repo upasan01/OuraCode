@@ -305,7 +305,7 @@ export default function App() {
             onUserLeft: (message) => {
                 if (message.username !== username) {
                     console.log(`User left: ${message.username}`);
-                    
+
                     // Remove the user's cursor from remote cursors
                     setRemoteCursors(prev => {
                         const next = new Map(prev);
@@ -316,7 +316,7 @@ export default function App() {
 
                     // Remove the user's color assignment to free it up for reuse
                     userColors.current.delete(message.username);
-                    
+
                     toast(`${message.username} has left the room `);
                 }
             },
@@ -437,7 +437,7 @@ export default function App() {
                         onClick={handleSaveCode}
                         variant="outline"
                         size="sm"
-                        className="border-[#313244] hover:bg-[#313244] text-[#cdd6f4] bg-transparent"
+                        className="border-[#313244] hover:bg-[#313244] text-[#cdd6f4] bg-transparent cursor-pointer"
                         title="Save (Ctrl+S)"
                     >
                         {isLoading ? <LoadingIcon className="w-5 h-5 mx-2" /> : <Save size={16} className="mr-2" />}
@@ -447,7 +447,7 @@ export default function App() {
                     <Button
                         onClick={handleDownload} variant="outline" size="sm"
                         disabled={downloadLoading || !code}
-                        className={`hover:bg-[#313244] text-[#cdd6f4] bg-transparent transition-colors duration-200 disabled:opacity-50 flex items-center gap-2 ${downloadError ? "bg-red-900/50" : ""}`}
+                        className={`hover:bg-[#313244] text-[#cdd6f4] bg-transparent transition-colors duration-200 cursor-pointer disabled:opacity-50 flex items-center gap-2 ${downloadError ? "bg-red-900/50" : ""}`}
                         title={downloadError || 'Download code'}
                     >
                         {downloadLoading ? <LoadingIcon className="w-5 h-5" /> : <DownloadIcon className="w-5 h-5" />}
@@ -543,7 +543,7 @@ export default function App() {
                                 variant="outline"
                                 size="sm"
                                 disabled={isRunning || !code.trim()}
-                                className="bg-[#a6e3a1] hover:bg-[#94e2d5] text-[#1e1e2e] hover:text-[#6363f6] font-semibold disabled:opacity-50"
+                                className="bg-[#a6e3a1] hover:bg-[#94e2d5] text-[#1e1e2e] hover:text-[#6363f6] font-semibold disabled:opacity-50 cursor-pointer"
                             >
                                 {isRunning ? (
                                     <>
@@ -561,22 +561,22 @@ export default function App() {
                                 onClick={() => terminalRef.current?.toggle?.()}
                                 variant="outline"
                                 size="icon"
-                                className={`border-[#313244] hover:bg-[#313244] ${""}`}
+                                className={`border-[#313244] hover:bg-[#313244] ${""} cursor-pointer`}
                             >
                                 <TerminalIcon size={16} />
                             </Button>
-                            <Button onClick={handleCopyCode} variant="outline" size="sm" className=" hover:bg-[#313244] text-[#cdd6f4] bg-transparent"
+                            <Button onClick={handleCopyCode} variant="outline" size="sm" className=" hover:bg-[#313244] text-[#cdd6f4] bg-transparent cursor-pointer"
                                 disabled={!code}>
 
                                 {isCopied ? <Check size={16} className="mr-2" /> : <Copy size={16} />}
                                 {isCopied ? "Copied!" : ''}
                             </Button>
 
-                            <Button onClick={handleReview} className="bg-[#f38ba8] hover:bg-[#f38ba8]/80 text-[#1e1e2e] font-semibold" disabled={isLoading}>
+                            <Button onClick={handleReview} className="bg-[#f38ba8] hover:bg-[#f38ba8]/80 text-[#1e1e2e] font-semibold cursor-pointer" disabled={isLoading}>
                                 <EnhanceIcon size={16} className="mr-2" />
                                 Goon
                             </Button>
-                            <Button variant="outline" size="icon" onClick={() => setChatOpen((v) => !v)} className="border-[#313244] hover:bg-[#313244]">
+                            <Button variant="outline" size="icon" onClick={() => setChatOpen((v) => !v)} className="border-[#313244] hover:bg-[#313244] cursor-pointer hover:text-[#f38ba8]/80 text-[#f38ba8]">
                                 <MessageCircle size={16} />
                             </Button>
                         </div>
