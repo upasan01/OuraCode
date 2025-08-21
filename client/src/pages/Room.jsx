@@ -377,6 +377,7 @@ export default function App() {
             },
             onAllUsersSent: (users) => {
                 setUserList(users);
+                console.log(users)
                 console.log("All users in the room:", users);
             },
             onError: (error) => {

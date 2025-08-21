@@ -47,12 +47,21 @@ class WebSocketManager {
         switch (message.type) {
             case 'load_code':
                 this.callbacks.onLoadCode?.(message.code);
+                if (this.roomId) {
+                    this.requestAllUsers(this.roomId);
+                }
                 break;
             case 'user_joined':
                 this.callbacks.onUserJoined?.(message);
+                if (this.roomId) {
+                    this.requestAllUsers(this.roomId);
+                }
                 break;
             case 'room_left':
                 this.callbacks.onUserLeft?.(message);
+                if (this.roomId) {
+                    this.requestAllUsers(this.roomId);
+                }
                 break;
             case 'code_update':
                 this.callbacks.onCodeUpdate?.(message.code, message.username);
