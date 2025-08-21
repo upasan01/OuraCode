@@ -136,6 +136,9 @@ export default function App() {
     // AI Panel
     const [isChatOpen, setChatOpen] = useState(false);
     const aiPanelRef = useRef(null);
+    const handleUseAiCode = (newCode) => {
+        setCode(newCode);
+    };
 
     // mobile responsiveness
     useEffect(() => {
@@ -749,7 +752,7 @@ export default function App() {
                     onClose={() => setChatOpen(false)}
                     code={code}
                     selectedLanguage={selectedLanguage}
-                    setCode={setCode}
+                    onUseCode={handleUseAiCode}
                     isLoading={isLoading}
                 />
             </div>

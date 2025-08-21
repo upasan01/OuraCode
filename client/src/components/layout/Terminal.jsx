@@ -125,9 +125,29 @@ const Terminal = forwardRef((
 
   // Helper to add output lines (serving fresh terminal content 📝)
   const addOutput = (content, type = "output") => {
-    setOutput((prev) => [...prev, { type, content }]);
-  };
+    setOutput((prev) => {
+      const lastOutput = prev.length > 0 ? prev[prev.length - 1] : null;
 
+      // Check if we should append to the last line.
+      if (
+        lastOutput &&
+        lastOutput.type !== 'command' && // Don't append to user commands
+        lastOutput.type !== 'info' &&    // Don't append to info messages
+        !lastOutput.content.endsWith('\n') // Only append if the last line is incomplete
+      ) {
+        // Create a new version of the last line with the appended content.
+        const updatedLastOutput = {
+          ...lastOutput,
+          content: lastOutput.content + content,
+        };
+        // Replace the old last line with the new, updated one.
+        return [...prev.slice(0, -1), updatedLastOutput];
+      } else {
+        // Otherwise, it's a new line.
+        return [...prev, { type, content }];
+      }
+    });
+  };
   // Preload audio pool (loading up the bops for later fr 🎵)
   useEffect(() => {
     audioPoolRef.current = audioList.current
@@ -363,39 +383,22 @@ const Terminal = forwardRef((
     e?.preventDefault();
     const cmd = input.trim();
     if (!cmd) return;
+    setInput("");
 
-    // Always echo the user's input to the terminal for clarity
-    addOutput(`$ ${cmd}`, "command");
-    setInput(""); // Clear the input field immediately
-
-    // If code is running, send the input to the parent component and stop.
     if (isCodeRunning) {
+      addOutput(cmd + '\n', 'output');
       onProcessInput?.(cmd);
       return;
     }
 
-    // If code is NOT running, handle it as a local command.
+    addOutput(`$ ${cmd}\n`, "command");
     setHistory((h) => {
       const next = [...h, cmd].slice(-200);
       historyIndex.current = next.length;
       return next;
     });
 
-
-    addOutput(`$ ${cmd}`, "command");
-    if (isCodeRunning) {
-      onProcessInput?.(cmd);
-      setInput("");
-      return;
-    }
-
-    setHistory((h) => {
-      const next = [...h, cmd].slice(-200);
-      historyIndex.current = next.length;
-      return next;
-    });
-    scrollToBottom({ smooth: true });
-
+    // Process the local command.
     setTimeout(() => {
       if (cmd === "goon" || cmd === "goon play") {
         playRandomGoon();
@@ -407,20 +410,16 @@ const Terminal = forwardRef((
         setGoonVolumeCmd(v);
       } else if (cmd === "goon status") {
         addOutput(`Goon playing: ${isGoonPlaying ? "Yes" : "No"}${currentTrack ? ` — ${currentTrack.split("/").pop()}` : ""}`, "info");
-        scrollToBottom({ smooth: true });
       } else if (cmd === "clear" || cmd === "cls") {
         setOutput([]);
       } else if (cmd.startsWith("echo ")) {
         addOutput(cmd.substring(5));
-        scrollToBottom({ smooth: true });
       } else if (cmd === "ls" || cmd === "ls -la") {
         addOutput("drwxr-xr-x  3 user user  4096 Dec 15 10:30 src/");
         addOutput("drwxr-xr-x  2 user user  4096 Dec 15 10:30 components/");
         addOutput("-rw-r--r--  1 user user  1024 Dec 15 10:30 package.json");
-        scrollToBottom({ smooth: true });
       } else if (cmd === "pwd") {
         addOutput("/workspace/goonshare-editor");
-        scrollToBottom({ smooth: true });
       } else if (cmd === "help") {
         addOutput("Available commands:");
         addOutput("  ls, ls -la    - List directory contents");
@@ -428,16 +427,13 @@ const Terminal = forwardRef((
         addOutput("  echo <text>   - Display text");
         addOutput("  clear         - Clear terminal");
         addOutput("  cd <dir>      - Change directory (simulated)");
-        scrollToBottom({ smooth: true });
       } else if (cmd.startsWith("cd ")) {
-        // simulated cd — no added output (fake directory changes hit different 📁)
+        // simulated cd — no added output
       } else {
         addOutput(`bash: ${cmd}: command not found`, "error");
-        scrollToBottom({ smooth: true });
       }
+      scrollToBottom({ smooth: true });
     }, 60);
-
-    setInput("");
   };
 
   const onKeyDownInput = (e) => {
@@ -549,7 +545,6 @@ const Terminal = forwardRef((
                       onChange={(e) => setInput(e.target.value)}
                       onKeyDown={onKeyDownInput}
                       className="w-full bg-transparent text-[#cdd6f4] outline-none caret-[#a6e3a1] text-sm font-mono placeholder:text-[#6c7086]"
-                      placeholder="Enter input for your program..."
                       autoComplete="off"
                       spellCheck="false"
                     />

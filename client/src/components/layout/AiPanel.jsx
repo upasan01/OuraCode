@@ -7,7 +7,7 @@ import { X, ArrowUp, Square } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
 
 // Panel Configuration Constants
-const DEFAULT_PANEL_WIDTH = 600;
+const DEFAULT_PANEL_WIDTH = 500;
 const MIN_PANEL_WIDTH = 400;
 const MAX_PANEL_WIDTH = 800;
 
@@ -30,7 +30,7 @@ const AiPanel = forwardRef(({
     onClose,
     code,
     selectedLanguage,
-    setCode,
+    onUseCode,
     isLoading
 }, ref) => {
     // all the chat state that matters 💬
@@ -475,7 +475,7 @@ const AiPanel = forwardRef(({
 
                                     {msg.text ? (
                                         <div>
-                                            <MarkdownRenderer text={msg.text} onUseCode={(newCode) => setCode(newCode)} />
+                                            <MarkdownRenderer text={msg.text} onUseCode={onUseCode} />
                                             {msg.status === "error" && msg.role === "ai" && (
                                                 <Button
                                                     onClick={() => retryMessageById(msg.id)}

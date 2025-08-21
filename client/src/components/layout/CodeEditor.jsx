@@ -40,7 +40,19 @@ const CodeEditor = forwardRef(({
         }
         isApplyingRemoteChange.current = false;
       }
+    },
+    applyLocalCodeChange: (newCode) => {
+      if (editorRef.current) {
+        isApplyingRemoteChange.current = true;
+        const viewState = editorRef.current.saveViewState();
+        editorRef.current.setValue(newCode);
+        if (viewState) {
+          editorRef.current.restoreViewState(viewState);
+        }
+        isApplyingRemoteChange.current = false;
+      }
     }
+
   }));
 
   const handleEditorDidMount = (editor) => {
@@ -61,6 +73,19 @@ const CodeEditor = forwardRef(({
       setCode(value || '');
     }
   };
+
+  // Sync editor content with external code state
+  useEffect(() => {
+    if (editorRef.current && code !== editorRef.current.getValue()) {
+      isApplyingRemoteChange.current = true;
+      const viewState = editorRef.current.saveViewState();
+      editorRef.current.setValue(code);
+      if (viewState) {
+        editorRef.current.restoreViewState(viewState);
+      }
+      isApplyingRemoteChange.current = false;
+    }
+  }, [code]);
 
   useEffect(() => {
 
