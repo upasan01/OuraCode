@@ -75,6 +75,15 @@ class WebSocketManager {
             case 'all_users_sent':
                 this.callbacks.onAllUsersSent?.(message.users);
                 break;
+            case 'stdout':
+                this.callbacks.onStdout?.(message.data);
+                break;
+            case 'stderr':
+                this.callbacks.onStderr?.(message.data);
+                break;
+            case 'done':
+                this.callbacks.onRunDone?.(message.exitCode);
+                break;
             case 'error':
                 this.callbacks.onError?.(new Error(message.message));
                 break;
@@ -132,6 +141,21 @@ class WebSocketManager {
             roomId
         });
     }
+    runCode(roomId, language, code) {
+        this.sendMessage({
+            type: 'run_code',
+            roomId,
+            language,
+            code
+        });
+    }
+
+    sendInputToProcess(data) {
+        this.sendMessage({
+            type: 'stdin',
+            data // The input from the bitch user
+        });
+    }
 
     // connection status check (are we still besties?) 
     isConnected() {
@@ -163,5 +187,7 @@ export const webSocketApi = {
     sendCursorSync: (roomId, cursorPosition) => webSocketManager.sendCursorSync(roomId, cursorPosition),
     sendLanguageChange: (roomId, language) => webSocketManager.sendLanguageChange(roomId, language),
     requestAllUsers: (roomId) => webSocketManager.requestAllUsers(roomId),
+    runCode: (roomId, language, code) => webSocketManager.runCode(roomId, language, code),
+    sendInputToProcess: (data) => webSocketManager.sendInputToProcess(data),
     isConnected: () => webSocketManager.isConnected()
 };

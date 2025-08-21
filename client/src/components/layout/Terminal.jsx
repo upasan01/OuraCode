@@ -19,6 +19,7 @@ const Terminal = forwardRef((
     onClose,
     audioList: audioListProp = null,
     isCodeRunning = false,
+    onProcessInput,
   },
   ref
 ) => {
@@ -363,13 +364,36 @@ const Terminal = forwardRef((
     const cmd = input.trim();
     if (!cmd) return;
 
+    // Always echo the user's input to the terminal for clarity
+    addOutput(`$ ${cmd}`, "command");
+    setInput(""); // Clear the input field immediately
+
+    // If code is running, send the input to the parent component and stop.
+    if (isCodeRunning) {
+      onProcessInput?.(cmd);
+      return;
+    }
+
+    // If code is NOT running, handle it as a local command.
     setHistory((h) => {
       const next = [...h, cmd].slice(-200);
       historyIndex.current = next.length;
       return next;
     });
 
+
     addOutput(`$ ${cmd}`, "command");
+    if (isCodeRunning) {
+      onProcessInput?.(cmd);
+      setInput("");
+      return;
+    }
+
+    setHistory((h) => {
+      const next = [...h, cmd].slice(-200);
+      historyIndex.current = next.length;
+      return next;
+    });
     scrollToBottom({ smooth: true });
 
     setTimeout(() => {
@@ -515,7 +539,23 @@ const Terminal = forwardRef((
 
             {/* Input prompt line */}
             <div className="flex items-center mt-1 group">
-              {!isCodeRunning && (
+              {isCodeRunning ? (
+                <>
+                  <span className="text-[#a6adc8] font-medium mr-2 font-mono select-none">&gt;&gt;</span>
+                  <form onSubmit={handleSubmit} className="flex-1">
+                    <input
+                      ref={inputRef}
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={onKeyDownInput}
+                      className="w-full bg-transparent text-[#cdd6f4] outline-none caret-[#a6e3a1] text-sm font-mono placeholder:text-[#6c7086]"
+                      placeholder="Enter input for your program..."
+                      autoComplete="off"
+                      spellCheck="false"
+                    />
+                  </form>
+                </>
+              ) : (
                 <>
                   <span className="text-[#89b4fa] font-medium mr-2 font-mono select-none">~</span>
                   <span className="text-[#a6e3a1] font-bold mr-2 font-mono select-none">$</span>

@@ -37,7 +37,7 @@ import {
 } from "lucide-react";
 
 // API
-import { downloadCode, saveCode, runCode } from '../../server/api/controllerApi';
+import { downloadCode, saveCode } from '../../server/api/controllerApi';
 
 export default function App() {
     const [searchParams] = useSearchParams();
@@ -207,31 +207,6 @@ export default function App() {
         }
     };
 
-    const handleRunCode = async () => {
-        if (!code.trim()) {
-            toast.error("Please enter some code to run.");
-            return;
-        }
-        try {
-            setIsRunning(true);
-            terminalRef.current?.open?.();
-            terminalRef.current?.addOutput?.(`Running code in ${selectedLanguage.name}...`, "info");
-            const result = await runCode(code, roomId, selectedLanguage.value);
-            if (result.success) {
-                if (result.output) terminalRef.current?.addOutput?.(result.output, "output");
-                if (result.error) terminalRef.current?.addOutput?.(result.error, "error");
-                if (!result.output && !result.error) terminalRef.current?.addOutput?.("No output or error returned from the server.", "info");
-            } else if (result.message) {
-                terminalRef.current?.addOutput?.(result.message, "error");
-            }
-        } catch (error) {
-            console.error('Run code error:', error);
-            terminalRef.current?.addOutput?.(`Error running code: ${error.message || error}`, "error");
-            toast.error(error.response?.message || error.message || 'Failed to run code.');
-        } finally {
-            setIsRunning(false);
-        }
-    };
 
     // ctrl+s / ctrl+g
     useEffect(() => {
@@ -390,14 +365,40 @@ export default function App() {
                     return next;
                 });
             },
+            onStdout: (data) => {
+                terminalRef.current?.addOutput?.(data, "output");
+            },
+            onStderr: (data) => {
+                terminalRef.current?.addOutput?.(data, "error");
+            },
+            onRunDone: (exitCode) => {
+                terminalRef.current?.addOutput?.(`Process finished with exit code ${exitCode}.`, "info");
+                setIsRunning(false);
+            },
             onError: (error) => {
                 toast.error(error.message);
+                setIsRunning(false);
             }
         });
         return () => {
             webSocketApi.disconnect();
         };
     }, [roomId, username, languages]);
+
+    const handleTerminalInput = (data) => {
+        webSocketApi.sendInputToProcess(data);
+    };
+
+    const handleRunCode = () => {
+        if (!code.trim()) {
+            toast.error("Please enter some code to run.");
+            return;
+        }
+        setIsRunning(true);
+        terminalRef.current?.open?.();
+        terminalRef.current?.addOutput?.(`Running code in ${selectedLanguage.name}...`, "info");
+        webSocketApi.runCode(roomId, selectedLanguage.value, code);
+    };
 
     const handleLanguageChange = (language) => {
         setSelectedLanguage(language);
@@ -736,6 +737,7 @@ export default function App() {
                             editorSelector=".editor-area"
                             className="editor-terminal"
                             isCodeRunning={isRunning}
+                            onProcessInput={handleTerminalInput}
                         />
                     </div>
                 </div>
