@@ -18,7 +18,7 @@ export default function GoonShareAILanding() {
       </div>
       <Nav />
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-10 md:py-10 z-0">
+      <section className="relative overflow-hidden md:py-10 z-0">
         <div className="absolute inset-0"></div>
 
         <div className="w-full max-w-7xl mx-auto relative px-4 md:px-6">
@@ -30,7 +30,7 @@ export default function GoonShareAILanding() {
 
             <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
               <TextType
-                text={["Gone.Code.GoonAgain", "Gooner Never Sleeps", "Happy gooning!"]}
+                text={["Vibe.To.Code", "LazyAzz", "Infinite.Aura!"]}
                 typingSpeed={40}
                 pauseDuration={2000}
                 showCursor={true}
@@ -45,16 +45,16 @@ export default function GoonShareAILanding() {
               <div className="text-[#6c7086]"> {"{"}</div>
             </h1>
 
-            <p className="mx-auto mb-12 max-w-2xl text-lg text-[#9399b2] leading-relaxed">
+            <p className="mx-auto mb-12 max-w-2xl text-xs sm:text-lg text-[#9399b2] leading-relaxed">
               <span className="text-[#6c7086]">{"/**"}</span>
               <br />
               <span className="text-[#6c7086]">{" * Real-time code sharing with live cursors,"}</span>
               <br />
-              <span className="text-[#6c7086]">{" * voice chat, and instant execution."}</span>
+              <span className="text-[#6c7086]">{" * AI chat, and instant execution."}</span>
               <br />
               <span className="text-[#6c7086]">{" * @param {Object} session - Build together, debug faster"}</span>
               <br />
-              <span className="text-[#6c7086]">{" * @returns {Promise<Success>} - Learn continuously"}</span>
+              <span className="text-[#6c7086]">{" * @returns {Promise<Success>} - Learn continuously and Vibe together"}</span>
               <br />
               <span className="text-[#6c7086]">{" */"}</span>
             </p>
@@ -63,7 +63,7 @@ export default function GoonShareAILanding() {
       </section>
 
       {/* Room Creation/Join Section */}
-      <section id="room" className="relative z-20 py-25">
+      <section id="room" className="relative z-20 sm:py-25">
         <CreateRoom />
       </section>
 
@@ -254,92 +254,13 @@ export default function GoonShareAILanding() {
                 </a>
               </div>
             </div>
-
-            <div>
-              <h3 className="font-semibold mb-4 text-[#a6e3a1]">{"// product"}</h3>
-              <ul className="space-y-2 text-[#9399b2] text-sm">
-                <li>
-                  <a href="#" className="hover:text-[#a6e3a1] transition-colors">
-                    features()
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-[#cdd6f4] transition-colors">
-                    pricing()
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-[#cdd6f4] transition-colors">
-                    api.docs()
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-[#cdd6f4] transition-colors">
-                    integrations()
-                  </a>
-                </li>
-              </ul>
+            <div className="border-t border-[#313244] mt-8 pt-8 text-center text-[#6c7086] text-sm">
+              <p>
+                {"/* © "}
+                {new Date().getFullYear()}
+                {" GoonShareAI. Built with ❤️ by developers, for developers. Come Goon With Sanjoy*/"}
+              </p>
             </div>
-
-            <div>
-              <h3 className="font-semibold mb-4 text-[#89b4fa]">{"// resources"}</h3>
-              <ul className="space-y-2 text-[#9399b2] text-sm">
-                <li>
-                  <a href="#" className="hover:text-[#89b4fa] transition-colors">
-                    documentation()
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-[#cdd6f4] transition-colors">
-                    tutorials()
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-[#cdd6f4] transition-colors">
-                    blog.posts()
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-[#cdd6f4] transition-colors">
-                    community()
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-4 text-[#cba6f7]">{"// support"}</h3>
-              <ul className="space-y-2 text-[#9399b2] text-sm">
-                <li>
-                  <a href="#" className="hover:text-[#cba6f7] transition-colors">
-                    help.center()
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-[#cdd6f4] transition-colors">
-                    contact.us()
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-[#cdd6f4] transition-colors">
-                    status.check()
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-[#cdd6f4] transition-colors">
-                    privacy.policy()
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-[#313244] mt-8 pt-8 text-center text-[#6c7086] text-sm">
-            <p>
-              {"/* © "}
-              {new Date().getFullYear()}
-              {" GoonShareAI. Built with ❤️ by developers, for developers. Come Goon With Sanjoy*/"}
-            </p>
           </div>
         </div>
       </footer>

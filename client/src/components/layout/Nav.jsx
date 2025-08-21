@@ -13,7 +13,7 @@ const Nav = () => {
             <Code2 className="h-6 w-6 text-[#1e1e2e]" />
           </div>
           <div>
-            <span className="text-2xl font-bold text-[#a6e3a1]">{"<GoonShareAI/>"}</span>
+            <span className="text-2xl font-bold text-[#a6e3a1]">{"<OuRAcoDE/>"}</span>
             <div className="text-xs text-[#6c7086]">{"// v1.1.0-stable"}</div>
           </div>
         </div>
@@ -84,6 +84,14 @@ const Nav = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden mt-2 rounded-xl border border-[#313244] bg-[#1e1e2e]/95 backdrop-blur">
             <div className="px-4 py-4 space-y-4">
+              <a href="#home" className='flex items-center space-x-3 text-sm text-[#9399b2] hover:text-[#f9e2af] transition-colors font-mono py-2' onClick={() => setIsMobileMenuOpen(false)}>
+                <House className="h-4 w-4" />
+                <span>{"home()"}</span>
+              </a>
+              <a href="#room" className='flex items-center space-x-3 text-sm text-[#9399b2] hover:text-[#89b4fa] transition-colors font-mono py-2' onClick={() => setIsMobileMenuOpen(false)}>
+                <GitPullRequestCreate className="h-4 w-4" />
+                <span>{"room()"}</span>
+              </a>
               <a
                 href="#features"
                 className="flex items-center space-x-3 text-sm text-[#9399b2] hover:text-[#a6e3a1] transition-colors font-mono py-2"
@@ -91,30 +99,6 @@ const Nav = () => {
               >
                 <Zap className="h-4 w-4" />
                 <span>{"features()"}</span>
-              </a>
-              <a
-                href="#docs"
-                className="flex items-center space-x-3 text-sm text-[#9399b2] hover:text-[#89b4fa] transition-colors font-mono py-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <FileText className="h-4 w-4" />
-                <span>{"docs.read()"}</span>
-              </a>
-              <a
-                href="#api"
-                className="flex items-center space-x-3 text-sm text-[#9399b2] hover:text-[#fab387] transition-colors font-mono py-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <Terminal className="h-4 w-4" />
-                <span>{"api.reference()"}</span>
-              </a>
-              <a
-                href="#community"
-                className="flex items-center space-x-3 text-sm text-[#9399b2] hover:text-[#cba6f7] transition-colors font-mono py-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <Users className="h-4 w-4" />
-                <span>{"community.join()"}</span>
               </a>
               <a
                 href="#pricing"

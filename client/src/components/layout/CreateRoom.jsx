@@ -97,11 +97,11 @@ const CreateRoom = () => {
     };
 
 
-    return (
-        <div className="mx-auto max-w-2xl mb-12">
+     return (
+        <div className="sm:w-full sm:max-w-2xl mx-auto my-12 px-4 sm:px-0">
             <Card className="bg-[#313244]/50 border-[#45475a] backdrop-blur">
                 <CardHeader className="pb-4">
-                    <CardTitle className="text-[#a6e3a1] text-lg font-mono">
+                    <CardTitle className="text-[#a6e3a1] text-base sm:text-lg font-mono">
                         <span className="text-[#f38ba8]">const</span> <span className="text-[#cdd6f4]">session</span>{" "}
                         <span className="text-[#89b4fa]">=</span>{" "}
                         <span className="text-[#fab387]">{isJoinMode ? "joinRoom" : "createRoom"}</span>
@@ -109,10 +109,9 @@ const CreateRoom = () => {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    {/* Error Message Display */}
                     {errorMessage && (
                         <div className="p-3 bg-[#f38ba8]/10 border border-[#f38ba8]/30 rounded-lg">
-                            <div className="text-sm text-[#f38ba8] font-mono">
+                            <div className="text-xs sm:text-sm text-[#f38ba8] font-mono">
                                 <span className="text-[#f38ba8]">error</span>
                                 <span className="text-[#89b4fa]">:</span> {errorMessage}
                             </div>
@@ -126,8 +125,8 @@ const CreateRoom = () => {
                             variant={!isJoinMode ? "default" : "ghost"}
                             className={
                                 !isJoinMode
-                                    ? "bg-[#a6e3a1] hover:bg-[#94e2d5] text-[#1e1e2e] flex-1 font-mono"
-                                    : "text-[#9399b2] hover:text-[#cdd6f4] hover:bg-[#313244] flex-1 font-mono"
+                                    ? "bg-[#a6e3a1] hover:bg-[#94e2d5] text-[#1e1e2e] flex-1 font-mono text-sm"
+                                    : "text-[#9399b2] hover:text-[#cdd6f4] hover:bg-[#313244] flex-1 font-mono text-sm"
                             }
                         >
                             {"// create()"}
@@ -137,8 +136,8 @@ const CreateRoom = () => {
                             variant={isJoinMode ? "default" : "ghost"}
                             className={
                                 isJoinMode
-                                    ? "bg-[#89b4fa] hover:bg-[#74c7ec] text-[#1e1e2e] flex-1 font-mono"
-                                    : "text-[#9399b2] hover:text-[#cdd6f4] hover:bg-[#313244] flex-1 font-mono"
+                                    ? "bg-[#89b4fa] hover:bg-[#74c7ec] text-[#1e1e2e] flex-1 font-mono text-sm"
+                                    : "text-[#9399b2] hover:text-[#cdd6f4] hover:bg-[#313244] flex-1 font-mono text-sm"
                             }
                         >
                             {"// join()"}
@@ -187,16 +186,15 @@ const CreateRoom = () => {
                             </div>
 
                             {/* Room Code Section */}
-
                             <div className="space-y-4">
-                                <div className="flex items-center space-x-4">
+                                <div className="flex items-center space-x-2 sm:space-x-4">
                                     <Button
                                         onClick={() => setIsCustomRoom(false)}
                                         variant={!isCustomRoom ? "default" : "outline"}
                                         className={
                                             !isCustomRoom
-                                                ? "bg-[#a6e3a1] hover:bg-[#94e2d5] text-[#1e1e2e] font-mono"
-                                                : "border-[#45475a] text-[#9399b2] hover:bg-[#313244] font-mono"
+                                                ? "bg-[#a6e3a1] hover:bg-[#94e2d5] text-[#1e1e2e] font-mono text-xs sm:text-sm"
+                                                : "border-[#45475a] text-[#9399b2] hover:bg-[#313244] font-mono text-xs sm:text-sm"
                                         }
                                     >
                                         {"Math.random()"}
@@ -206,15 +204,15 @@ const CreateRoom = () => {
                                         variant={isCustomRoom ? "default" : "outline"}
                                         className={
                                             isCustomRoom
-                                                ? "bg-[#cba6f7] hover:bg-[#b4befe] text-[#1e1e2e] font-mono"
-                                                : "border-[#45475a] text-[#9399b2] hover:bg-[#313244] font-mono"
+                                                ? "bg-[#cba6f7] hover:bg-[#b4befe] text-[#1e1e2e] font-mono text-xs sm:text-sm"
+                                                : "border-[#45475a] text-[#9399b2] hover:bg-[#313244] font-mono text-xs sm:text-sm"
                                         }
                                     >
                                         {"custom.name"}
                                     </Button>
                                 </div>
 
-                                {!isCustomRoom ? '' : (
+                                {isCustomRoom && (
                                     <div className="space-y-2">
                                         <label className="text-sm text-[#9399b2] font-mono">
                                             <span className="text-[#f38ba8]">const</span>{" "}
@@ -244,7 +242,6 @@ const CreateRoom = () => {
                     ) : (
                         <>
                             {/* Join Room Section */}
-
                             {/* Username Section */}
                             <div className="space-y-2">
                                 <label className="text-sm text-[#9399b2] font-mono">
@@ -254,12 +251,12 @@ const CreateRoom = () => {
                                 <Input
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
+                                    placeholder="/* enter your username */"
                                     className="bg-[#11111b] border-[#45475a] text-[#cdd6f4] font-mono"
                                 />
                             </div>
 
                             {/* Room Code Section */}
-
                             <div className="space-y-4">
                                 <div className="space-y-2">
                                     <label className="text-sm text-[#9399b2] font-mono ">
