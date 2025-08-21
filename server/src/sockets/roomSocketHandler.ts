@@ -1,11 +1,16 @@
 import { WebSocket, WebSocketServer } from "ws";
+import path from "path";
 import { redis } from "../lib/redis.js";
+import fs from "fs"
+import os from "os"
+import { spawn } from "child_process";
 
 interface ExtWebSocket extends WebSocket {
     roomId?: string;
     username?: string;
     code?: string;
     language?: string;
+    docker?: any;
 }
 
 interface BaseMessage {
@@ -42,12 +47,37 @@ interface AllUserMessage extends BaseMessage {
     users: string[];
 }
 
+interface RunCodeMessage extends BaseMessage {
+    type: "run_code";
+    roomId: string;
+    language: string;
+    code: string;
+}
+
+interface StdinMessage extends BaseMessage {
+    type: "stdin",
+    docker: any;
+    data: any;
+}
+
 type RoomSocketMessage =
     | JoinRoomMessage
     | CodeChangeMessage
     | CursorSyncMessage
     | LanguageChangeMessage
-    | AllUserMessage;
+    | AllUserMessage
+    | RunCodeMessage
+    | StdinMessage;
+
+const languageCommands = {
+    c: (file: string) => ["sh", "-c", `gcc ${file} -o /code/a.out && /code/a.out`],
+    cpp: (file: string) => ["sh", "-c", `g++ ${file} -o /code/a.out && /code/a.out`],
+    cs: (file: string) => ["sh", "-c", `mcs ${file} -out:/code/main.exe && mono /code/main.exe`],
+    js: (file: string) => ["node", file],
+    py: (file: string) => ["python3", file],
+    java: (file: string) => ["sh", "-c", `javac ${file} -d /code && java -cp /code ${path.basename(file, '.java')}`],
+    go: (file: string) => ["go", "run", file],
+};
 
 export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
     ws.on("error", (error) => console.error(error));
@@ -96,6 +126,7 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
 
                 break;
             }
+
             case "code_change": {
                 if (!ws.roomId) return
                 // ws.code will be defined here
@@ -116,6 +147,7 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
                 }
                 break;
             }
+
             case "cursor_sync": {
                 if (!ws.roomId) return
 
@@ -130,6 +162,7 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
                 }
                 break;
             }
+
             case "language_change": {
                 if (!ws.roomId) return
 
@@ -152,6 +185,7 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
                 }
                 break;
             }
+
             case "all_user": {
                 if (!ws.roomId) return
                 try {
@@ -170,6 +204,124 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
                 }
                 break;
             }
+
+            case "run_code": {
+                if (!ws.roomId) return
+                try {
+                    ws.code = data.code
+                    const language = await redis.get(`room:${ws.roomId}:language`)
+                    console.log(language)
+                    let code = ws.code
+
+                    // temp dir - linux/prod
+                    /*const tempDir = path.join("/tmp", `${Date.now()}-${Math.random()}`)
+                    fs.mkdirSync(tempDir)*/
+
+                    // win
+                    const tempDir = path.join(os.tmpdir(), `${Date.now()}-${Math.random()}`)
+                    fs.mkdirSync(tempDir, { recursive: true })
+                    console.log(tempDir)
+
+                    const extension = language
+                    const filePath = path.join(tempDir, `main.${extension}`)
+                    // auto-inject flushing for all C/C++ codes - VIBE CODED
+                    if (language === "c" || language === "cpp") {
+                        code = ws.code.replace(
+                            /int\s+main\s*\([^)]*\)\s*{/,
+                            match => `${match}\n    setvbuf(stdout, NULL, _IONBF, 0);`
+                        );
+                    }
+
+                    // writting the code inside code.ext file
+                    fs.writeFileSync(filePath, code);
+                    console.log(filePath)
+
+                    // docker run command
+                    const dockerCmd = [
+                        "run", // run new docker container
+                        "--rm", // after process exits auto remove the container
+                        "-i", //enables stdin
+                        "--network", "none", // disable network inside container
+                        "--memory", "200m", // container ram limit 200mb
+                        "--cpus", "0.5", // half core usage
+                        "-v", `${tempDir}:/code`, // mounts host folder in container, tempDis host folder and /code is where the code will appear in container
+                        "custom-compiler", // my custom docker image name
+                        //@ts-ignore
+                        ...languageCommands[language](`/code/main.${extension}`) // tells the container run command for the given lang
+                    ]
+
+                    // spawn docker process
+                    const docker = spawn("docker", dockerCmd, {
+                        timeout: 20000,
+                        stdio: ["pipe", "pipe", "pipe"]  // important! gives stdin, stdout, stderr
+                    })
+                    ws.docker = docker;
+
+                    docker.stdout.on("data", data => {
+                        ws.send(JSON.stringify({ type: "stdout", data: data.toString() })) // saving the op data in output
+                    })
+
+                    docker.stderr.on("data", data => {
+                        ws.send(JSON.stringify({ type: "stderr", data: data.toString() })) // saving the err data in error
+                    })
+
+                    // checking err
+                    docker.on("error", (err) => {
+                        // removing the temp file
+                        fs.rmSync(tempDir, { recursive: true, force: true });
+                        console.error(err)
+                        ws.send(JSON.stringify({
+                            type: "error",
+                            message: err.message
+                        }))
+                        return;
+                    });
+
+                    // killing the term if it takaes longer then grace period
+                    const killTimer = setTimeout(() => {
+                        docker.kill("SIGKILL")
+                    }, 20000)
+
+                    // child process exits
+                    docker.on("close", (code, signal) => {
+                        clearTimeout(killTimer)
+                        fs.rmSync(tempDir, { recursive: true, force: true });
+
+                        // if once timeout hit it sends SIGTERM
+                        if (signal === "SIGTERM" || signal === "SIGKILL") {
+                            ws.send(JSON.stringify({
+                                type: "error",
+                                message: "Execution time out",
+                                output: ""
+                            }))
+                            return
+                        }
+
+                        ws.send(JSON.stringify({ type: "done", exitCode: code }))
+                    });
+                } catch (err) {
+                    console.error("Faied to run the code: ", err)
+                    ws.send(JSON.stringify({
+                        type: "error",
+                        message: "Failed to run code"
+                    }))
+                    return
+                }
+                break;
+            }
+
+            // STDIN (user input)
+            case "stdin": {
+                if (ws.docker && ws.docker.stdin.writable) {
+                    if (data.data === null) {
+                        ws.docker.stdin.end(); // close pipe
+                    } else {
+                        ws.docker.stdin.write(data.data + "\n");
+                    }
+                }
+                break;
+            }
+
         }
     });
 
@@ -188,7 +340,7 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
                 brodcastToRoom(wss, ws.roomId, {
                     type: "room_left",
                     username: ws.username,
-                    message : `${ws.username} left the room` // added message for client
+                    message: `${ws.username} left the room` // added message for client
                 })
             }
             catch (err) {
