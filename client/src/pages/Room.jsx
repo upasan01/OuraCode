@@ -368,6 +368,7 @@ export default function App() {
             },
             onAllUsersSent: (users) => {
                 setUserList(users);
+                console.log(users)
             },
             onError: (error) => {
                 toast.error(error.message);

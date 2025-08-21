@@ -39,7 +39,7 @@ interface LanguageChangeMessage extends BaseMessage {
 interface AllUserMessage extends BaseMessage {
     type: "all_user";
     roomId: string;
-    users: [];
+    users: string[];
 }
 
 type RoomSocketMessage =
@@ -156,6 +156,7 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
                 if (!ws.roomId) return
                 try {
                     const users = await redis.smembers(`room:${ws.roomId}:users`)
+                    console.log(users)
                     ws.send(JSON.stringify({
                         type: "all_users_sent",
                         users
