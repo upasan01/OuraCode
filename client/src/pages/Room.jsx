@@ -1,30 +1,42 @@
-import React, { useEffect, useMemo, useCallback, useRef, useState, use } from "react";
+import React, { useEffect, useMemo, useCallback, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { webSocketApi } from "../../server/api/webSocketApi";
 
-// UI Components (the pretty stuff that makes users happy) ✨
+// UI Components
 import { Button } from "../components/ui/button";
 import { ScrollArea } from "../components/ui/ScrollArea";
+import { Badge } from "../components/ui/badge"; // 
 import { LoadingIcon, EnhanceIcon } from "../components/ui/Icons";
 import BackgroundGradientAnimation from "../components/ui/BackgroundGradientAnimation";
 import { SiJavascript, SiPython, SiCplusplus, SiC, SiTypescript, SiKotlin } from 'react-icons/si';
-import { FaJava, FaRust, FaPhp, FaSwift } from "react-icons/fa"
-import { TbBrandCSharp } from "react-icons/tb"
-import { FaGolang } from "react-icons/fa6"
+import { FaJava, FaRust, FaPhp, FaSwift } from "react-icons/fa";
+import { TbBrandCSharp } from "react-icons/tb";
+import { FaGolang } from "react-icons/fa6";
 import { DiRuby } from "react-icons/di";
 
-// App Components (our homemade goodies) 🏠
+// App Components
 import CodeEditor from "../components/layout/CodeEditor";
 import AiPanel from "../components/layout/AiPanel";
 import { toast } from "react-hot-toast";
 import { Terminal } from "../components/layout/Terminal";
 
-// Icons (because we love visual candy) 🍭
+// Icons
 import {
-    MessageCircle, Code2, Copy, X, Check, DownloadIcon, Save, Menu, Terminal as TerminalIcon, Play
+    MessageCircle,
+    Code2,
+    Copy,
+    Check,
+    Download as DownloadIcon, // ✅ lucide-react exports `Download`, not `DownloadIcon`
+    Save,
+    Menu,
+    Terminal as TerminalIcon,
+    Play,
+    Users,
+    Languages,
+    X
 } from "lucide-react";
 
-// API (the backend communication squad) 📡
+// API
 import { downloadCode, saveCode, runCode } from '../../server/api/controllerApi';
 
 export default function App() {
@@ -36,9 +48,12 @@ export default function App() {
         username: passedUsername,
     } = location.state || {};
 
-    sessionStorage.setItem("storedusername", passedUsername);
-
-    // In Room.jsx
+    // ✅ only persist if we actually have a username
+    useEffect(() => {
+        if (passedUsername) {
+            sessionStorage.setItem("storedusername", passedUsername);
+        }
+    }, [passedUsername]);
 
     // A nice, vibrant color palette for cursors
     const CURSOR_COLORS = [
@@ -46,6 +61,8 @@ export default function App() {
         '#3300FF', '#FF6600', '#66FF00', '#FF0066', '#0066FF',
         '#CCFF00', '#FF00CC', '#00CCFF', '#FF9900', '#9900FF'
     ];
+
+    // ✅ languages -> memoized
     const languages = useMemo(
         () => [
             { id: "c", value: "c", name: "C", icon: SiC, color: "bg-gray-500/20 text-gray-300" },
@@ -53,7 +70,7 @@ export default function App() {
             { id: "python", value: "py", name: "Python", icon: SiPython, color: "bg-green-500/20 text-green-300" },
             { id: "java", value: "java", name: "Java", icon: FaJava, color: "bg-orange-500/20 text-orange-300" },
             { id: "cpp", value: "cpp", name: "C++", icon: SiCplusplus, color: "bg-purple-500/20 text-purple-300" },
-            { id: "csharp", value: "cs", name: "C#", icon: TbBrandCSharp, color: "bg-teal-500/20" },
+            { id: "csharp", value: "cs", name: "C#", icon: TbBrandCSharp, color: "bg-teal-500/20 text-teal-300" },
             { id: "go", value: "go", name: "Go lang", icon: FaGolang, color: "bg-[#00ADD8]/20 text-[#00ADD8]" },
             { id: "rust", value: "rs", name: "Rust", icon: FaRust, color: "bg-orange-600/20 text-orange-400" },
             { id: "typescript", value: "ts", name: "TypeScript", icon: SiTypescript, color: "bg-blue-500/20 text-blue-300" },
@@ -65,98 +82,96 @@ export default function App() {
         []
     );
 
-    // Code based states
-    const defaultLang = languages.find((l) => l.value === initialLanguage) || languages[0];
-    const [selectedLanguage, setSelectedLanguage] = useState(defaultLang);
+    // ✅ pick default language defensively (supports id/value/name)
+    const computedDefaultLang = useMemo(() => {
+        const key = String(initialLanguage || '').toLowerCase();
+        return (
+            languages.find(l => l.value === key || l.id === key || l.name.toLowerCase() === key) ||
+            languages[0]
+        );
+    }, [languages, initialLanguage]);
+
+    // Code-based state
+    const [selectedLanguage, setSelectedLanguage] = useState(computedDefaultLang);
+    useEffect(() => setSelectedLanguage(computedDefaultLang), [computedDefaultLang]);
+
     const [code, setCode] = useState("");
     const codeEditorRef = useRef(null);
     const [remoteCursors, setRemoteCursors] = useState(() => new Map());
     const userColors = useRef(new Map());
 
     const [isCopied, setIsCopied] = useState(false);
-    // copy code handler (ctrl+c but with extra steps) 📋
     const handleCopyCode = async () => {
         try {
             await navigator.clipboard.writeText(code);
             setIsCopied(true);
             setTimeout(() => setIsCopied(false), 2000);
         } catch (err) {
-            toast.error("Failed to copy code:", err);
+            console.error(err);
+            toast.error("Failed to copy code.");
         }
     };
-    // state management central command 🎮
+
     const [isLoading, setIsLoading] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
 
-    // sidebar states (for that mobile responsive flex) 📱
-    const [isSidebarCollapsed, setSidebarCollapsed] = useState(false)
-    const [isSidebarOpen, setSidebarOpen] = useState(false)
-    const [isMobile, setIsMobile] = useState(false)
+    // Sidebar / layout
+    const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [isSidebarOpen, setSidebarOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+    const [sidebarView, setSidebarView] = useState("languages");
     const terminalRef = useRef(null);
 
-    // AI Panel State (where the magic happens) ✨
+    // AI Panel
     const [isChatOpen, setChatOpen] = useState(false);
     const aiPanelRef = useRef(null);
 
-
-    // mobile responsiveness handler (gotta look good on all screens) 📱💻
+    // mobile responsiveness
     useEffect(() => {
         const handleResize = () => {
-            const mobile = window.innerWidth < 768
-            setIsMobile(mobile)
+            const mobile = window.innerWidth < 768;
+            setIsMobile(mobile);
             if (mobile) {
-                setSidebarCollapsed(false)
-                setSidebarOpen(false)
+                setSidebarCollapsed(false);
+                setSidebarOpen(false);
             }
-        }
+        };
+        handleResize();
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
-        handleResize()
-        window.addEventListener("resize", handleResize)
-        return () => window.removeEventListener("resize", handleResize)
-    }, [])
-
-    // download state management (for when things go wrong) 💀
+    // Download state
     const [downloadLoading, setDownloadLoading] = useState(false);
     const [downloadError, setDownloadError] = useState('');
 
-    // review handler that doesn't care about panel drama 
     const handleReview = async () => {
         if (!code.trim()) {
             toast.error("Please enter some code to review.");
             return;
         }
-
-        // always make sure panel is vibing open
         setChatOpen(true);
-
-        // wait a hot sec for panel to open, then hit that review button
         setTimeout(() => {
-            if (aiPanelRef.current) {
-                aiPanelRef.current.triggerReview();
-            }
-        }, isChatOpen ? 0 : 100); // no delay if already open, tiny delay if opening
+            aiPanelRef.current?.triggerReview?.();
+        }, isChatOpen ? 0 : 100);
     };
 
-    // download handler (when you need that code offline) 
     const handleDownload = async () => {
         if (!code || !roomId) {
             toast.error('Missing code or room ID');
             return;
         }
-
         try {
             setDownloadLoading(true);
             setDownloadError('');
-
-            // timeout protection bc we ain't waiting forever
             const downloadPromise = downloadCode(code, roomId);
             const timeoutPromise = new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Download timeout - server may be unresponsive')), 30000)
             );
-
             await Promise.race([downloadPromise, timeoutPromise]);
-            toast.success('Download Started!')
+            toast.success('Download Started!');
         } catch (error) {
+            console.error(error);
             toast.error(`Download failed: ${error.message || error}`);
             setDownloadError(error.message || 'Unknown error');
         } finally {
@@ -164,7 +179,6 @@ export default function App() {
         }
     };
 
-    // save code handler (ctrl+s but make it fancy) 💾✨
     const handleSaveCode = async () => {
         setIsLoading(true);
         try {
@@ -182,28 +196,23 @@ export default function App() {
         }
     };
 
-    // handle running code
     const handleRunCode = async () => {
         if (!code.trim()) {
             toast.error("Please enter some code to run.");
             return;
         }
-
         try {
             setIsRunning(true);
             terminalRef.current?.open?.();
             terminalRef.current?.addOutput?.(`Running code in ${selectedLanguage.name}...`, "info");
-            const result = await runCode(code, roomId);
+            // ✅ include language hint if your API supports it
+            const result = await runCode(code, roomId, selectedLanguage.value);
             if (result.success) {
-                if (result.output) {
-                    terminalRef.current?.addOutput?.(result.output, "output");
-                }
-                if (result.error) {
-                    terminalRef.current?.addOutput?.(result.error, "error");
-                }
-                if (!result.output && !result.error) {
-                    terminalRef.current?.addOutput?.("No output or error returned from the server.", "info");
-                }
+                if (result.output) terminalRef.current?.addOutput?.(result.output, "output");
+                if (result.error) terminalRef.current?.addOutput?.(result.error, "error");
+                if (!result.output && !result.error) terminalRef.current?.addOutput?.("No output or error returned from the server.", "info");
+            } else if (result.message) {
+                terminalRef.current?.addOutput?.(result.message, "error");
             }
         } catch (error) {
             console.error('Run code error:', error);
@@ -214,7 +223,7 @@ export default function App() {
         }
     };
 
-    // ctrl+s keyboard listener (because we're fancy like that) 
+    // ctrl+s / ctrl+g
     useEffect(() => {
         const handleKeyDown = (event) => {
             if (event.ctrlKey && event.key === 's') {
@@ -226,27 +235,75 @@ export default function App() {
                 handleRunCode();
             }
         };
-
         document.addEventListener('keydown', handleKeyDown);
-
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         };
     }, [roomId, code]);
 
-
-
     const toggleSidebar = () => {
-        if (isMobile) {
-            setSidebarOpen(!isSidebarOpen)
-        } else {
-            setSidebarCollapsed(!isSidebarCollapsed)
-        }
-    }
+        if (isMobile) setSidebarOpen(!isSidebarOpen);
+        else setSidebarCollapsed(!isSidebarCollapsed);
+    };
 
-    // websocket connection state (real-time collab vibes) 
+    // WebSocket state
     const [wsConnected, setWsConnected] = useState(false);
-    const [username] = useState(passedUsername || sessionStorage.getItem("storedusername"));
+    const [username] = useState(passedUsername || sessionStorage.getItem("storedusername") || "Guest");
+    const [userList, setUserList] = useState(['SiJohndeere1', 'SiJohndeere2', 'SiJohndeere3']);
+
+    const createDynamicMembers = (currentUser, userListArg) => {
+        const initials = String(currentUser || 'U')
+            .split(" ")
+            .map((w) => w[0])
+            .join("")
+            .toUpperCase();
+
+        const currentUserObj = {
+            id: "current",
+            name: currentUser || 'You',
+            avatar: initials,
+            status: "online",
+            role: "Owner",
+            color: "bg-red-500",
+            isCurrent: true,
+        };
+
+        const colors = [
+            "bg-blue-500",
+            "bg-green-500",
+            "bg-purple-500",
+            "bg-orange-500",
+            "bg-pink-500",
+            "bg-cyan-500",
+            "bg-yellow-500",
+        ];
+
+        const otherMembers = (userListArg || [])
+            .filter((user) => (user?.username || user?.name || String(user)) !== currentUser)
+            .map((user, index) => {
+                const display = user?.username || user?.name || `User ${index + 1}`;
+                const avatar = display
+                    .split(" ")
+                    .map((w) => w[0])
+                    .join("")
+                    .toUpperCase();
+                return {
+                    id: user?.id || `user-${index}`,
+                    name: display,
+                    avatar,
+                    status: user?.status || "online",
+                    role: user?.role || "Editor",
+                    color: colors[index % colors.length],
+                    isCurrent: false,
+                };
+            });
+
+        return [currentUserObj, ...otherMembers];
+    };
+
+    // ✅ compute members & onlineMembers without the undefined var bug
+    const members = useMemo(() => createDynamicMembers(username, userList), [username, userList]);
+    const onlineMembers = useMemo(() => members.filter((m) => m.status === 'online'), [members]);
 
     useEffect(() => {
         if (!roomId || !username) return;
@@ -261,62 +318,42 @@ export default function App() {
             },
             onLoadCode: (loadedCode) => {
                 setCode(loadedCode);
-                // set timeout ensures monaco mounted before rendering the code
                 setTimeout(() => {
-                    codeEditorRef.current?.applyRemoteUpdate(loadedCode);
+                    codeEditorRef.current?.applyRemoteUpdate?.(loadedCode);
                 }, 50);
             },
-
             onCodeUpdate: (newcode, fromUsername) => {
                 if (fromUsername !== username) {
-                    codeEditorRef.current?.applyRemoteUpdate(newcode);
+                    codeEditorRef.current?.applyRemoteUpdate?.(newcode);
                 }
             },
-
-
             onCursorUpdate: (fromUsername, cursorPosition) => {
                 if (fromUsername !== username) {
-                    console.log(`Cursor update from ${fromUsername}:`, cursorPosition);
-                    // Check if we have a color for this user. If not, assign one.
                     if (!userColors.current.has(fromUsername)) {
                         const colorIndex = userColors.current.size % CURSOR_COLORS.length;
                         userColors.current.set(fromUsername, CURSOR_COLORS[colorIndex]);
                     }
-
                     const userColor = userColors.current.get(fromUsername);
-
                     setRemoteCursors(prev => {
                         const next = new Map(prev);
-                        // Store the position AND the color
-                        next.set(fromUsername, {
-                            position: cursorPosition,
-                            color: userColor
-                        });
+                        next.set(fromUsername, { position: cursorPosition, color: userColor });
                         return next;
                     });
                 }
             },
-
             onUserJoined: (message) => {
-                if (message.username !== username) {
+                if (message?.username !== username && message?.message) {
                     toast(message.message);
                 }
             },
             onUserLeft: (message) => {
-                if (message.username !== username) {
-                    console.log(`User left: ${message.username}`);
-
-                    // Remove the user's cursor from remote cursors
+                if (message?.username !== username) {
                     setRemoteCursors(prev => {
                         const next = new Map(prev);
                         next.delete(message.username);
-                        console.log(`Removed cursor for ${message.username}`);
                         return next;
                     });
-
-                    // Remove the user's color assignment to free it up for reuse
                     userColors.current.delete(message.username);
-
                     toast(`${message.username} has left the room `);
                 }
             },
@@ -329,60 +366,50 @@ export default function App() {
                     }
                 }
             },
+            onAllUsersSent: (users) => {
+                setUserList(users);
+            },
             onError: (error) => {
-                toast.error(error.message)
+                toast.error(error.message);
             }
         });
         return () => {
-            webSocketApi.disconnect(code); // sending the code on disconnect
+            // ✅ avoid passing unexpected args unless your API expects it
+            webSocketApi.disconnect();
         };
-    }, [roomId, username]);
+    }, [roomId, username, languages]);
 
-    // language change handler (when you switch your coding vibe) 
     const handleLanguageChange = (language) => {
         setSelectedLanguage(language);
         if (wsConnected) {
             webSocketApi.sendLanguageChange(roomId, language.value);
         }
-        if (isMobile) {
-            setSidebarOpen(false);
-        }
+        if (isMobile) setSidebarOpen(false);
     };
+
     const cursorTimeoutRef = useRef(null);
 
-    // handle cursor change (when the user moves their cursor)
     const handleCursorChange = useCallback((position) => {
         if (webSocketApi.isConnected()) {
-            // // To be thought if actually needed
-            // if (cursorTimeoutRef.current) {
-            //     clearTimeout(cursorTimeoutRef.current);
-            // }
+            if (cursorTimeoutRef.current) clearTimeout(cursorTimeoutRef.current);
             cursorTimeoutRef.current = setTimeout(() => {
                 webSocketApi.sendCursorSync(roomId, position);
-            }, 100); // 100ms delay too prevent race condition with change code
+            }, 100);
         }
     }, [roomId]);
 
-    // Add cleanup (somewhere after your existing useEffects)
-    useEffect(() => {
-        return () => {
-            if (cursorTimeoutRef.current) {
-                clearTimeout(cursorTimeoutRef.current);
-            }
-        };
-    }, []);
+    useEffect(() => () => cursorTimeoutRef.current && clearTimeout(cursorTimeoutRef.current), []);
 
-    //debounce code updates to avoid spamming the server
+    // ✅ send updates even when code becomes an empty string
     useEffect(() => {
-        if (!wsConnected || !code) return;
-
+        if (!wsConnected) return;
         const timeoutId = setTimeout(() => {
             webSocketApi.sendCodeChange(roomId, code);
         }, 50);
         return () => clearTimeout(timeoutId);
     }, [code, wsConnected, roomId]);
 
-
+    const SelectedIcon = selectedLanguage?.icon || Code2;
 
     return (
         <div className="relative h-screen bg-[#1e1e2e] text-[#cdd6f4] flex flex-col overflow-hidden ">
@@ -392,7 +419,7 @@ export default function App() {
 
             <header className="h-16 bg-[#11111b] border-b border-[#313244] flex items-center justify-between px-6 z-10 flex-shrink-0">
                 <div className="flex items-center gap-4">
-                    {/* mobile menu button (hamburger menu but make it aesthetic)  */}
+                    {/* mobile menu */}
                     <Button
                         variant="ghost"
                         size="icon"
@@ -400,13 +427,7 @@ export default function App() {
                         className={`${isMobile ? 'flex' : 'hidden'} hover:bg-[#313244] text-[#cdd6f4] p-2 transition-all duration-300`}
                     >
                         <div className="relative w-5 h-5 flex items-center justify-center">
-                            <Menu
-                                size={20}
-                                className={`absolute transition-all duration-300 ${isSidebarOpen
-                                    ? 'opacity-0 rotate-90 scale-75'
-                                    : 'opacity-100 rotate-0 scale-100'
-                                    }`}
-                            />
+                            <Menu size={20} />
                         </div>
                     </Button>
 
@@ -422,17 +443,14 @@ export default function App() {
                 </div>
 
                 <div className="flex items-center gap-2 z-10">
-                    {/* connection status indicator (so you know if you're vibing with the server)  */}
+                    {/* connection status */}
                     <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-slate-800/50 border border-slate-600/50">
-                        <div className={`w-2 h-2 rounded-full transition-all duration-300 ${wsConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'
-                            }`} />
+                        <div className={`w-2 h-2 rounded-full transition-all duration-300 ${wsConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
                         <span className="text-xs text-slate-300">
-                            {wsConnected
-                                ? `${username} • Connected`
-                                : `${username} • Disconnected`
-                            }
+                            {wsConnected ? `${username} • Connected` : `${username} • Disconnected`}
                         </span>
                     </div>
+
                     <Button
                         onClick={handleSaveCode}
                         variant="outline"
@@ -445,7 +463,9 @@ export default function App() {
                     </Button>
 
                     <Button
-                        onClick={handleDownload} variant="outline" size="sm"
+                        onClick={handleDownload}
+                        variant="outline"
+                        size="sm"
                         disabled={downloadLoading || !code}
                         className={`hover:bg-[#313244] text-[#cdd6f4] bg-transparent transition-colors duration-200 cursor-pointer disabled:opacity-50 flex items-center gap-2 ${downloadError ? "bg-red-900/50" : ""}`}
                         title={downloadError || 'Download code'}
@@ -456,9 +476,9 @@ export default function App() {
                 </div>
             </header>
 
-            {/* Column 1: Sidebar (the language picker zone) 🗂️ */}
+            {/* Body */}
             <div className="flex-1 flex overflow-hidden">
-                {/* mobile overlay (so the sidebar doesn't just float there awkwardly) */}
+                {/* mobile overlay */}
                 {isMobile && isSidebarOpen && (
                     <div
                         className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 animate-in fade-in-0"
@@ -466,74 +486,157 @@ export default function App() {
                     />
                 )}
 
+                {/* Sidebar */}
                 <div
                     className={`
-            ${isMobile ? "fixed left-0 top-16 bottom-0 z-50" : "relative"}
-            ${isMobile && !isSidebarOpen ? "-translate-x-full" : "translate-x-0"}
-            ${!isMobile && isSidebarCollapsed ? "w-16" : "w-64"}
-            bg-[#181825] border-r border-[#313244] flex flex-col transition-all duration-500 ease-in-out
-            ${isMobile ? 'shadow-2xl' : ''}
-          `}
+                          ${isMobile ? "fixed left-0 top-16 bottom-0 z-50" : "relative"}
+                          ${isMobile && !isSidebarOpen ? "-translate-x-full" : "translate-x-0"}
+                          ${!isMobile && isSidebarCollapsed ? "w-16" : "w-68"}
+                          bg-[#181825] border-r border-[#313244] flex flex-col transition-all duration-300
+                        `}
                 >
-                    <div className="p-4 border-b border-[#313244] flex items-center justify-between">
-                        <div className={`transition-all duration-500 overflow-hidden ${!isSidebarCollapsed ? 'opacity-100 max-w-full' : 'opacity-0 max-w-0'}`}>
-                            <div className={`transition-all duration-300 ${!isSidebarCollapsed ? 'translate-x-0' : 'translate-x-4'}`}>
-                                <h2 className="text-lg font-semibold text-[#f38ba8] mb-2">Languages</h2>
+                    <div className={`${!isSidebarCollapsed ? "border-b border-[#313244] p-4" : ""}`}>
+                        {!isSidebarCollapsed && (
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex bg-[#11111b] rounded-lg p-1">
+                                    <button
+                                        onClick={() => setSidebarView("languages")}
+                                        className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${sidebarView === "languages" ? "bg-[#f38ba8] text-[#1e1e2e]" : "text-[#a6adc8] hover:text-[#cdd6f4] hover:bg-[#313244]"}`}
+                                    >
+                                        <Languages size={16} />
+                                        Languages
+                                    </button>
+                                    <button
+                                        onClick={() => setSidebarView("members")}
+                                        className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${sidebarView === "members" ? "bg-[#f38ba8] text-[#1e1e2e]" : "text-[#a6adc8] hover:text-[#cdd6f4] hover:bg-[#313244]"}`}
+                                    >
+                                        <Users size={16} />
+                                        Members
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                        <Button variant="ghost" size="icon" onClick={toggleSidebar} className="hover:bg-[#313244] text-[#cdd6f4] p-2 transition-all duration-300">
-                            <div className="relative w-5 h-5 flex items-center justify-center">
-                                <Menu
-                                    size={20}
-                                    className={`absolute transition-all duration-300 ${(isMobile && isSidebarOpen) || (!isMobile && !isSidebarCollapsed)
-                                        ? 'opacity-0 rotate-90 scale-75'
-                                        : 'opacity-100 rotate-0 scale-100'
-                                        }`}
-                                />
-                                <X
-                                    size={20}
-                                    className={`absolute transition-all duration-300 ${(isMobile && isSidebarOpen) || (!isMobile && !isSidebarCollapsed)
-                                        ? 'opacity-100 rotate-0 scale-100'
-                                        : 'opacity-0 rotate-90 scale-75'
-                                        }`}
-                                />
+
+                        )}
+
+                        {!isSidebarCollapsed && (
+                            <div>
+                                {sidebarView === "languages" ? (
+                                    <div>
+                                        <h2 className="text-lg font-semibold text-[#f38ba8] mb-2">Languages</h2>
+                                        <Badge variant="secondary" className="bg-[#313244] text-[#a6adc8]">
+                                            {languages.length} Available
+                                        </Badge>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <h2 className="text-lg font-semibold text-[#a6e3a1] mb-2">Room Members</h2>
+                                        <div className="flex items-center gap-2">
+                                            <Badge variant="secondary" className="bg-[#313244] text-[#a6adc8]">
+                                                {members.length} Total
+                                            </Badge>
+                                            <Badge variant="secondary" className="bg-[#a6e3a1]/20 text-[#a6e3a1]">
+                                                {onlineMembers.length} Online
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        </Button>
+                        )}
                     </div>
 
                     <ScrollArea className="flex-1 p-2">
-                        <div className="space-y-1">
-                            {languages.map((language) => {
-                                const IconComponent = language.icon
-                                return (
-                                    <button
-                                        key={language.id}
-                                        onClick={() => handleLanguageChange(language)}
-                                        className={`w-full flex items-center rounded-lg transition-all duration-300 hover:bg-[#313244] hover:scale-[1.02] active:scale-[0.98] ${selectedLanguage.id === language.id ? "bg-[#313244] border border-[#f38ba8] shadow-lg shadow-[#f38ba8]/20" : ""
-                                            } ${isSidebarCollapsed ? "justify-center p-2" : "gap-3 p-3"}`}
-                                        title={isSidebarCollapsed ? language.name : ""}
+                        {sidebarView === "languages" ? (
+                            <div className="space-y-1">
+                                {languages.map((language) => {
+                                    const IconComponent = language.icon;
+                                    return (
+                                        <button
+                                            key={language.id}
+                                            onClick={() => handleLanguageChange(language)}
+                                            className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-[#313244] ${selectedLanguage.id === language.id ? "bg-[#313244] border border-[#f38ba8]" : ""} ${isSidebarCollapsed ? "justify-center" : ""}`}
+                                            title={isSidebarCollapsed ? language.name : ""}
+                                        >
+                                            <div className={`p-2 rounded-md ${language.color} flex-shrink-0`}>
+                                                <IconComponent size={16} />
+                                            </div>
+                                            {!isSidebarCollapsed && <span className="font-medium">{language.name}</span>}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="space-y-2">
+                                {members.map((member) => (
+                                    <div
+                                        key={member.id}
+                                        className={`flex items-center gap-3 p-3 rounded-lg hover:bg-[#313244] transition-all ${isSidebarCollapsed ? "justify-center" : ""} ${member.isCurrent ? "ring-2 ring-[#f38ba8]/50 bg-[#313244]/50" : ""}`}
+                                        title={isSidebarCollapsed ? `${member.name} (${member.status})` : ""}
                                     >
-                                        <div className={`p-2 rounded-md ${language.color} flex-shrink-0 transition-all duration-300`}>
-                                            <IconComponent size={16} />
+                                        <div className="relative flex-shrink-0">
+                                            <div className={`w-8 h-8 ${member.color} rounded-full flex items-center justify-center text-white text-sm font-semibold ${member.isCurrent ? "ring-2 ring-[#f38ba8]" : ""}`}>
+                                                {member.avatar}
+                                            </div>
+                                            <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-[#181825] ${member.status === "online" ? "bg-[#a6e3a1]" : member.status === "away" ? "bg-[#f9e2af]" : "bg-[#6c7086]"}`} />
                                         </div>
                                         {!isSidebarCollapsed && (
-                                            <span className="font-medium transition-all duration-300 opacity-100 translate-x-0">
-                                                {language.name}
-                                            </span>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center justify-between">
+                                                    <p className={`font-medium truncate ${member.isCurrent ? "text-[#f38ba8]" : "text-[#cdd6f4]"}`}>
+                                                        {member.name} {member.isCurrent && "(You)"}
+                                                    </p>
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className={`text-xs ${member.role === "Owner"
+                                                            ? "bg-[#f38ba8]/20 text-[#f38ba8]"
+                                                            : member.role === "Editor"
+                                                                ? "bg-[#a6e3a1]/20 text-[#a6e3a1]"
+                                                                : "bg-[#6c7086]/20 text-[#6c7086]"}
+                            `}
+                                                    >
+                                                        {member.role}
+                                                    </Badge>
+                                                </div>
+                                                <p className={`text-xs capitalize ${member.status === "online" ? "text-[#a6e3a1]" : member.status === "away" ? "text-[#f9e2af]" : "text-[#6c7086]"}`}>
+                                                    {member.status}
+                                                </p>
+                                            </div>
                                         )}
-                                    </button>
-                                )
-                            })}
-                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </ScrollArea>
                 </div>
 
-                {/* column 2: editor (where the coding magic happens) ⌨️ */}
+                {/* Editor */}
                 <div className="flex-1 flex flex-col relative overflow-hidden">
                     <div className="h-14 bg-[#181825] border-b border-[#313244] flex items-center justify-between px-4 flex-shrink-0">
                         <div className="flex items-center gap-3">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={toggleSidebar}
+                                className="hover:bg-[#313244] text-[#cdd6f4] transition-all duration-300"
+                            >
+                                <div className="relative w-5 h-5 flex items-center justify-center overflow-hidden">
+                                    <Menu
+                                        size={20}
+                                        className={`absolute transition-all duration-300 ${(isMobile && isSidebarOpen) || (!isMobile && !isSidebarCollapsed)
+                                            ? 'opacity-0 -rotate-90 scale-75'
+                                            : 'opacity-100 rotate-0 scale-100'
+                                            }`}
+                                    />
+                                    <X
+                                        size={20}
+                                        className={`absolute transition-all duration-300 ${(isMobile && isSidebarOpen) || (!isMobile && !isSidebarCollapsed)
+                                            ? 'opacity-100 rotate-0 scale-100'
+                                            : 'opacity-0 rotate-90 scale-75'
+                                            }`}
+                                    />
+                                </div>
+                            </Button>
                             <div className={`p-2 rounded-md ${selectedLanguage.color}`}>
-                                <selectedLanguage.icon size={20} />
+                                <SelectedIcon size={20} />
                             </div>
                             <h1 className="text-xl font-semibold">{selectedLanguage.name} Editor</h1>
                         </div>
@@ -561,13 +664,17 @@ export default function App() {
                                 onClick={() => terminalRef.current?.toggle?.()}
                                 variant="outline"
                                 size="icon"
-                                className={`border-[#313244] hover:bg-[#313244] ${""} cursor-pointer`}
+                                className={`border-[#313244] hover:bg-[#313244] cursor-pointer`}
                             >
                                 <TerminalIcon size={16} />
                             </Button>
-                            <Button onClick={handleCopyCode} variant="outline" size="sm" className=" hover:bg-[#313244] text-[#cdd6f4] bg-transparent cursor-pointer"
-                                disabled={!code}>
-
+                            <Button
+                                onClick={handleCopyCode}
+                                variant="outline"
+                                size="sm"
+                                className=" hover:bg-[#313244] text-[#cdd6f4] bg-transparent cursor-pointer"
+                                disabled={!code}
+                            >
                                 {isCopied ? <Check size={16} className="mr-2" /> : <Copy size={16} />}
                                 {isCopied ? "Copied!" : ''}
                             </Button>
@@ -576,12 +683,18 @@ export default function App() {
                                 <EnhanceIcon size={16} className="mr-2" />
                                 Goon
                             </Button>
-                            <Button variant="outline" size="icon" onClick={() => setChatOpen((v) => !v)} className="border-[#313244] hover:bg-[#313244] cursor-pointer hover:text-[#f38ba8]/80 text-[#f38ba8]">
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setChatOpen((v) => !v)}
+                                className="border-[#313244] hover:bg-[#313244] cursor-pointer hover:text-[#f38ba8]/80 text-[#f38ba8]"
+                            >
                                 <MessageCircle size={16} />
                             </Button>
                         </div>
                     </div>
-                    {/* code editor area (the main event) 🎯 */}
+
+                    {/* code editor area */}
                     <div className="flex-1 p-4 h-full editor-area">
                         <CodeEditor
                             ref={codeEditorRef}
@@ -603,11 +716,10 @@ export default function App() {
                             className="editor-terminal"
                             isCodeRunning={isRunning}
                         />
-
                     </div>
                 </div>
 
-                {/*column 3: AI panel (where the goons live) 🤖 */}
+                {/* AI panel */}
                 <AiPanel
                     ref={aiPanelRef}
                     isOpen={isChatOpen}

@@ -63,6 +63,9 @@ class WebSocketManager {
             case 'language_changed':
                 this.callbacks.onLanguageChanged?.(message.language, message.username);
                 break;
+            case 'all_users_sent':
+                this.callbacks.onAllUsersSent?.(message.users);
+                break;
             case 'error':
                 this.callbacks.onError?.(new Error(message.message));
                 break;
@@ -114,6 +117,13 @@ class WebSocketManager {
         });
     }
 
+    requestAllUsers(roomId) {
+        this.sendMessage({
+            type: 'all_user',
+            roomId
+        });
+    }
+
     // connection status check (are we still besties?) 
     isConnected() {
         return this.connected && this.socket && this.socket.readyState === WebSocket.OPEN;
@@ -143,5 +153,6 @@ export const webSocketApi = {
     sendCodeChange: (roomId, code) => webSocketManager.sendCodeChange(roomId, code),
     sendCursorSync: (roomId, cursorPosition) => webSocketManager.sendCursorSync(roomId, cursorPosition),
     sendLanguageChange: (roomId, language) => webSocketManager.sendLanguageChange(roomId, language),
+    requestAllUsers: (roomId) => webSocketManager.requestAllUsers(roomId),
     isConnected: () => webSocketManager.isConnected()
 };
