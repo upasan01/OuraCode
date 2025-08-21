@@ -259,49 +259,41 @@ export default function App() {
     // WebSocket state
     const [wsConnected, setWsConnected] = useState(false);
     const [username] = useState(passedUsername || sessionStorage.getItem("storedusername") || "Guest");
-    const [userList, setUserList] = useState([]);
+    const [usersMap, setUsersMap] = useState(() => new Map());
 
-    const createDynamicMembers = (currentUser, userListArg) => {
-        const initials = String(currentUser || 'U')
-            .split(" ")
-            .map((w) => w[0])
-            .join("")
-            .toUpperCase();
+    const createDynamicMembers = (currentUser, userMap) => {
+        const initials = String(currentUser || 'U').split(" ").map((w) => w[0]).join("").toUpperCase();
 
         const currentUserObj = {
-            id: "current",
-            name: currentUser || 'You',
-            avatar: initials,
-            status: "online",
-            role: "Owner",
-            color: "bg-red-500",
-            isCurrent: true,
+            id: "current", name: currentUser || 'You', avatar: initials,
+            status: "online", role: "Owner", color: "bg-red-500", isCurrent: true,
         };
 
         const colors = [
-            "bg-blue-500",
-            "bg-green-500",
-            "bg-purple-500",
-            "bg-orange-500",
-            "bg-pink-500",
-            "bg-cyan-500",
-            "bg-yellow-500",
+            "bg-[#00FFFF]",
+            "bg-[#FF00FF]",
+            "bg-[#39FF14]",
+            "bg-[#FFFB00]",
+            "bg-[#FF3131]",
+            "bg-[#00F0FF]",
+            "bg-[#F38BA8]",
+            "bg-[#A6E3A1]",
+            "bg-[#89B4FA]",
         ];
 
-        const otherMembers = (userListArg || [])
-            .filter((user) => (user?.username || user?.name || String(user)) !== currentUser)
-            .map((user, index) => {
-                const display = user?.username || user?.name || `User ${index + 1}`;
-                const avatar = display
-                    .split(" ")
-                    .map((w) => w[0])
-                    .join("")
-                    .toUpperCase();
+        // Convert the Map to an array of [username, userData] pairs to process it
+        const otherMembers = [...userMap.entries()]
+            .filter(([username]) => username !== currentUser)
+            .map(([username, userData], index) => {
+                const display = username;
+                const avatar = display.split(" ").map((w) => w[0]).join("").toUpperCase();
+
                 return {
-                    id: user?.id || `user-${index}`,
+                    id: `user-${index}`,
                     name: display,
                     avatar,
-                    status: user?.status || "online",
+                    status: userData.status,
+                    role: "Editor",
                     color: colors[index % colors.length],
                     isCurrent: false,
                 };
@@ -311,8 +303,9 @@ export default function App() {
     };
 
     // compute members & onlineMembers without the undefined var bug
-    const members = useMemo(() => createDynamicMembers(username, userList), [username, userList]);
+    const members = useMemo(() => createDynamicMembers(username, usersMap), [username, usersMap]);
     const onlineMembers = useMemo(() => members.filter((m) => m.status === 'online'), [members]);
+    const isRemoteUpdate = useRef(false);
 
     useEffect(() => {
         if (!roomId || !username) return;
@@ -334,6 +327,8 @@ export default function App() {
             onCodeUpdate: (newcode, fromUsername) => {
                 if (fromUsername !== username) {
                     codeEditorRef.current?.applyRemoteUpdate?.(newcode);
+                    isRemoteUpdate.current = true;
+                    setCode(newcode);
                 }
             },
             onCursorUpdate: (fromUsername, cursorPosition) => {
@@ -353,10 +348,18 @@ export default function App() {
             onUserJoined: (message) => {
                 if (message?.username !== username && message?.message) {
                     toast(message.message);
+                    setUsersMap(prev => new Map(prev).set(message.username, { status: 'online' }));
                 }
             },
             onUserLeft: (message) => {
                 if (message?.username !== username) {
+                    setUsersMap(prev => {
+                        const next = new Map(prev);
+                        if (next.has(message.username)) {
+                            next.set(message.username, { status: 'offline' });
+                        }
+                        return next;
+                    });
                     setRemoteCursors(prev => {
                         const next = new Map(prev);
                         next.delete(message.username);
@@ -376,9 +379,16 @@ export default function App() {
                 }
             },
             onAllUsersSent: (users) => {
-                setUserList(users);
-                console.log(users)
-                console.log("All users in the room:", users);
+                setUsersMap(prev => {
+                    const next = new Map(prev);
+                    users.forEach(user => {
+                        if (!next.has(user)) {
+                            next.set(user, { status: 'online' });
+                        }
+                    });
+                    console.log("All users in the room:", users);
+                    return next;
+                });
             },
             onError: (error) => {
                 toast.error(error.message);
@@ -412,6 +422,10 @@ export default function App() {
 
     useEffect(() => {
         if (!wsConnected) return;
+        if (isRemoteUpdate.current) {
+            isRemoteUpdate.current = false;
+            return;
+        }
         const timeoutId = setTimeout(() => {
             webSocketApi.sendCodeChange(roomId, code);
         }, 50);
@@ -450,25 +464,14 @@ export default function App() {
                         </div>
                     </div>
                 </div>
-                <div className="flex justify-center">
-                    <div className="p-4 bg-[#11111b] border border-[#a6e3a1]/40 rounded-xl shadow-lg flex flex-col items-center space-y-2 w-fit">
-                        <div className="text-xs text-[#9399b2] font-mono flex items-center space-x-1">
-                            <span className="text-[#f38ba8]">const</span>
-                            <span className="text-[#cdd6f4]">roomId</span>
-                            <span className="text-[#89b4fa]">=</span>
-                        </div>
-                        <Button
-                            onClick={handleCopyId}
-                            className="px-4 bg-[#1e1e2e] rounded-lg border border-[#a6e3a1]/30 hover:bg-[#313244]">
-                            {isCopyId ? <Check size={18} className="mr-2 text-[#a6e3a1]" /> : <Copy size={18} className="text-[#a6e3a1]" />}
-                            <span className="text-2xl font-bold text-[#a6e3a1] tracking-wider font-mono">
-                                "{roomId}"
-                            </span>
-                        </Button>
-                    </div>
-                </div>
-
-
+                <Button
+                    onClick={handleCopyId}
+                    className="px-4 bg-[#1e1e2e] rounded-lg border border-[#a6e3a1]/30 hover:bg-[#313244]">
+                    {isCopyId ? <Check size={18} className="mr-2 text-[#a6e3a1]" /> : <Copy size={18} className="text-[#a6e3a1]" />}
+                    <span className="text-2xl font-bold text-[#a6e3a1] tracking-wider font-mono">
+                        "{roomId}"
+                    </span>
+                </Button>
                 <div className="flex items-center gap-2 z-10">
                     {/* connection status */}
                     <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-slate-800/50 border border-slate-600/50">
@@ -596,7 +599,7 @@ export default function App() {
                                 {members.map((member) => (
                                     <div
                                         key={member.id}
-                                        className={`flex items-center gap-3 p-3 rounded-lg hover:bg-[#313244] transition-all ${isSidebarCollapsed ? "justify-center" : ""} ${member.isCurrent ? "ring-2 ring-[#f38ba8]/50 bg-[#313244]/50" : ""}`}
+                                        className={`flex items-center gap-3 p-3 rounded-lg hover:bg-[#313244] transition-all ${isSidebarCollapsed ? "justify-center" : ""} ${member.isCurrent ? " bg-[#313244]/50" : ""}`}
                                         title={isSidebarCollapsed ? `${member.name} (${member.status})` : ""}
                                     >
                                         <div className="relative flex-shrink-0">
