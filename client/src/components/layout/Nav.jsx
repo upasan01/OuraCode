@@ -7,14 +7,14 @@ const Nav = () => {
 
   return (
     <>
-      <div className="relative z-50 w-full px-4 md:px-6 flex justify-between items-center h-18">
-        <div className="flex items-center space-x-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#a6e3a1] to-[#89b4fa]">
-            <Code2 className="h-6 w-6 text-[#1e1e2e]" />
+      <div className="relative z-50 w-full px-4 md:px-6 flex justify-between items-center h-20 sm:h-18">
+        <div className="flex items-center space-x-3 sm:space-x-3">
+          <div className="flex h-12 w-12 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#a6e3a1] to-[#89b4fa]">
+            <Code2 className="h-7 w-7 sm:h-6 sm:w-6 text-[#1e1e2e]" />
           </div>
           <div>
-            <span className="text-2xl font-bold text-[#a6e3a1]">{"<OuRAcoDE/>"}</span>
-            <div className="text-xs text-[#6c7086]">{"// v1.1.0-stable"}</div>
+            <span className="text-3xl sm:text-2xl font-bold text-[#a6e3a1]">{"<OuRAcoDE/>"}</span>
+            <div className="text-sm sm:text-xs text-[#6c7086]">{"// v1.1.0-stable"}</div>
           </div>
         </div>
         <div className="absolute right-0 flex items-center md:px-4">
@@ -28,10 +28,10 @@ const Nav = () => {
           </div>
 
           <button
-            className="md:hidden p-2 text-[#9399b2] hover:text-[#cdd6f4] hover:bg-[#313244] rounded-lg transition-colors"
+            className="md:hidden p-3 sm:p-2 text-[#9399b2] hover:text-[#cdd6f4] hover:bg-[#313244] rounded-lg transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {isMobileMenuOpen ? <X className="h-6 w-6 sm:h-5 sm:w-5" /> : <Menu className="h-6 w-6 sm:h-5 sm:w-5" />}
           </button>
         </div>
       </div>
@@ -43,10 +43,10 @@ const Nav = () => {
           {/* Desktop Navigation (Centered) */}
           <div className="p-[2px] rounded-[90px] bg-gradient-to-r from-white/10 via-white/5 to-white/10">
             <nav className="hidden md:flex items-center space-x-8 rounded-[90px] border-b border-[#313244] bg-[#1e1e2e]/50 backdrop-blur supports-[backdrop-filter]:bg-[#1e1e2e]/60 px-6 py-4 font-bold">
-            <a href="#home" className='text-sm text-[#9399b2] hover:text-[#f9e2af] transition-colors font-mono flex items-center space-x-1'>
-              <House className="h-4 w-4" />
-              <span>{"home()"}</span>
-            </a>
+              <a href="#home" className='text-sm text-[#9399b2] hover:text-[#f9e2af] transition-colors font-mono flex items-center space-x-1'>
+                <House className="h-4 w-4" />
+                <span>{"home()"}</span>
+              </a>
               <a
                 href="#room"
                 className="text-sm text-[#9399b2] hover:text-[#89b4fa] transition-colors font-mono flex items-center space-x-1"
@@ -83,40 +83,48 @@ const Nav = () => {
         {/* Mobile Navigation Dropdown */}
         {isMobileMenuOpen && (
           <div className="md:hidden mt-2 rounded-xl border border-[#313244] bg-[#1e1e2e]/95 backdrop-blur">
-            <div className="px-4 py-4 space-y-4">
-              <a href="#home" className='flex items-center space-x-3 text-sm text-[#9399b2] hover:text-[#f9e2af] transition-colors font-mono py-2' onClick={() => setIsMobileMenuOpen(false)}>
-                <House className="h-4 w-4" />
+            <div className="px-5 py-5 space-y-4">
+              <a href="#home" className='flex items-center space-x-3 text-base text-[#9399b2] hover:text-[#f9e2af] transition-colors font-mono py-3' onClick={() => setIsMobileMenuOpen(false)}>
+                <House className="h-5 w-5" />
                 <span>{"home()"}</span>
               </a>
-              <a href="#room" className='flex items-center space-x-3 text-sm text-[#9399b2] hover:text-[#89b4fa] transition-colors font-mono py-2' onClick={() => setIsMobileMenuOpen(false)}>
-                <GitPullRequestCreate className="h-4 w-4" />
+              <a href="#room" className='flex items-center space-x-3 text-base text-[#9399b2] hover:text-[#89b4fa] transition-colors font-mono py-3' onClick={() => setIsMobileMenuOpen(false)}>
+                <GitPullRequestCreate className="h-5 w-5" />
                 <span>{"room()"}</span>
               </a>
               <a
                 href="#features"
-                className="flex items-center space-x-3 text-sm text-[#9399b2] hover:text-[#a6e3a1] transition-colors font-mono py-2"
+                className="flex items-center space-x-3 text-base text-[#9399b2] hover:text-[#a6e3a1] transition-colors font-mono py-3"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <Zap className="h-4 w-4" />
+                <Zap className="h-5 w-5" />
                 <span>{"features()"}</span>
               </a>
               <a
-                href="#pricing"
-                className="flex items-center space-x-3 text-sm text-[#9399b2] hover:text-[#f9e2af] transition-colors font-mono py-2"
+                href="#api"
+                className="flex items-center space-x-3 text-base text-[#9399b2] hover:text-[#fab387] transition-colors font-mono py-3"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <Settings className="h-4 w-4" />
-                <span>{"pricing.view()"}</span>
+                <Terminal className="h-5 w-5" />
+                <span>{"api.reference()"}</span>
+              </a>
+              <a
+                href="#community"
+                className="flex items-center space-x-3 text-base text-[#9399b2] hover:text-[#cba6f7] transition-colors font-mono py-3"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Users className="h-5 w-5" />
+                <span>{"community.join()"}</span>
               </a>
 
               <div className="pt-4 border-t border-[#313244] space-y-3">
                 <Button
                   variant="ghost"
-                  className="w-full text-[#9399b2] hover:text-[#cdd6f4] hover:bg-[#313244] font-mono justify-start"
+                  className="w-full text-[#9399b2] hover:text-[#cdd6f4] hover:bg-[#313244] font-mono justify-start text-base py-3"
                 >
                   {"auth.signIn()"}
                 </Button>
-                <Button className="w-full bg-[#a6e3a1] hover:bg-[#94e2d5] text-[#1e1e2e] font-semibold font-mono">
+                <Button className="w-full bg-[#a6e3a1] hover:bg-[#94e2d5] text-[#1e1e2e] font-semibold font-mono text-base py-3">
                   {"deploy.now()"}
                 </Button>
               </div>

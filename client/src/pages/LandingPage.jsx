@@ -1,17 +1,35 @@
 import { useState } from "react";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import Particles from "../components/ui/particles";
 import Nav from "../components/layout/Nav";
-import { Code2, Share2, Terminal, GitBranch, Play, MessageSquare, Eye, DiscIcon as Discord, Github, Twitter } from "lucide-react";
+import {
+  Code2,
+  Share2,
+  Terminal,
+  Play,
+  MessageSquare,
+  User,
+  DiscIcon as Discord,
+  Users,
+  Github,
+  Twitter,
+} from "lucide-react";
 import CreateRoom from "../components/layout/CreateRoom";
 import TextType from "../components/ui/TextType";
 
 export default function GoonShareAILanding() {
-
   return (
-    <main id="home" className="relative min-h-screen w-full bg-gradient-to-br from-[#11111b] via-[#181825] to-[#1e1e2e] font-mono">
+    <main
+      id="home"
+      className="relative min-h-screen w-full bg-gradient-to-br from-[#11111b] via-[#181825] to-[#1e1e2e] font-mono"
+    >
       {/* Background */}
       <div className="fixed inset-0 w-full h-full z-10">
         <Particles />
@@ -23,12 +41,12 @@ export default function GoonShareAILanding() {
 
         <div className="w-full max-w-7xl mx-auto relative px-4 md:px-6">
           <div className="mx-auto max-w-4xl text-center">
-            <Badge className="mb-4 bg-[#313260]/50 text-[#a6e3a1] border-[#313244] hover:bg-[#313244]/70 mt-6">
-              <Terminal className="w-4 h-4 mr-1" />
+            <Badge className="mb-3 sm:mb-4 bg-[#313260]/50 text-[#a6e3a1] border-[#313244] hover:bg-[#313244]/70 mt-4 sm:mt-6 text-xs sm:text-sm">
+              <Terminal className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
               {"/* real-time vibe coding */"}
             </Badge>
 
-            <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+            <h1 className="mb-4 sm:mb-6 text-2xl sm:text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl xl:text-7xl">
               <TextType
                 text={["Vibe.To.Code", "LazyAzz", "Infinite.Aura!"]}
                 typingSpeed={40}
@@ -40,21 +58,31 @@ export default function GoonShareAILanding() {
                 function main
               </div>
               <span className="text-[#89b4fa]">(</span>
-              <span className="bg-gradient-to-r from-[#a6e3a1] via-[#89b4fa] to-[#cba6f7] bg-clip-text text-transparent">vibe_gooner</span>
+              <span className="bg-gradient-to-r from-[#a6e3a1] via-[#89b4fa] to-[#cba6f7] bg-clip-text text-transparent">
+                vibe_gooner
+              </span>
               <span className="text-[#89b4fa]">)</span>
               <div className="text-[#6c7086]"> {"{"}</div>
             </h1>
 
-            <p className="mx-auto mb-12 max-w-2xl text-xs sm:text-lg text-[#9399b2] leading-relaxed">
+            <p className="mx-auto mb-8 sm:mb-12 max-w-2xl text-xs sm:text-sm md:text-base lg:text-lg text-[#9399b2] leading-relaxed">
               <span className="text-[#6c7086]">{"/**"}</span>
               <br />
-              <span className="text-[#6c7086]">{" * Real-time code sharing with live cursors,"}</span>
+              <span className="text-[#6c7086]">
+                {" * Real-time code sharing (aka real-time chaos)."}
+              </span>
               <br />
-              <span className="text-[#6c7086]">{" * AI chat, and instant execution."}</span>
+              <span className="text-[#6c7086]">
+                {" * AI chat included, because we gave up too."}
+              </span>
               <br />
-              <span className="text-[#6c7086]">{" * @param {Object} session - Build together, debug faster"}</span>
+              <span className="text-[#6c7086]">
+                {" * @param {Object} session - Debugging, aka crying together"}
+              </span>
               <br />
-              <span className="text-[#6c7086]">{" * @returns {Promise<Success>} - Learn continuously and Vibe together"}</span>
+              <span className="text-[#6c7086]">
+                {" * @returns {Promise<Success>} - If it runs, we’re shocked"}
+              </span>
               <br />
               <span className="text-[#6c7086]">{" */"}</span>
             </p>
@@ -68,113 +96,152 @@ export default function GoonShareAILanding() {
       </section>
 
       {/* Features Cards */}
-      <section id="features" className="py-20 md:py-32 relative">
-        <div className="w-full max-w-7xl mx-auto px-4 md:px-6 relative z-20">
-          <div className="mx-auto max-w-2xl text-center mb-16">
-            <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl text-[#a6e3a1]">
-              {"/* Core Features */"}
+      <section
+        id="features"
+        className="py-12 sm:py-20 md:py-32 relative overflow-hidden"
+      >
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 relative z-20">
+          <div className="mx-auto max-w-2xl text-center mb-8 sm:mb-12 md:mb-16">
+            <h2 className="mb-3 sm:mb-4 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-[#a6e3a1]">
+              {"/* Feature Circus */"}
             </h2>
-            <p className="text-lg text-[#9399b2]">
-              {"// Everything you need for seamless collaborative coding"}
+            <p className="text-sm sm:text-base md:text-lg text-[#9399b2]">
+              {
+                "// All-in-one collab coding setup: code, sync, and silently judge your teammates."
+              }
             </p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#a6e3a1]/50 transition-all duration-300 group">
-              <CardHeader>
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#a6e3a1]/20 group-hover:bg-[#a6e3a1]/30 transition-colors">
-                  <Code2 className="h-6 w-6 text-[#a6e3a1]" />
+          <div className="grid gap-2 grid-cols-2 sm:gap-4 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {/* Card 1 */}
+            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#fab387]/50 transition-all duration-300 group min-w-0">
+              <CardHeader className="pb-1 sm:pb-2 md:pb-4 px-3 sm:px-4 md:px-6">
+                <div className="flex h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 items-center justify-center rounded-lg bg-[#fab387]/20 group-hover:bg-[#fab387]/30 transition-colors">
+                  <Share2 className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-[#fab387]" />
                 </div>
-                <CardTitle className="text-[#a6e3a1]">realtime.sync()</CardTitle>
+                <CardTitle className="text-sm sm:text-base md:text-lg text-[#fab387] mt-2">
+                  share.export()
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-[#9399b2]">
+              <CardContent className="pt-0 px-3 sm:px-4 md:px-6">
+                <p className="text-xs sm:text-sm text-[#9399b2] leading-relaxed">
                   {
-                    "/* Live cursors, instant sync, and real-time code editing. See exactly what your teammates are working on. */"
+                    "/*  Why vibe-code solo when you can squad up with your equally unhinged coder friends 💻✨. Create a Room, vibe together, and farm infinite Aura like it's XP in a busted RPG. */"
                   }
                 </p>
-                <div className="mt-3 text-xs text-[#6c7086]">{"websocket.connect()"}</div>
+                <div className="mt-2 text-xs text-[#6c7086]">
+                  {"room.create(ID)"}
+                </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#89b4fa]/50 transition-all duration-300 group">
-              <CardHeader>
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#89b4fa]/20 group-hover:bg-[#89b4fa]/30 transition-colors">
-                  <Play className="h-6 w-6 text-[#89b4fa]" />
+            {/* Card 2 */}
+            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#a6e3a1]/50 transition-all duration-300 group min-w-0">
+              <CardHeader className="pb-1 sm:pb-2 md:pb-4 px-3 sm:px-4 md:px-6">
+                <div className="flex h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 items-center justify-center rounded-lg bg-[#a6e3a1]/20 group-hover:bg-[#a6e3a1]/30 transition-colors">
+                  <Code2 className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-[#a6e3a1]" />
                 </div>
-                <CardTitle className="text-[#89b4fa]">execute.instantly()</CardTitle>
+                <CardTitle className="text-sm sm:text-base md:text-lg text-[#a6e3a1] mt-2">
+                  realtime.sync()
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-[#9399b2]">
+              <CardContent className="pt-0 px-3 sm:px-4 md:px-6">
+                <p className="text-xs sm:text-sm text-[#9399b2] leading-relaxed">
                   {
-                    "/* Run code instantly in the browser. Support for 10+ languages with built-in compiler and runtime. */"
+                    "/* Live cursors so you can instantly see which clown is breaking the code 🤡, instant sync so no one rage-quits from being left behind, and real-time editing because chaos loves company. */"
                   }
                 </p>
-                <div className="mt-3 text-xs text-[#6c7086]">{"runtime.exec(code)"}</div>
+                <div className="mt-2 text-xs text-[#6c7086]">
+                  {"websocket.connect()"}
+                </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#cba6f7]/50 transition-all duration-300 group">
-              <CardHeader>
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#cba6f7]/20 group-hover:bg-[#cba6f7]/30 transition-colors">
-                  <MessageSquare className="h-6 w-6 text-[#cba6f7]" />
+            {/* Card 3 */}
+            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#cba6f7]/50 transition-all duration-300 group min-w-0">
+              <CardHeader className="pb-1 sm:pb-2 md:pb-4 px-3 sm:px-4 md:px-6">
+                <div className="flex h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 items-center justify-center rounded-lg bg-[#cba6f7]/20 group-hover:bg-[#cba6f7]/30 transition-colors">
+                  <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-[#cba6f7]" />
                 </div>
-                <CardTitle className="text-[#cba6f7]">chat.connect()</CardTitle>
+                <CardTitle className="text-sm sm:text-base md:text-lg text-[#cba6f7] mt-2">
+                  chat.connect()
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-[#9399b2]">
+              <CardContent className="pt-0 px-3 sm:px-4 md:px-6">
+                <p className="text-xs sm:text-sm text-[#9399b2] leading-relaxed">
                   {
-                    "/* Built-in voice chat and text messaging. Discuss code, share ideas, and debug together seamlessly. */"
+                    "/* Built-in AI chat. Perfect for when the squad's collective IQ drops to room temperature 🥶.  Aura can upgrade your code… or just code it all for you (guess which one's the fan favorite). */"
                   }
                 </p>
-                <div className="mt-3 text-xs text-[#6c7086]">{"voice.enable(true)"}</div>
+                <div className="mt-2 text-xs text-[#6c7086]">
+                  {"AI.enable(true)"}
+                </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#fab387]/50 transition-all duration-300 group">
-              <CardHeader>
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#fab387]/20 group-hover:bg-[#fab387]/30 transition-colors">
-                  <Share2 className="h-6 w-6 text-[#fab387]" />
+            {/* Card 4 */}
+            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#89b4fa]/50 transition-all duration-300 group min-w-0">
+              <CardHeader className="pb-1 sm:pb-2 md:pb-4 px-3 sm:px-4 md:px-6">
+                <div className="flex h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 items-center justify-center rounded-lg bg-[#89b4fa]/20 group-hover:bg-[#89b4fa]/30 transition-colors">
+                  <Play className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-[#89b4fa]" />
                 </div>
-                <CardTitle className="text-[#fab387]">share.export()</CardTitle>
+                <CardTitle className="text-sm sm:text-base md:text-lg text-[#89b4fa] mt-2">
+                  execute.instantly()
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-[#9399b2]">
-                  {"/* Share your code with a simple link. Export to GitHub, save as gists, or download as files. */"}
-                </p>
-                <div className="mt-3 text-xs text-[#6c7086]">{"github.push(repo)"}</div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#94e2d5]/50 transition-all duration-300 group">
-              <CardHeader>
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#94e2d5]/20 group-hover:bg-[#94e2d5]/30 transition-colors">
-                  <GitBranch className="h-6 w-6 text-[#94e2d5]" />
-                </div>
-                <CardTitle className="text-[#94e2d5]">git.version()</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-[#9399b2]">
-                  {"/* Built-in version history, branching, and merge capabilities. Never lose your progress again. */"}
-                </p>
-                <div className="mt-3 text-xs text-[#6c7086]">{"git.commit('feat')"}</div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#f9e2af]/50 transition-all duration-300 group">
-              <CardHeader>
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#f9e2af]/20 group-hover:bg-[#f9e2af]/30 transition-colors">
-                  <Eye className="h-6 w-6 text-[#f9e2af]" />
-                </div>
-                <CardTitle className="text-[#f9e2af]">preview.live()</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-[#9399b2]">
+              <CardContent className="pt-0 px-3 sm:px-4 md:px-6">
+                <p className="text-xs sm:text-sm text-[#9399b2] leading-relaxed">
                   {
-                    "/* See your web applications come to life with instant preview. Hot reload for faster development. */"
+                    "/* Run code in the browser with Aura++ — instant, no downloads, no excuses. Supports more languages than you'll ever actually touch (yes, it has a compiler and runtime built-in 🤯). */"
                   }
                 </p>
-                <div className="mt-3 text-xs text-[#6c7086]">{"hotReload.enable()"}</div>
+                <div className="mt-2 text-xs text-[#6c7086]">
+                  {"runtime.exec(code)"}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Card 5 */}
+            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#94e2d5]/50 transition-all duration-300 group min-w-0">
+              <CardHeader className="pb-1 sm:pb-2 md:pb-4 px-3 sm:px-4 md:px-6">
+                <div className="flex h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 items-center justify-center rounded-lg bg-[#94e2d5]/20 group-hover:bg-[#94e2d5]/30 transition-colors">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-[#94e2d5]" />
+                </div>
+                <CardTitle className="text-sm sm:text-base md:text-lg text-[#94e2d5] mt-2">
+                  track.work()
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0 px-3 sm:px-4 md:px-6">
+                <p className="text-xs sm:text-sm text-[#9399b2] leading-relaxed">
+                  {
+                    "/*  See who's really building 🛠️ and who's just lowkey loafing 😴 with the Members option — spot the grinders, the lurkers, and that one guy “debugging” by staring at the screen 👀.*/"
+                  }
+                </p>
+                <div className="mt-2 text-xs text-[#6c7086]">
+                  {"push.work('feat')"}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Card 6 */}
+            <Card className="bg-[#313244]/50 border-[#45475a] hover:border-[#f9e2af]/50 transition-all duration-300 group min-w-0">
+              <CardHeader className="pb-1 sm:pb-2 md:pb-4 px-3 sm:px-4 md:px-6">
+                <div className="flex h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 items-center justify-center rounded-lg bg-[#f9e2af]/20 group-hover:bg-[#f9e2af]/30 transition-colors">
+                  <User className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-[#f9e2af]" />
+                </div>
+                <CardTitle className="text-sm sm:text-base md:text-lg text-[#f9e2af] mt-2">
+                  work.loner()
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0 px-3 sm:px-4 md:px-6">
+                <p className="text-xs sm:text-sm text-[#9399b2] leading-relaxed font-mono">
+                  {
+                    "/* For when you're on that solo grind 🚀 — no friends, no drama. Just vibe and code alone (keep that roomId lowkey 🤫) */"
+                  }
+                </p>
+                <div className="mt-2 text-xs text-[#6c7086]">
+                  {"selflove.enable()"}
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -182,10 +249,10 @@ export default function GoonShareAILanding() {
       </section>
 
       {/* Room-less Join Section */}
-      <section className="py-20 md:py-32 border-t border-[#313244] relative">
+      <section className="py-12 sm:py-20 md:py-32 border-t border-[#313244] relative">
         <div className="w-full max-w-7xl mx-auto px-4 md:px-6 relative z-20">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+            <h2 className="mb-3 sm:mb-4 text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight">
               <span className="text-[#f38ba8]">if</span>
               <span className="text-[#cdd6f4]"> (</span>
               <span className="text-[#fab387]">ready</span>
@@ -196,74 +263,127 @@ export default function GoonShareAILanding() {
               <span className="text-[#cdd6f4]">) </span>
               <span className="text-[#6c7086]">{"{"}</span>
             </h2>
-            <p className="mb-8 text-lg text-[#9399b2]">
-              {"/* Join thousands of developers who are already collaborating */"}
+            <p className="mb-6 sm:mb-8 text-sm sm:text-base md:text-lg text-[#9399b2]">
+              {
+                "/* Code with others — because debugging alone is too depressing */"
+              }
               <br />
-              {"/* and building amazing projects together. */"}
+              {"/*…and breaking stuff in perfect sync. */"}
             </p>
-            <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
+            <div className="flex flex-row gap-3 sm:gap-4 justify-center">
               <Button
-                size="lg"
-                className="bg-gradient-to-r from-[#a6e3a1] to-[#89b4fa] hover:from-[#94e2d5] hover:to-[#74c7ec] text-[#1e1e2e] font-semibold"
+                onClick={() => {
+                  const roomSection = document.getElementById("room");
+                  if (roomSection) {
+                    roomSection.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
+                  }
+                }}
+                size="sm"
+                className="bg-gradient-to-r from-[#a6e3a1] to-[#89b4fa] hover:from-[#94e2d5] hover:to-[#74c7ec] text-[#1e1e2e] font-semibold text-xs sm:text-sm md:text-base px-3 sm:px-4 md:px-6 py-2 sm:py-2 md:py-3"
               >
-                <Terminal className="mr-2 h-4 w-4" />
+                <Terminal className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                 {"startCoding()"}
               </Button>
               <Button
-                size="lg"
+                size="sm"
+                onClick={() => {
+                  window.open(
+                    "https://github.com/yourusername/GoonShareAI",
+                    "_blank"
+                  );
+                }}
                 variant="outline"
-                className="border-[#45475a] text-[#9399b2] hover:bg-[#313244] bg-transparent"
+                className="border-[#45475a] text-[#9399b2] hover:bg-[#313244] bg-transparent text-xs sm:text-sm md:text-base px-3 sm:px-4 md:px-6 py-2 sm:py-2 md:py-3"
               >
-                <Github className="mr-2 h-4 w-4" />
+                <Github className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                 {"github.clone()"}
               </Button>
             </div>
-            <p className="mt-4 text-sm text-[#6c7086] ">
-              {"/* Free forever • No credit card required • Open source */"}
+            <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-[#6c7086]">
+              {
+                "/* Free forever • We don’t want your card • Open source, so blame is shared */"
+              }
             </p>
-            <div className="mt-4 text-sm text-[#6c7086]">{"}"}</div>
+            <div className="mt-2 sm:mt-4 text-xs sm:text-sm text-[#6c7086]">
+              {"}"}
+            </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-[#313244] relative py-6">
-        <div className="w-full max-w-7xl mx-auto px-4 md:px-6 relative z-20">
-          <div className="grid gap-8 md:grid-cols-4">
-            <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#a6e3a1] to-[#89b4fa]">
-                  <Code2 className="h-5 w-5 text-[#1e1e2e]" />
-                </div>
-                <span className="text-lg font-bold text-[#a6e3a1]">{"<GoonShareAI/>"}</span>
+      <footer className="border-t border-[#313244] relative py-3 sm:py-4 bg-gradient-to-br from-[#1e1e2e]/80 to-[#313244]/60 bg-transparent z-10">
+        <div className="w-full max-w-7xl mx-auto px-4 md:px-6 relative z-20 space-y-4">
+          {/* App Name on top */}
+          <div className="flex items-center justify-center sm:justify-start">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#a6e3a1] to-[#89b4fa]">
+                <Code2 className="h-3 w-3 sm:h-4 sm:w-4 text-[#1e1e2e]" />
               </div>
-              <p className="text-[#9399b2] mb-4 text-sm">
-                {"/* The ultimate collaborative coding platform */"}
+              <span className="text-base sm:text-lg font-bold text-[#a6e3a1]">
+                {"<OuRAcoDE/>"}
+              </span>
+            </div>
+          </div>
+
+          {/* Main content */}
+          <div className="grid gap-6 sm:gap-8 md:grid-cols-2">
+            {/* Left Side */}
+            <div className="flex flex-col items-center sm:items-start">
+              <p className="text-[#9399b2] mb-2 sm:mb-3 text-xs sm:text-sm text-center sm:text-left">
+                {"/* Where bugs are features, and features are bugs. */"}
                 <br />
-                {"/* for developers who build together. */"}
+                {"/* The platform nobody asked for, but here we are. */"}
               </p>
-              <div className="flex space-x-4">
-                <a href="#" className="text-[#9399b2] hover:text-[#cdd6f4] transition-colors">
-                  <Github className="h-5 w-5" />
+              <div className="flex space-x-3 sm:space-x-4">
+                <a
+                  href="#"
+                  className="text-[#9399b2] hover:text-[#cdd6f4] transition-colors"
+                >
+                  <Github className="h-4 w-4 sm:h-5 sm:w-5" />
                 </a>
-                <a href="#" className="text-[#9399b2] hover:text-[#cdd6f4] transition-colors">
-                  <Twitter className="h-5 w-5" />
+                <a
+                  href="#"
+                  className="text-[#9399b2] hover:text-[#cdd6f4] transition-colors"
+                >
+                  <Twitter className="h-4 w-4 sm:h-5 sm:w-5" />
                 </a>
-                <a href="#" className="text-[#9399b2] hover:text-[#cdd6f4] transition-colors">
-                  <Discord className="h-5 w-5" />
+                <a
+                  href="#"
+                  className="text-[#9399b2] hover:text-[#cdd6f4] transition-colors"
+                >
+                  <Discord className="h-4 w-4 sm:h-5 sm:w-5" />
                 </a>
               </div>
             </div>
-            <div className="border-t border-[#313244] mt-8 pt-8 text-center text-[#6c7086] text-sm">
+
+            {/* Right Side - Sarcasm */}
+            <div className="flex flex-col items-center sm:items-end text-xs sm:text-sm text-[#9399b2] space-y-1">
               <p>
-                {"/* © "}
-                {new Date().getFullYear()}
-                {" GoonShareAI. Built with ❤️ by developers, for developers. Come Goon With Sanjoy*/"}
+                {"/* Warning: May cause merge conflicts and mild despair. */"}
+              </p>
+              <p>{"/* Optimized for chaos, not performance. */"}</p>
+              <p>
+                {"/* 99% debugging, 1% pretending we know what we’re doing. */"}
               </p>
             </div>
+          </div>
+
+          {/* Bottom Note */}
+          <div className="border-t border-[#313244] pt-3 mt-2 text-center text-[#6c7086] text-xs sm:text-sm">
+            <p>
+              {"/* © "}
+              {new Date().getFullYear()}
+              {
+                " OuraCode. Built with questionable life choices, infinite coffee, and 3 AM debugging. Proudly held together with duct tape, console.logs, and sleep deprivation. By Mahir and Sanjoy. */"
+              }
+            </p>
           </div>
         </div>
       </footer>
     </main>
-  )
+  );
 }
