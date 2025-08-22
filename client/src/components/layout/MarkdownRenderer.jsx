@@ -83,13 +83,34 @@ const MarkdownRenderer = ({ text, onUseCode }) => {
                 return part.split('\n').map((line, lineIndex) => {
                     const key = `text-${index}-${lineIndex}`;
 
-                    // Helper function to process inline styles like bold and code
+                    // Enhanced helper function to process inline styles
                     const processInline = (text) => {
                         return text
+                            // Inline code (backticks) - process first to avoid conflicts
                             .replace(/`([^`]+)`/g, '<code class="bg-gray-700 text-yellow-300 rounded px-1.5 py-0.5 text-sm font-mono">$1</code>')
-                            .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-white">$1</strong>');
+                            // Bold with ** or __
+                            .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-white">$1</strong>')
+                            .replace(/__(.*?)__/g, '<strong class="font-bold text-white">$1</strong>')
+                            // Italics with * or _ (single, not already processed)
+                            .replace(/(?<!\*)\*([^*\s][^*]*[^*\s]|\S)\*(?!\*)/g, '<em class="italic text-gray-200">$1</em>')
+                            .replace(/(?<!_)_([^_\s][^_]*[^_\s]|\S)_(?!_)/g, '<em class="italic text-gray-200">$1</em>')
+                            // Strikethrough with ~~
+                            .replace(/~~(.*?)~~/g, '<del class="line-through text-gray-500">$1</del>')
+                            // Links [text](url)
+                            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 underline transition-colors duration-200">$1</a>')
+                            // Highlight with ==text==
+                            .replace(/==(.*?)==/g, '<mark class="bg-yellow-400 text-black px-1 rounded">$1</mark>')
+                            // Subscript with ~text~
+                            .replace(/~([^~\s]+)~/g, '<sub class="text-xs">$1</sub>')
+                            // Superscript with ^text^
+                            .replace(/\^([^^]+)\^/g, '<sup class="text-xs">$1</sup>')
+                            // Keyboard keys with [[key]]
+                            .replace(/\[\[([^\]]+)\]\]/g, '<kbd class="bg-gray-600 text-gray-200 px-2 py-1 rounded text-xs font-mono border border-gray-500">$1</kbd>')
+                            // Escape sequences for literal markdown characters
+                            .replace(/\\([*_~`\[\](){}#+-.])/g, '$1');
                     };
 
+                    // Process different line types
                     if (/^### /.test(line)) {
                         const content = processInline(line.slice(4));
                         return <h3 key={key} className="text-xl font-semibold mt-6 mb-2 text-indigo-300" dangerouslySetInnerHTML={{ __html: content }} />;
@@ -98,17 +119,47 @@ const MarkdownRenderer = ({ text, onUseCode }) => {
                         const content = processInline(line.slice(3));
                         return <h2 key={key} className="text-2xl font-bold mt-8 mb-3 text-indigo-200" dangerouslySetInnerHTML={{ __html: content }} />;
                     }
-                    if (/^\* /.test(line)) {
+                    if (/^# /.test(line)) {
+                        const content = processInline(line.slice(2));
+                        return <h1 key={key} className="text-3xl font-bold mt-8 mb-4 text-indigo-100" dangerouslySetInnerHTML={{ __html: content }} />;
+                    }
+                    if (/^#### /.test(line)) {
+                        const content = processInline(line.slice(5));
+                        return <h4 key={key} className="text-lg font-semibold mt-4 mb-2 text-indigo-400" dangerouslySetInnerHTML={{ __html: content }} />;
+                    }
+                    if (/^##### /.test(line)) {
+                        const content = processInline(line.slice(6));
+                        return <h5 key={key} className="text-base font-semibold mt-4 mb-2 text-indigo-400" dangerouslySetInnerHTML={{ __html: content }} />;
+                    }
+                    if (/^###### /.test(line)) {
+                        const content = processInline(line.slice(7));
+                        return <h6 key={key} className="text-sm font-semibold mt-4 mb-2 text-indigo-400" dangerouslySetInnerHTML={{ __html: content }} />;
+                    }
+                    // Unordered list items
+                    if (/^[\*\-\+] /.test(line)) {
                         const content = processInline(line.slice(2));
                         return <li key={key} className="ml-6 list-disc text-gray-300 my-1" dangerouslySetInnerHTML={{ __html: content }} />;
                     }
-                    if (/^---$/.test(line)) {
+                    // Ordered list items
+                    if (/^\d+\. /.test(line)) {
+                        const content = processInline(line.replace(/^\d+\. /, ''));
+                        return <li key={key} className="ml-6 list-decimal text-gray-300 my-1" dangerouslySetInnerHTML={{ __html: content }} />;
+                    }
+                    // Blockquotes
+                    if (/^> /.test(line)) {
+                        const content = processInline(line.slice(2));
+                        return <blockquote key={key} className="border-l-4 border-blue-500 pl-4 my-2 text-gray-300 italic bg-gray-800/30 py-2" dangerouslySetInnerHTML={{ __html: content }} />;
+                    }
+                    // Horizontal rules
+                    if (/^---$/.test(line) || /^\*\*\*$/.test(line) || /^___$/.test(line)) {
                         return <hr key={key} className="my-6 border-gray-700" />;
                     }
+                    // Empty lines
                     if (line.trim() === '') {
                         return <br key={key} />;
                     }
 
+                    // Regular paragraphs
                     const content = processInline(line);
                     return <p key={key} className="my-2 text-gray-400 leading-relaxed" dangerouslySetInnerHTML={{ __html: content }} />;
                 });
@@ -139,4 +190,5 @@ const MarkdownRenderer = ({ text, onUseCode }) => {
         </div>
     );
 };
+
 export default MarkdownRenderer;
