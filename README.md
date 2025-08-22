@@ -51,6 +51,8 @@ Code With Aura
 
 <a href="https://www.mongodb.com//">MongoDB</a>  is a source-available, cross-platform, document-oriented database program. Classified as a NoSQL database product, MongoDB utilizes JSON-like documents with optional schemas. MongoDB is developed by MongoDB Inc. and current versions are licensed under the Server Side Public License.
 
+<a href="https://www.docker.com/">Docker</a> Docker is a software platform that allows you to build, test, and deploy applications quickly. Docker packages software into standardized units called containers that have everything the software needs to run including libraries, system tools, code, and runtime. Be sure that you have docker installed.  
+
 <a href="https://console.upstash.com/redis?teamid=0">Redis Upstash Key</a>
 <a href="https://makersuite.google.com/app/apikey">Gemini Api Key</a> 
 <a href="https://vite.dev/">Vite</a> 
@@ -94,6 +96,9 @@ cp .env.example .env
 
 ```bash
 npm install
+```
+```bash
+docker build -t custom-compiler  .
 ```
 ```bash
 npm run dev
