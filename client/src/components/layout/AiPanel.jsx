@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 const DEFAULT_PANEL_WIDTH = 500;
 const MIN_PANEL_WIDTH = 400;
 const MAX_PANEL_WIDTH = 800;
+const MOBILE_PANEL_WIDTH = 300;
 
 /**
  * Chat message vibe check - this is what each message looks like
@@ -44,11 +45,23 @@ const AiPanel = forwardRef(({
 
     // panel sizing things ↔️
     const [panelWidth, setPanelWidth] = useState(DEFAULT_PANEL_WIDTH);
+    const [isMobile, setIsMobile] = useState(false);
     const isResizing = useRef(false);
     const chatContainerRef = useRef(null);
     
     // keeping track of requests so we can yeet them if needed 🗑️
     const activeRequestsRef = useRef(new Map()); // Map<requestId, AbortController>
+
+    // mobile responsiveness detection
+    useEffect(() => {
+        const handleResize = () => {
+            const mobile = window.innerWidth < 768;
+            setIsMobile(mobile);
+        };
+        handleResize();
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     // let parent component trigger review (main character energy)
     useImperativeHandle(ref, () => ({
@@ -181,10 +194,9 @@ const AiPanel = forwardRef(({
         return activeRequestsRef.current.has(requestId);
     };
 
-
-
-    // panel resize magic ↔️
+    // panel resize magic ↔️ (desktop only)
     const handleMouseDown = (e) => {
+        if (isMobile) return; // no resizing on mobile
         e.preventDefault();
         isResizing.current = true;
         document.addEventListener("mousemove", handleMouseMove);
@@ -192,7 +204,7 @@ const AiPanel = forwardRef(({
     };
 
     const handleMouseMove = (e) => {
-        if (!isResizing.current) return;
+        if (!isResizing.current || isMobile) return;
 
         requestAnimationFrame(() => {
             const newWidth = window.innerWidth - e.clientX;
@@ -225,7 +237,6 @@ const AiPanel = forwardRef(({
             cancelAllRequests();
         };
     }, []);
-
 
     // the real MVP - talks to gemini with cancel support 🧠
     const callGeminiAPI = async (prompt, requestId) => {
@@ -429,14 +440,138 @@ const AiPanel = forwardRef(({
 
     if (!isOpen) return null;
 
+    // Mobile overlay layout (similar to sidebar)
+    if (isMobile) {
+        return (
+            <>
+                {/* Mobile overlay backdrop */}
+                <div
+                    className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 animate-in fade-in-0"
+                    onClick={onClose}
+                />
+                
+                {/* Mobile AI Panel */}
+                <div className="fixed right-0 top-12 bottom-0 z-50 w-80 bg-[#181825] border-l border-[#313244] flex flex-col transition-all duration-300">
+                    {/* Mobile Header */}
+                    <div className="h-12 sm:h-14 bg-[#181825] border-b border-[#313244] flex items-center justify-between px-3 sm:px-4 flex-shrink-0">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-[#a6e3a1] rounded-full animate-pulse" />
+                            <h3 className="font-semibold text-[#a6e3a1] text-sm sm:text-base">AuraFarmer AI</h3>
+                            {activeRequestCount > 0 && (
+                                <span className="text-xs text-[#6c7086] bg-[#313244] px-2 py-1 rounded">
+                                    {activeRequestCount}
+                                </span>
+                            )}
+                        </div>
+                        <Button variant="ghost" size="icon" onClick={onClose} className="hover:bg-[#313244] h-8 w-8 sm:h-10 sm:w-10">
+                            <X size={16} className="sm:w-4 sm:h-4" />
+                        </Button>
+                    </div>
+
+                    {/* Mobile Chat Container */}
+                    <div ref={chatContainerRef} className="flex-1 p-3 sm:p-4 overflow-y-auto">
+                        {error && (
+                            <div className="bg-red-900/50 text-red-300 p-3 sm:p-4 rounded-md mb-4">
+                                <p className="font-bold text-sm sm:text-base">An error occurred:</p>
+                                <p className="mt-1 text-xs sm:text-sm">{error}</p>
+                            </div>
+                        )}
+                        {chatHistory.length === 0 && !isLoading && !error && (
+                            <div className="flex justify-center items-center h-full text-center">
+                                <p className="text-[#6c7086] text-sm sm:text-base">Analyze your code or start a conversation.</p>
+                            </div>
+                        )}
+                        <div className="space-y-2">
+                            {chatHistory.map((msg) => (
+                                <div key={msg.id || `fallback-${msg.role}-${msg.timestamp || Date.now()}`} className="py-2 sm:py-3">
+                                    <div className={`${msg.role === "user" ? "ml-auto max-w-[85%] bg-[#242431] text-[#ffffff] px-3 sm:px-4 py-2 sm:py-3 rounded-2xl sm:rounded-3xl" : "max-w-[90%] bg-[#1e1e2e] text-[#ffffff] px-3 sm:px-4 py-2 sm:py-3 rounded-2xl sm:rounded-3xl"}`}>
+                                        <p className={`text-xs opacity-90 mb-2 font-medium ${msg.role === "user" ? "text-gray-400" : "text-[#a6e3a1]"}`}>
+                                            {msg.role === "user" ? "You" : "AuraFarmer AI"}
+                                            {msg.status === "error" && (
+                                                <span className="ml-2 text-red-400 text-xs">[Error]</span>
+                                            )}
+                                        </p>
+
+                                        {msg.text ? (
+                                            <div>
+                                                <MarkdownRenderer text={msg.text} onUseCode={onUseCode} />
+                                                {msg.status === "error" && msg.role === "ai" && (
+                                                    <Button
+                                                        onClick={() => retryMessageById(msg.id)}
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        className="mt-2 text-[#f38ba8] hover:bg-[#f38ba8]/10 h-8 px-3 text-xs sm:text-sm"
+                                                        disabled={retryingMessageIds.has(msg.id) || isRequestActive(msg.id)}
+                                                    >
+                                                        {retryingMessageIds.has(msg.id) || isRequestActive(msg.id) ? "Retrying..." : "Retry"}
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="text-[#a1a1a1] animate-pulse flex items-center gap-2">
+                                                <div className="flex space-x-1">
+                                                    <div className="w-2 h-2 bg-[#a1a1a1] rounded-full animate-bounce"></div>
+                                                    <div className="w-2 h-2 bg-[#a1a1a1] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                                    <div className="w-2 h-2 bg-[#a1a1a1] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                                </div>
+                                                <span className="text-sm">
+                                                    {msg.status === "pending" ? "Thinking..." : "Loading..."}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Mobile Input Form */}
+                    <div className="p-3 sm:p-4 border-t border-[#313244] flex-shrink-0">
+                        <form onSubmit={handleChatSubmit} className="flex gap-2">
+                            <Input
+                                value={chatInput}
+                                onChange={(e) => setChatInput(e.target.value)}
+                                placeholder="Ask about your code..."
+                                className="bg-[#11111b] border-[#313244] rounded-lg text-[#cdd6f4] placeholder:text-[#6c7086] h-10 text-sm"
+                                disabled={isLoading}
+                            />
+                            <Button 
+                                type={isChatLoading ? "button" : "submit"}
+                                size="icon" 
+                                onClick={isChatLoading ? handleSendCancelClick : undefined}
+                                disabled={(!isChatLoading && !chatInput.trim()) || isLoading}
+                                className={`transition-all duration-300 ease-in-out transform hover:scale-105 h-10 w-10 ${
+                                    isChatLoading 
+                                        ? "bg-[#f38ba8] hover:bg-[#f38ba8]/80 text-white shadow-lg animate-pulse" 
+                                        : "bg-[#f0f6ef] hover:bg-[#a6e3a1]/80 text-[#1e1e2e]"
+                                }`}
+                            >
+                                <div className={`transition-all duration-300 ease-in-out ${
+                                    isChatLoading ? "scale-110" : "scale-100"
+                                }`}>
+                                    {isChatLoading ? (
+                                        <Square size={16} className="transition-all duration-300 ease-in-out" />
+                                    ) : (
+                                        <ArrowUp size={16} className="transition-all duration-300 ease-in-out" />
+                                    )}
+                                </div>
+                            </Button>
+                        </form>
+                    </div>
+                </div>
+            </>
+        );
+    }
+
+    // Desktop layout (original)
     return (
         <div className="flex flex-shrink-0">
             <div onMouseDown={handleMouseDown} className="w-1 bg-[#313244] cursor-col-resize hover:bg-[#f38ba8] z-10 transition-colors" />
-            <div className=" border-l border-[#313244] flex flex-col z-10" style={{ width: panelWidth }}>
+            <div className="border-l border-[#313244] flex flex-col z-10" style={{ width: panelWidth }}>
                 <div className="h-14 bg-[#181825] border-b border-[#313244] flex items-center justify-between px-4 flex-shrink-0">
                     <div className="flex items-center gap-2">
                         <div className="w-2 h-2 bg-[#a6e3a1] rounded-full animate-pulse" />
-                        <h3 className="font-semibold text-[#a6e3a1]">Goonology AI</h3>
+                        <h3 className="font-semibold text-[#a6e3a1]">AuraFarmer AI</h3>
                         {activeRequestCount > 0 && (
                             <span className="text-xs text-[#6c7086] bg-[#313244] px-2 py-1 rounded">
                                 {activeRequestCount} active
@@ -467,7 +602,7 @@ const AiPanel = forwardRef(({
                                         className={`text-xs opacity-90 mb-2 font-medium ${msg.role === "user" ? "text-gray-400" : "text-[#a6e3a1]"
                                             }`}
                                     >
-                                        {msg.role === "user" ? "You" : "GoonologyAI"}
+                                        {msg.role === "user" ? "You" : "AuraFarmer AI"}
                                         {msg.status === "error" && (
                                             <span className="ml-2 text-red-400 text-xs">[Error]</span>
                                         )}
@@ -505,7 +640,7 @@ const AiPanel = forwardRef(({
                         ))}
                     </div>
                 </div>
-                <div className="p-4 border-t border-[#313244] flex-shrink-0 ">
+                <div className="p-4 border-t border-[#313244] flex-shrink-0">
                     <form onSubmit={handleChatSubmit} className="flex gap-2">
                         <Input
                             value={chatInput}

@@ -439,61 +439,70 @@ export default function App() {
     const SelectedIcon = selectedLanguage?.icon || Code2;
 
     return (
-        <div className="relative h-screen bg-[#1e1e2e] text-[#cdd6f4] flex flex-col overflow-hidden ">
+        <div className="relative h-screen bg-[#1e1e2e] text-[#cdd6f4] flex flex-col overflow-hidden">
             <div className="fixed inset-0 w-full h-full z-0">
                 <BackgroundGradientAnimation />
             </div>
 
-            <header className="h-16 bg-[#11111b] border-b border-[#313244] flex items-center justify-between px-6 z-10 flex-shrink-0">
-                <div className="flex items-center gap-4">
+            <header className="h-12 sm:h-16 bg-[#11111b] border-b border-[#313244] flex items-center justify-between px-2 sm:px-6 z-10 flex-shrink-0">
+                <div className="flex items-center gap-1 sm:gap-4">
                     {/* mobile menu */}
                     <Button
                         variant="ghost"
                         size="icon"
                         onClick={toggleSidebar}
-                        className={`${isMobile ? 'flex' : 'hidden'} hover:bg-[#313244] text-[#cdd6f4] p-2 transition-all duration-300`}
+                        className={`${isMobile ? 'flex' : 'hidden'} hover:bg-[#313244] text-[#cdd6f4] h-8 w-8 sm:h-10 sm:w-10 transition-all duration-300`}
                     >
-                        <div className="relative w-5 h-5 flex items-center justify-center">
-                            <Menu size={20} />
-                        </div>
+                        <Menu size={18} className="sm:w-5 sm:h-5" />
                     </Button>
 
-                    <div className="flex items-center space-x-3 z-10 mb-2">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#a6e3a1] to-[#89b4fa]">
-                            <Code2 className="h-6 w-6 text-[#1e1e2e]" />
+                    <div className="flex items-center space-x-1 sm:space-x-3 z-10 mb-2">
+                        <div className="flex h-6 w-6 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#a6e3a1] to-[#89b4fa]">
+                            <Code2 className="h-3 w-3 sm:h-6 sm:w-6 text-[#1e1e2e]" />
                         </div>
-                        <div>
-                            <span className="text-2xl font-bold text-[#a6e3a1]">{"<GoonShareAI/>"}</span>
+                        <div className="hidden sm:block">
+                            <span className="text-lg sm:text-2xl font-bold text-[#a6e3a1]">{"<OuRAcoDE/>"}</span>
                             <div className="text-xs text-[#7b7d87]">{"// v1.1.0-stable"}</div>
+                        </div>
+                        <div className="block sm:hidden">
+                            <span className="text-xs font-bold text-[#a6e3a1]">{"<OuRAcoDE/>"}</span>
                         </div>
                     </div>
                 </div>
+                
+                {/* Room ID */}
                 <Button
                     onClick={handleCopyId}
-                    className="px-4 bg-[#1e1e2e] rounded-lg border border-[#a6e3a1]/30 hover:bg-[#313244]">
-                    {isCopyId ? <Check size={18} className="mr-2 text-[#a6e3a1]" /> : <Copy size={18} className="text-[#a6e3a1]" />}
-                    <span className="text-2xl font-bold text-[#a6e3a1] tracking-wider font-mono">
+                    className="h-8 sm:h-10 px-2 sm:px-4 bg-[#1e1e2e] rounded-lg border border-[#a6e3a1]/30 hover:bg-[#313244] min-w-0 text-xs sm:text-base">
+                    {isCopyId ? <Check size={14} className="sm:w-[18px] sm:h-[18px] mr-1 sm:mr-2 text-[#a6e3a1]" /> : <Copy size={14} className="sm:w-[18px] sm:h-[18px] text-[#a6e3a1]" />}
+                    <span className="font-bold text-[#a6e3a1] tracking-wider font-mono truncate max-w-[80px] sm:max-w-none">
                         "{roomId}"
                     </span>
                 </Button>
-                <div className="flex items-center gap-2 z-10">
+                
+                <div className="flex items-center gap-1 sm:gap-2 z-10">
                     {/* connection status */}
-                    <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-slate-800/50 border border-slate-600/50">
+                    <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-md bg-slate-800/50 border border-slate-600/50">
                         <div className={`w-2 h-2 rounded-full transition-all duration-300 ${wsConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
                         <span className="text-xs text-slate-300">
                             {wsConnected ? `${username} • Connected` : `${username} • Disconnected`}
                         </span>
                     </div>
 
+                    {/* Mobile connection indicator */}
+                    <div className="flex sm:hidden items-center">
+                        <div className={`w-2 h-2 rounded-full transition-all duration-300 ${wsConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
+                    </div>
+
                     <Button
                         onClick={handleSaveCode}
                         variant="outline"
                         size="sm"
-                        className="border-[#313244] hover:bg-[#313244] text-[#cdd6f4] bg-transparent cursor-pointer"
+                        className="border-[#313244] hover:bg-[#313244] text-[#cdd6f4] bg-transparent cursor-pointer h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm"
                         title="Save (Ctrl+S)"
                     >
-                        {isLoading ? <LoadingIcon className="w-5 h-5 mx-2" /> : <Save size={16} className="mr-2" />}
-                        Save
+                        {isLoading ? <LoadingIcon className="w-4 h-4 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> : <Save size={16} className="sm:w-4 sm:h-4 mr-1 sm:mr-2" />}
+                        <span className="hidden sm:inline">Save</span>
                     </Button>
 
                     <Button
@@ -501,11 +510,11 @@ export default function App() {
                         variant="outline"
                         size="sm"
                         disabled={downloadLoading || !code}
-                        className={`hover:bg-[#313244] text-[#cdd6f4] bg-transparent transition-colors duration-200 cursor-pointer disabled:opacity-50 flex items-center gap-2 ${downloadError ? "bg-red-900/50" : ""}`}
+                        className={`hover:bg-[#313244] text-[#cdd6f4] bg-transparent transition-colors duration-200 cursor-pointer disabled:opacity-50 flex items-center gap-1 sm:gap-2 h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm ${downloadError ? "bg-red-900/50" : ""}`}
                         title={downloadError || 'Download code'}
                     >
-                        {downloadLoading ? <LoadingIcon className="w-5 h-5" /> : <DownloadIcon className="w-5 h-5" />}
-                        {downloadError ? <span className="text-xs text-red-400 ml-2">{downloadError}</span> : null}
+                        {downloadLoading ? <LoadingIcon className="w-4 h-4 sm:w-4 sm:h-4" /> : <DownloadIcon className="w-4 h-4 sm:w-4 sm:h-4" />}
+                        {downloadError && !isMobile ? <span className="text-xs text-red-400 ml-2">{downloadError}</span> : null}
                     </Button>
                 </div>
             </header>
@@ -523,29 +532,29 @@ export default function App() {
                 {/* Sidebar */}
                 <div
                     className={`
-                          ${isMobile ? "fixed left-0 top-16 bottom-0 z-50" : "relative"}
+                          ${isMobile ? "fixed left-0 top-12 bottom-0 z-50 w-64" : "relative"}
                           ${isMobile && !isSidebarOpen ? "-translate-x-full" : "translate-x-0"}
                           ${!isMobile && isSidebarCollapsed ? "w-16" : "w-68"}
                           bg-[#181825] border-r border-[#313244] flex flex-col transition-all duration-300
                         `}
                 >
-                    <div className={`${!isSidebarCollapsed ? "border-b border-[#313244] p-4" : ""}`}>
+                    <div className={`${!isSidebarCollapsed ? "border-b border-[#313244] p-3 sm:p-4" : ""}`}>
                         {!isSidebarCollapsed && (
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex bg-[#11111b] rounded-lg p-1">
                                     <button
                                         onClick={() => setSidebarView("languages")}
-                                        className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${sidebarView === "languages" ? "bg-[#f38ba8] text-[#1e1e2e]" : "text-[#a6adc8] hover:text-[#cdd6f4] hover:bg-[#313244]"}`}
+                                        className={`flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-all ${sidebarView === "languages" ? "bg-[#f38ba8] text-[#1e1e2e]" : "text-[#a6adc8] hover:text-[#cdd6f4] hover:bg-[#313244]"}`}
                                     >
-                                        <Languages size={16} />
-                                        Languages
+                                        <Languages size={14} className="sm:w-4 sm:h-4" />
+                                        <span className="hidden sm:inline">Languages</span>
                                     </button>
                                     <button
                                         onClick={() => setSidebarView("members")}
-                                        className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${sidebarView === "members" ? "bg-[#f38ba8] text-[#1e1e2e]" : "text-[#a6adc8] hover:text-[#cdd6f4] hover:bg-[#313244]"}`}
+                                        className={`flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-all ${sidebarView === "members" ? "bg-[#f38ba8] text-[#1e1e2e]" : "text-[#a6adc8] hover:text-[#cdd6f4] hover:bg-[#313244]"}`}
                                     >
-                                        <Users size={16} />
-                                        Members
+                                        <Users size={14} className="sm:w-4 sm:h-4" />
+                                        <span className="hidden sm:inline">Members</span>
                                     </button>
                                 </div>
                             </div>
@@ -556,19 +565,19 @@ export default function App() {
                             <div>
                                 {sidebarView === "languages" ? (
                                     <div>
-                                        <h2 className="text-lg font-semibold text-[#f38ba8] mb-2">Languages</h2>
-                                        <Badge variant="secondary" className="bg-[#313244] text-[#a6adc8]">
+                                        <h2 className="text-base sm:text-lg font-semibold text-[#f38ba8] mb-2">Languages</h2>
+                                        <Badge variant="secondary" className="bg-[#313244] text-[#a6adc8] text-xs sm:text-sm">
                                             {languages.length} Available
                                         </Badge>
                                     </div>
                                 ) : (
                                     <div>
-                                        <h2 className="text-lg font-semibold text-[#a6e3a1] mb-2">Room Members</h2>
+                                        <h2 className="text-base sm:text-lg font-semibold text-[#a6e3a1] mb-2">Room Members</h2>
                                         <div className="flex items-center gap-2">
-                                            <Badge variant="secondary" className="bg-[#313244] text-[#a6adc8]">
+                                            <Badge variant="secondary" className="bg-[#313244] text-[#a6adc8] text-xs sm:text-sm">
                                                 {members.length} Total
                                             </Badge>
-                                            <Badge variant="secondary" className="bg-[#a6e3a1]/20 text-[#a6e3a1]">
+                                            <Badge variant="secondary" className="bg-[#a6e3a1]/20 text-[#a6e3a1] text-xs sm:text-sm">
                                                 {onlineMembers.length} Online
                                             </Badge>
                                         </div>
@@ -587,13 +596,13 @@ export default function App() {
                                         <button
                                             key={language.id}
                                             onClick={() => handleLanguageChange(language)}
-                                            className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all hover:bg-[#313244] ${selectedLanguage.id === language.id ? "bg-[#313244] border border-[#f38ba8]" : ""} ${isSidebarCollapsed ? "justify-center" : ""}`}
+                                            className={`w-full flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg transition-all hover:bg-[#313244] ${selectedLanguage.id === language.id ? "bg-[#313244] border border-[#f38ba8]" : ""} ${isSidebarCollapsed ? "justify-center" : ""}`}
                                             title={isSidebarCollapsed ? language.name : ""}
                                         >
-                                            <div className={`p-2 rounded-md ${language.color} flex-shrink-0`}>
-                                                <IconComponent size={16} />
+                                            <div className={`p-1.5 sm:p-2 rounded-md ${language.color} flex-shrink-0`}>
+                                                <IconComponent size={14} className="sm:w-4 sm:h-4" />
                                             </div>
-                                            {!isSidebarCollapsed && <span className="font-medium">{language.name}</span>}
+                                            {!isSidebarCollapsed && <span className="font-medium text-sm sm:text-base">{language.name}</span>}
                                         </button>
                                     );
                                 })}
@@ -603,19 +612,19 @@ export default function App() {
                                 {members.map((member) => (
                                     <div
                                         key={member.id}
-                                        className={`flex items-center gap-3 p-3 rounded-lg hover:bg-[#313244] transition-all ${isSidebarCollapsed ? "justify-center" : ""} ${member.isCurrent ? " bg-[#313244]/50" : ""}`}
+                                        className={`flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-[#313244] transition-all ${isSidebarCollapsed ? "justify-center" : ""} ${member.isCurrent ? " bg-[#313244]/50" : ""}`}
                                         title={isSidebarCollapsed ? `${member.name} (${member.status})` : ""}
                                     >
                                         <div className="relative flex-shrink-0">
-                                            <div className={`w-8 h-8 ${member.color} rounded-full flex items-center justify-center text-white text-sm font-semibold ${member.isCurrent ? "ring-2 ring-[#f38ba8]" : ""}`}>
+                                            <div className={`w-6 h-6 sm:w-8 sm:h-8 ${member.color} rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-semibold ${member.isCurrent ? "ring-2 ring-[#f38ba8]" : ""}`}>
                                                 {member.avatar}
                                             </div>
-                                            <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-[#181825] ${member.status === "online" ? "bg-[#a6e3a1]" : member.status === "away" ? "bg-[#f9e2af]" : "bg-[#6c7086]"}`} />
+                                            <div className={`absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-2 h-2 sm:w-3 sm:h-3 rounded-full border-2 border-[#181825] ${member.status === "online" ? "bg-[#a6e3a1]" : member.status === "away" ? "bg-[#f9e2af]" : "bg-[#6c7086]"}`} />
                                         </div>
                                         {!isSidebarCollapsed && (
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center justify-between">
-                                                    <p className={`font-medium truncate ${member.isCurrent ? "text-[#f38ba8]" : "text-[#cdd6f4]"}`}>
+                                                    <p className={`font-medium truncate text-sm sm:text-base ${member.isCurrent ? "text-[#f38ba8]" : "text-[#cdd6f4]"}`}>
                                                         {member.name} {member.isCurrent && "(You)"}
                                                     </p>
                                                 </div>
@@ -633,26 +642,26 @@ export default function App() {
 
                 {/* Editor */}
                 <div className="flex-1 flex flex-col relative overflow-hidden">
-                    <div className="h-14 bg-[#181825] border-b border-[#313244] flex items-center justify-between px-4 flex-shrink-0">
-                        <div className="flex items-center gap-3">
+                    <div className="h-12 sm:h-14 bg-[#181825] border-b border-[#313244] flex items-center justify-between px-2 sm:px-4 flex-shrink-0">
+                        <div className="flex items-center gap-1 sm:gap-3">
                             {isMobile ? '' : (
                                 <Button
                                     variant="ghost"
                                     size="icon"
                                     onClick={toggleSidebar}
-                                    className="hover:bg-[#313244] text-[#cdd6f4] transition-all duration-300"
+                                    className="hover:bg-[#313244] text-[#cdd6f4] transition-all duration-300 h-8 w-8 sm:h-10 sm:w-10"
                                 >
                                     <div className="relative w-5 h-5 flex items-center justify-center overflow-hidden">
                                         <Menu
-                                            size={20}
-                                            className={`absolute transition-all duration-300 ${(isMobile && isSidebarOpen) || (!isMobile && !isSidebarCollapsed)
+                                            size={18}
+                                            className={`absolute transition-all duration-300 sm:w-5 sm:h-5 ${(isMobile && isSidebarOpen) || (!isMobile && !isSidebarCollapsed)
                                                 ? 'opacity-0 -rotate-90 scale-75'
                                                 : 'opacity-100 rotate-0 scale-100'
                                                 }`}
                                         />
                                         <X
-                                            size={20}
-                                            className={`absolute transition-all duration-300 ${(isMobile && isSidebarOpen) || (!isMobile && !isSidebarCollapsed)
+                                            size={18}
+                                            className={`absolute transition-all duration-300 sm:w-5 sm:h-5 ${(isMobile && isSidebarOpen) || (!isMobile && !isSidebarCollapsed)
                                                 ? 'opacity-100 rotate-0 scale-100'
                                                 : 'opacity-0 rotate-90 scale-75'
                                                 }`}
@@ -660,28 +669,28 @@ export default function App() {
                                     </div>
                                 </Button>
                             )}
-                            <div className={`p-2 rounded-md ${selectedLanguage.color}`}>
-                                <SelectedIcon size={20} />
+                            <div className={`p-1 sm:p-2 rounded-md ${selectedLanguage.color}`}>
+                                <SelectedIcon size={16} className="sm:w-5 sm:h-5" />
                             </div>
-                            <h1 className="text-xl font-semibold">{selectedLanguage.name} Editor</h1>
+                            <h1 className="text-sm sm:text-xl font-semibold truncate">{selectedLanguage.name} Editor</h1>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 sm:gap-2">
                             <Button
                                 onClick={handleRunCode}
                                 variant="outline"
                                 size="sm"
                                 disabled={isRunning || !code.trim()}
-                                className="bg-[#a6e3a1] hover:bg-[#94e2d5] text-[#1e1e2e] hover:text-[#6363f6] font-semibold disabled:opacity-50 cursor-pointer"
+                                className="bg-[#a6e3a1] hover:bg-[#94e2d5] text-[#1e1e2e] hover:text-[#6363f6] font-semibold disabled:opacity-50 cursor-pointer h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm"
                             >
                                 {isRunning ? (
                                     <>
-                                        <LoadingIcon size={16} className="mr-2" />
-                                        Running...
+                                        <LoadingIcon size={16} className="sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                                        <span className="hidden sm:inline">Running...</span>
                                     </>
                                 ) : (
                                     <>
-                                        <Play size={16} className="mr-2" />
-                                        Run
+                                        <Play size={16} className="sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                                        <span className="hidden sm:inline">Run</span>
                                     </>
                                 )}
                             </Button>
@@ -689,38 +698,38 @@ export default function App() {
                                 onClick={() => terminalRef.current?.toggle?.()}
                                 variant="outline"
                                 size="icon"
-                                className={`border-[#313244] hover:bg-[#313244] cursor-pointer`}
+                                className={`border-[#313244] hover:bg-[#313244] cursor-pointer h-8 w-8 sm:h-9 sm:w-9`}
                             >
-                                <TerminalIcon size={16} />
+                                <TerminalIcon size={16} className="sm:w-4 sm:h-4" />
                             </Button>
                             <Button
                                 onClick={handleCopyCode}
                                 variant="outline"
                                 size="sm"
-                                className=" hover:bg-[#313244] text-[#cdd6f4] bg-transparent cursor-pointer"
+                                className="hover:bg-[#313244] text-[#cdd6f4] bg-transparent cursor-pointer h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm"
                                 disabled={!code}
                             >
-                                {isCopied ? <Check size={16} className="mr-2" /> : <Copy size={16} />}
-                                {isCopied ? "Copied!" : ''}
+                                {isCopied ? <Check size={16} className="sm:w-4 sm:h-4 mr-1 sm:mr-2" /> : <Copy size={16} className="sm:w-4 sm:h-4" />}
+                                {isCopied ? <span className="hidden sm:inline">Copied!</span> : <span className="hidden sm:inline"></span>}
                             </Button>
 
-                            <Button onClick={handleReview} className="bg-[#f38ba8] hover:bg-[#f38ba8]/80 text-[#1e1e2e] font-semibold cursor-pointer" disabled={isLoading}>
-                                <EnhanceIcon size={16} className="mr-2" />
-                                Goon
+                            <Button onClick={handleReview} className="bg-[#f38ba8] hover:bg-[#f38ba8]/80 text-[#1e1e2e] font-semibold cursor-pointer h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm" disabled={isLoading}>
+                                <EnhanceIcon size={16} className="sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                                <span className="hidden sm:inline">FarM</span>
                             </Button>
                             <Button
                                 variant="outline"
                                 size="icon"
                                 onClick={() => setChatOpen((v) => !v)}
-                                className="border-[#313244] hover:bg-[#313244] cursor-pointer hover:text-[#f38ba8]/80 text-[#f38ba8]"
+                                className="border-[#313244] hover:bg-[#313244] cursor-pointer hover:text-[#f38ba8]/80 text-[#f38ba8] h-8 w-8 sm:h-9 sm:w-9"
                             >
-                                <MessageCircle size={16} />
+                                <MessageCircle size={16} className="sm:w-4 sm:h-4" />
                             </Button>
                         </div>
                     </div>
 
                     {/* code editor area */}
-                    <div className="flex-1 p-4 h-full editor-area">
+                    <div className="flex-1 p-2 sm:p-4 h-full editor-area">
                         <CodeEditor
                             ref={codeEditorRef}
                             code={code}

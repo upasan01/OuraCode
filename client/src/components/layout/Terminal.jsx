@@ -483,42 +483,42 @@ const Terminal = forwardRef((
       style={{ height: `${height}px`, minHeight: `${minHeight}px` }}
     >
       {/* Drag handle (that resize grip hits different ↕️) */}
-      <div className="h-1 cursor-row-resize hover:bg-[#a6e3a1] bg-[#313244] transition-colors relative group" onMouseDown={() => setIsResizing(true)}
+      <div className="h-1 sm:h-1.5 cursor-row-resize hover:bg-[#a6e3a1] bg-[#313244] transition-colors relative group" onMouseDown={() => setIsResizing(true)}
         onTouchStart={() => setIsResizing(true)}
         aria-hidden >
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-12 h-0.5 bg-[#45475a] rounded-full group-hover:bg-[#a6e3a1]" />
+          <div className="w-8 sm:w-12 h-0.5 bg-[#45475a] rounded-full group-hover:bg-[#a6e3a1]" />
         </div>
       </div>
 
       {/* Header (the terminal drip at the top fr 💻) */}
-      <div className="h-8 border-b border-[#313244] flex items-center px-3 bg-[#181825] text-xs">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1 bg-[#1e1e2e] border-r border-[#313244] rounded-t-sm">
-            <TerminalIcon size={12} className="text-[#a6e3a1]" />
-            <span className="text-[#cdd6f4] font-medium">bash</span>
+      <div className="h-7 sm:h-8 border-b border-[#313244] flex items-center px-2 sm:px-3 bg-[#181825] text-xs">
+        <div className="flex items-center gap-1 sm:gap-3">
+          <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 bg-[#1e1e2e] border-r border-[#313244] rounded-t-sm">
+            <TerminalIcon size={10} className="sm:w-3 sm:h-3 text-[#a6e3a1]" />
+            <span className="text-[#cdd6f4] font-medium text-xs sm:text-sm hidden sm:inline">bash</span>
           </div>
 
-          <Button variant="ghost" size="icon" className="h-5 w-5 hover:bg-[#313244] text-[#6c7086] hover:text-[#cdd6f4] rounded">
+          <Button variant="ghost" size="icon" className="h-4 w-4 sm:h-5 sm:w-5 hover:bg-[#313244] text-[#6c7086] hover:text-[#cdd6f4] rounded hidden sm:flex">
             <span className="text-xs">+</span>
           </Button>
         </div>
 
         <div className="flex-1" />
 
-        <div className="flex items-center gap-2 text-[#6c7086]">
-          <span className="text-xs">Terminal</span>
-          <div className="w-px h-3 bg-[#313244]" />
-          <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="h-5 w-5 hover:bg-[#313244] text-[#6c7086] hover:text-[#f38ba8] rounded">
-            <X size={12} />
+        <div className="flex items-center gap-1 sm:gap-2 text-[#6c7086]">
+          <span className="text-xs hidden sm:inline">Terminal</span>
+          <div className="w-px h-2 sm:h-3 bg-[#313244] hidden sm:block" />
+          <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="h-4 w-4 sm:h-5 sm:w-5 hover:bg-[#313244] text-[#6c7086] hover:text-[#f38ba8] rounded">
+            <X size={10} className="sm:w-3 sm:h-3" />
           </Button>
         </div>
       </div>
 
       {/* Content */}
       <div className="flex-1 flex flex-col min-h-0 bg-[#1e1e2e]">
-        <ScrollArea className="flex-1 px-3 py-2">
-          <div className="font-mono text-sm leading-6">
+        <ScrollArea className="flex-1 px-2 sm:px-3 py-1 sm:py-2">
+          <div className="font-mono text-xs sm:text-sm leading-5 sm:leading-6">
             {output.map((line, idx) => (
               <div key={idx} className={`
                 ${line.type === "command" ? "text-[#cdd6f4] font-medium" : ""}
@@ -537,14 +537,14 @@ const Terminal = forwardRef((
             <div className="flex items-center mt-1 group">
               {isCodeRunning ? (
                 <>
-                  <span className="text-[#a6adc8] font-medium mr-2 font-mono select-none">&gt;&gt;</span>
+                  <span className="text-[#a6adc8] font-medium mr-1 sm:mr-2 font-mono select-none text-xs sm:text-sm">&gt;&gt;</span>
                   <form onSubmit={handleSubmit} className="flex-1">
                     <input
                       ref={inputRef}
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       onKeyDown={onKeyDownInput}
-                      className="w-full bg-transparent text-[#cdd6f4] outline-none caret-[#a6e3a1] text-sm font-mono placeholder:text-[#6c7086]"
+                      className="w-full bg-transparent text-[#cdd6f4] outline-none caret-[#a6e3a1] text-xs sm:text-sm font-mono placeholder:text-[#6c7086] min-h-[20px] sm:min-h-[24px]"
                       autoComplete="off"
                       spellCheck="false"
                     />
@@ -552,15 +552,15 @@ const Terminal = forwardRef((
                 </>
               ) : (
                 <>
-                  <span className="text-[#89b4fa] font-medium mr-2 font-mono select-none">~</span>
-                  <span className="text-[#a6e3a1] font-bold mr-2 font-mono select-none">$</span>
+                  <span className="text-[#89b4fa] font-medium mr-1 sm:mr-2 font-mono select-none text-xs sm:text-sm">~</span>
+                  <span className="text-[#a6e3a1] font-bold mr-1 sm:mr-2 font-mono select-none text-xs sm:text-sm">$</span>
                   <form onSubmit={handleSubmit} className="flex-1">
                     <input
                       ref={inputRef}
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       onKeyDown={onKeyDownInput}
-                      className="w-full bg-transparent text-[#cdd6f4] outline-none caret-[#a6e3a1] text-sm font-mono placeholder:text-[#6c7086]"
+                      className="w-full bg-transparent text-[#cdd6f4] outline-none caret-[#a6e3a1] text-xs sm:text-sm font-mono placeholder:text-[#6c7086] min-h-[20px] sm:min-h-[24px]"
                       placeholder="Type a command..."
                       autoComplete="off"
                       spellCheck="false"

@@ -33,22 +33,22 @@ const ErrorPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#11111b] via-[#181825] to-[#1e1e2e] flex items-center justify-center p-4">
-      <div className="flex flex-col items-center justify-center text-center max-w-md">
-        <AlertTriangle className="w-26 h-26 text-[#f38ba8] mb-6 animate-pulse" />
-        <h1 className="text-8xl md:text-9xl font-bold text-[#f38ba8] font-mono tracking-wider mb-4">
+<div className="min-h-screen bg-gradient-to-br from-[#11111b] via-[#181825] to-[#1e1e2e] flex items-center justify-center p-4 sm:p-6 md:p-8">
+      <div className="flex flex-col items-center justify-center text-center max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl">
+        <AlertTriangle className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-26 lg:h-26 text-[#f38ba8] mb-4 sm:mb-6 animate-pulse" />
+        <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold text-[#f38ba8] font-mono tracking-wider mb-3 sm:mb-4">
           {statusCode}
         </h1>
-        <h2 className="text-2xl md:text-3xl font-semibold text-[#cdd6f4] mb-4 font-mono">
+        <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-[#cdd6f4] mb-3 sm:mb-4 font-mono px-2">
           {"// " + getErrorTitle(statusCode)}
         </h2>
-        <p className="text-lg text-[#9399b2] mb-8 max-w-sm font-mono leading-relaxed">
+        <p className="text-sm sm:text-base md:text-lg text-[#9399b2] mb-6 sm:mb-8 max-w-xs sm:max-w-sm md:max-w-md font-mono leading-relaxed px-2">
           <span className="text-[#f38ba8]">error</span>
           <span className="text-[#89b4fa]">:</span> {message}
         </p>
         <button
           onClick={() => navigate('/')}
-          className="px-8 py-3 bg-gradient-to-r from-[#a6e3a1] to-[#89b4fa] hover:from-[#94e2d5] hover:to-[#74c7ec] text-[#1e1e2e] font-semibold rounded-lg transition-all duration-300 font-mono shadow-lg hover:shadow-xl transform hover:scale-105"
+          className="px-4 py-2 sm:px-6 sm:py-3 md:px-8 md:py-3 bg-gradient-to-r from-[#a6e3a1] to-[#89b4fa] hover:from-[#94e2d5] hover:to-[#74c7ec] text-[#1e1e2e] font-semibold rounded-lg transition-all duration-300 font-mono shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base md:text-lg min-h-[44px]"
         >
           {"return home()"}
         </button>
