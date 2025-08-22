@@ -25,6 +25,22 @@ import CreateRoom from "../components/layout/CreateRoom";
 import TextType from "../components/ui/TextType";
 
 export default function GoonShareAILanding() {
+  const [isJoinMode, setIsJoinMode] = useState(false);
+  const handleCreateNowClick = () => {
+    setIsJoinMode(false);
+    const roomSection = document.getElementById("room");
+    if (roomSection) {
+      roomSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const handleJoinNowClick = () => {
+    setIsJoinMode(true);
+    const roomSection = document.getElementById("room");
+    if (roomSection) {
+      roomSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
   return (
     <main
       id="home"
@@ -34,7 +50,8 @@ export default function GoonShareAILanding() {
       <div className="fixed inset-0 w-full h-full z-10">
         <Particles />
       </div>
-      <Nav />
+      <Nav onCreateNowClick={handleCreateNowClick}
+        onJoinNowClick={handleJoinNowClick} />
       {/* Hero Section */}
       <section className="relative overflow-hidden md:py-10 z-0">
         <div className="absolute inset-0"></div>
@@ -59,7 +76,7 @@ export default function GoonShareAILanding() {
               </div>
               <span className="text-[#89b4fa]">(</span>
               <span className="bg-gradient-to-r from-[#a6e3a1] via-[#89b4fa] to-[#cba6f7] bg-clip-text text-transparent">
-                vibe_gooner
+                farm_Aura
               </span>
               <span className="text-[#89b4fa]">)</span>
               <div className="text-[#6c7086]"> {"{"}</div>
@@ -92,7 +109,8 @@ export default function GoonShareAILanding() {
 
       {/* Room Creation/Join Section */}
       <section id="room" className="relative z-20 sm:py-25">
-        <CreateRoom />
+        <CreateRoom isJoinMode={isJoinMode}
+                    setIsJoinMode={setIsJoinMode} />
       </section>
 
       {/* Features Cards */}
@@ -291,7 +309,7 @@ export default function GoonShareAILanding() {
                 size="sm"
                 onClick={() => {
                   window.open(
-                    "https://github.com/yourusername/GoonShareAI",
+                    "https://github.com/Mahir-o4/GoonShareAI",
                     "_blank"
                   );
                 }}
@@ -340,7 +358,7 @@ export default function GoonShareAILanding() {
               </p>
               <div className="flex space-x-3 sm:space-x-4">
                 <a
-                  href="#"
+                  href="https://github.com/yourusername/GoonShareAI"
                   className="text-[#9399b2] hover:text-[#cdd6f4] transition-colors"
                 >
                   <Github className="h-4 w-4 sm:h-5 sm:w-5" />

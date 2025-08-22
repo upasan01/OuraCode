@@ -465,7 +465,7 @@ export default function App() {
                             <div className="text-xs text-[#7b7d87]">{"// v1.1.0-stable"}</div>
                         </div>
                         <div className="block sm:hidden">
-                            <span className="text-xs font-bold text-[#a6e3a1]">{"<OuRAcoDE/>"}</span>
+                            <span className="text-sm font-bold text-[#a6e3a1]">{"<OuRAcoDE/>"}</span>
                         </div>
                     </div>
                 </div>
@@ -475,8 +475,8 @@ export default function App() {
                     onClick={handleCopyId}
                     className="h-8 sm:h-10 px-2 sm:px-4 bg-[#1e1e2e] rounded-lg border border-[#a6e3a1]/30 hover:bg-[#313244] min-w-0 text-xs sm:text-base">
                     {isCopyId ? <Check size={14} className="sm:w-[18px] sm:h-[18px] mr-1 sm:mr-2 text-[#a6e3a1]" /> : <Copy size={14} className="sm:w-[18px] sm:h-[18px] text-[#a6e3a1]" />}
-                    <span className="font-bold text-[#a6e3a1] tracking-wider font-mono truncate max-w-[80px] sm:max-w-none">
-                        "{roomId}"
+                    <span className="font-bold text-[#a6e3a1] tracking-wider font-mono truncate max-w-[80px] sm:max-w-none text-xs">
+                        roomId
                     </span>
                 </Button>
                 

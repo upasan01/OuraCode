@@ -19,11 +19,10 @@ const programmingLanguages = [
     { value: 'go', label: 'Go' },
 ]
 
-const CreateRoom = () => {
+const CreateRoom = ({isJoinMode, setIsJoinMode}) => {
     const [selectedLanguage, setSelectedLanguage] = useState("")
     const [roomCode, setRoomCode] = useState("")
     const [isCustomRoom, setIsCustomRoom] = useState(false)
-    const [isJoinMode, setIsJoinMode] = useState(false)
     const [username, setUsername] = useState("")
     const [errorMessage, setErrorMessage] = useState("")
     const [isLoading, setIsLoading] = useState(false);

@@ -204,7 +204,6 @@ const CodeEditor = forwardRef(({
             quickSuggestions: true,
             contextmenu: true,
             folding: true,
-            glyphMargin: true,
           }}
         />
       </div>
