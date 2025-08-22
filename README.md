@@ -17,7 +17,7 @@ A collaborative coding platform where you can code with Aura with your mates.
 - [API Resources](#api-resources)
 
 ## About The Project
-![image](https://github.com/Mahir-o4/GoonShareAI/tree/main/client/src/assets/poster.png)
+<img width="1918" height="912" alt="Image" src="https://github.com/user-attachments/assets/2ee4edea-dc14-45e1-a965-6aa404bde63e" />
 
 
 Code With Aura
