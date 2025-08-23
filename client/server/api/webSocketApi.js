@@ -4,10 +4,10 @@ class WebSocketManager {
         this.connected = false;
         this.username = '';
         this.roomId = null;
-        this.callbacks = {} // callback storage (for when things get spicy) 🌶️
+        this.callbacks = {} // callback storage for when things get spicy
     }
 
-    // connection setup (time to slide into the server's world) 🌐💫
+    // connection setup time to slide into the server's world
     connect(roomId, username, callbacks = {}) {
         this.roomId = roomId;
         this.username = username;
@@ -18,7 +18,7 @@ class WebSocketManager {
         this.setupEventListeners();
     }
 
-    // event listener setup (teaching our socket how to behave)
+    // event listener setup teaching our socket how to behave no cap
     setupEventListeners() {
         this.socket.onopen = () => {
             this.connected = true;
@@ -42,7 +42,7 @@ class WebSocketManager {
         };
     }
 
-    // incoming message handler (we're basically the message therapist) 
+    // incoming message handler we're basically the message therapist fr
     handleMessage(message) {
         switch (message.type) {
             case 'load_code':
@@ -90,7 +90,7 @@ class WebSocketManager {
         }
     }
 
-    // send message to server (sliding into backend's DMs) 📱✨
+    // send message to server sliding into backend's DMs
     sendMessage(message) {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(JSON.stringify(message));
@@ -99,7 +99,7 @@ class WebSocketManager {
         }
     }
 
-    // join room method (knock knock, can we come in?) 🚪✨
+    // join room method knock knock can we come in
     joinRoom(roomId, username) {
         this.sendMessage({
             type: 'join_room',
@@ -108,7 +108,7 @@ class WebSocketManager {
         });
     }
 
-    // send code changes (sharing the coding tea)
+    // send code changes sharing the coding tea bestie
     sendCodeChange(roomId, code) {
         this.sendMessage({
             type: 'code_change',
@@ -117,7 +117,7 @@ class WebSocketManager {
         });
     }
 
-    // cursor sync (showing where the magic happens) 
+    // cursor sync showing where the magic happens periodt 
     sendCursorSync(roomId, cursorPosition) {
         this.sendMessage({
             type: 'cursor_sync',
@@ -126,7 +126,7 @@ class WebSocketManager {
         });
     }
 
-    // language change broadcaster (switching coding vibes) 
+    // language change broadcaster switching coding vibes fr 
     sendLanguageChange(roomId, language) {
         this.sendMessage({
             type: 'language_change',
@@ -135,12 +135,15 @@ class WebSocketManager {
         });
     }
 
+    // get all users in the room rn
     requestAllUsers(roomId) {
         this.sendMessage({
             type: 'all_user',
             roomId
         });
     }
+    
+    // execute code like a boss
     runCode(roomId, language, code) {
         this.sendMessage({
             type: 'run_code',
@@ -150,19 +153,20 @@ class WebSocketManager {
         });
     }
 
+    // send user input to running process bestie
     sendInputToProcess(data) {
         this.sendMessage({
             type: 'stdin',
-            data // The input from the bitch user
+            data // the input from the user
         });
     }
 
-    // connection status check (are we still besties?) 
+    // connection status check are we still besties 
     isConnected() {
         return this.connected && this.socket && this.socket.readyState === WebSocket.OPEN;
     }
 
-    // disconnect method (time to ghost the server) 
+    // disconnect method time to ghost the server 
     disconnect(latestCode) {
         if (this.socket && this.connected) {
             // sending latest code before closing, less goon 

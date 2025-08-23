@@ -66,18 +66,12 @@ export default function App() {
     const languages = useMemo(
         () => [
             { id: "c", value: "c", name: "C", icon: SiC, color: "bg-gray-500/20 text-gray-300" },
-            { id: "javascript", value: "js", name: "JavaScript", icon: SiJavascript, color: "bg-yellow-500/20 text-yellow-300" },
+            { id: "cpp", value: "cpp", name: "C++", icon: SiCplusplus, color: "bg-purple-500/20 text-purple-300" },
             { id: "python", value: "py", name: "Python", icon: SiPython, color: "bg-green-500/20 text-green-300" },
             { id: "java", value: "java", name: "Java", icon: FaJava, color: "bg-orange-500/20 text-orange-300" },
-            { id: "cpp", value: "cpp", name: "C++", icon: SiCplusplus, color: "bg-purple-500/20 text-purple-300" },
+            { id: "javascript", value: "js", name: "JavaScript", icon: SiJavascript, color: "bg-yellow-500/20 text-yellow-300" },
             { id: "csharp", value: "cs", name: "C#", icon: TbBrandCSharp, color: "bg-teal-500/20 text-teal-300" },
             { id: "go", value: "go", name: "Go lang", icon: FaGolang, color: "bg-[#00ADD8]/20 text-[#00ADD8]" },
-            { id: "rust", value: "rs", name: "Rust", icon: FaRust, color: "bg-orange-600/20 text-orange-400" },
-            { id: "typescript", value: "ts", name: "TypeScript", icon: SiTypescript, color: "bg-blue-500/20 text-blue-300" },
-            { id: "php", value: "php", name: "PHP", icon: FaPhp, color: "bg-indigo-500/20 text-indigo-300" },
-            { id: "ruby", value: "rb", name: "Ruby", icon: DiRuby, color: "bg-red-500/20 text-red-300" },
-            { id: "swift", value: "swift", name: "Swift", icon: FaSwift, color: "bg-orange-500/20 text-orange-300" },
-            { id: "kotlin", value: "kt", name: "Kotlin", icon: SiKotlin, color: "bg-purple-600/20 text-purple-400" }
         ],
         []
     );
