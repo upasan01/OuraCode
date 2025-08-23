@@ -7,19 +7,23 @@ import { Play, ArrowRight, Copy } from "lucide-react";
 import { createRoom, joinRoom } from "../../../server/api/roomApi";
 import { useNavigate } from "react-router-dom";
 import { LoadingIcon } from '../ui/Icons';
+import { SiJavascript, SiPython, SiCplusplus, SiC } from 'react-icons/si';
+import { FaJava } from "react-icons/fa";
+import { TbBrandCSharp } from "react-icons/tb";
+import { FaGolang } from "react-icons/fa6";
 
 
 const programmingLanguages = [
-    {value: 'c', label :"C"},
-    { value: 'js', label: 'JavaScript' },
-    { value: 'py', label: 'Python' },
-    { value: 'java', label: 'Java' },
-    { value: 'cs', label: 'C#' },
-    { value: 'cpp', label: 'C++' },
-    { value: 'go', label: 'Go' },
+    { value: 'c', label: "C", icon: SiC },
+    { value: 'cpp', label: 'C++', icon: SiCplusplus },
+    { value: 'py', label: 'Python', icon: SiPython },
+    { value: 'java', label: 'Java', icon: FaJava },
+    { value: 'js', label: 'JavaScript', icon: SiJavascript },
+    { value: 'cs', label: 'C#', icon: TbBrandCSharp },
+    { value: 'go', label: 'Go', icon: FaGolang },
 ]
 
-const CreateRoom = ({isJoinMode, setIsJoinMode}) => {
+const CreateRoom = ({ isJoinMode, setIsJoinMode }) => {
     const [selectedLanguage, setSelectedLanguage] = useState("")
     const [roomCode, setRoomCode] = useState("")
     const [isCustomRoom, setIsCustomRoom] = useState(false)
@@ -79,7 +83,7 @@ const CreateRoom = ({isJoinMode, setIsJoinMode}) => {
 
             navigate(`/room?roomId=${roomCode}`, {
                 state: {
-                    language: response.room.language, 
+                    language: response.room.language,
                     username: username,
                     roomData: response.room
                 }
@@ -96,7 +100,7 @@ const CreateRoom = ({isJoinMode, setIsJoinMode}) => {
     };
 
 
-     return (
+    return (
         <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl mx-auto my-8 sm:my-12 px-3 sm:px-4 md:px-0">
             <Card className="bg-[#313244]/50 border-[#45475a] backdrop-blur">
                 <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
@@ -143,6 +147,7 @@ const CreateRoom = ({isJoinMode, setIsJoinMode}) => {
                         </Button>
                     </div>
 
+                    {/* Create Room Section */}
                     {!isJoinMode ? (
                         <>
                             {/* Username Section */}
@@ -176,8 +181,10 @@ const CreateRoom = ({isJoinMode, setIsJoinMode}) => {
                                                 value={lang.value}
                                                 className="text-[#cdd6f4] hover:bg-[#313244] font-mono text-sm sm:text-base"
                                             >
-                                                <span className="text-[#a6e3a1] mr-2">●</span>
-                                                {lang.label}
+                                                <div className="flex items-center gap-2">
+                                                    <lang.icon size={16} className="text-[#a6e3a1]" />
+                                                    {lang.label}
+                                                </div>
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -207,7 +214,7 @@ const CreateRoom = ({isJoinMode, setIsJoinMode}) => {
                                                 : "border-[#45475a] text-[#9399b2] hover:bg-[#313244] font-mono text-xs sm:text-sm flex-1 min-w-0 px-2 sm:px-3"
                                         }
                                     >
-                                        <span className="truncate">{"custom.name"}</span>
+                                        <span className="truncate">{"custom.Id"}</span>
                                     </Button>
                                 </div>
 

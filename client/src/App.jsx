@@ -9,7 +9,6 @@ function App() {
   return (
     <Router>
       <Toaster position="top-center" reverseOrder={false} />
-
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route element={<ProtectedRoute />}>
