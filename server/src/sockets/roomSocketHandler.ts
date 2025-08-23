@@ -190,7 +190,7 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
                 if (!ws.roomId) return
                 try {
                     const users = await redis.smembers(`room:${ws.roomId}:users`)
-                    console.log(users)
+                    //console.log(users)
                     ws.send(JSON.stringify({
                         type: "all_users_sent",
                         users
@@ -210,7 +210,7 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
                 try {
                     ws.code = data.code
                     const language = await redis.get(`room:${ws.roomId}:language`)
-                    console.log(language)
+                    //console.log(language)
                     let code = ws.code
 
                     // temp dir - linux/prod
@@ -220,7 +220,7 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
                     // win
                     const tempDir = path.join(os.tmpdir(), `${Date.now()}-${Math.random()}`)
                     fs.mkdirSync(tempDir, { recursive: true })
-                    console.log(tempDir)
+                    //console.log(tempDir)
 
                     const extension = language
                     const filePath = path.join(tempDir, `main.${extension}`)
@@ -234,7 +234,7 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
 
                     // writting the code inside code.ext file
                     fs.writeFileSync(filePath, code);
-                    console.log(filePath)
+                    //console.log(filePath)
 
                     // docker run command
                     const dockerCmd = [
@@ -334,7 +334,7 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
 
                 if (typeof ws.code === "string") {
                     await redis.set(`room:${ws.roomId}:code`, ws.code).catch(console.error)
-                    console.log(ws.code)
+                    //console.log(ws.code)
                 }
 
                 brodcastToRoom(wss, ws.roomId, {

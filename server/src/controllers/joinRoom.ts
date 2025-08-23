@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import Room from "../models/room.model.js";
 import { redis } from "../lib/redis.js";
 
 export const joinRoom = async (req: Request, res: Response) => {
@@ -13,8 +12,7 @@ export const joinRoom = async (req: Request, res: Response) => {
             })
         }
 
-        const roomInRedis = await redis.exists(`room:${roomId}:language`)
-        const room = await Room.findOne({ roomId });
+        const roomInRedis = await redis.exists(`room:${roomId}`)
 
         if (!roomInRedis) {
             return res.status(404).json({
@@ -24,7 +22,6 @@ export const joinRoom = async (req: Request, res: Response) => {
         }
 
         const userLimit = await redis.scard(`room:${roomId}:users`)
-        console.log(userLimit)
         const MAX_USER_LIMITS = 2
 
         if (userLimit === MAX_USER_LIMITS) {
@@ -35,7 +32,6 @@ export const joinRoom = async (req: Request, res: Response) => {
         }
 
         const userExistsInRoom = await redis.sismember(`room:${roomId}:users`, username)
-        console.log(userExistsInRoom)
 
         if (userExistsInRoom) {
             return res.status(409).json({
@@ -44,18 +40,18 @@ export const joinRoom = async (req: Request, res: Response) => {
             });
         }
 
-        // @ts-ignore
-        room.users.push(username);
-        //@ts-ignore
-        await room.save();
-        //await redis.sadd(`room:${roomId}:users`, username);
-        // have to add expire also here before prod
+        const data = await redis.get(`room:${roomId}:language`)
 
         return res.status(200).json({
             message: "Joined successfully",
-            room
+            room: {
+                language: data,
+                id: roomId,
+                users: await redis.smembers(`room:${roomId}:users`)
+            }
         });
     } catch (err) {
+        console.error(err)
         return res.status(500).json({
             message: "Something went wrong",
             //@ts-ignore

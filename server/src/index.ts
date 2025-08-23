@@ -6,9 +6,6 @@ import http from "http"
 import app from "./app.js"
 import { WebSocketServer } from "ws"
 import { roomSocketHandler } from "./sockets/roomSocketHandler.js"
-import { connectDB } from "./config/db.js"
-
-connectDB()
 
 const server = http.createServer(app)
 const wss = new WebSocketServer ({ server })

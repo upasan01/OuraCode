@@ -30,7 +30,6 @@ Code With Aura
 * [NodeJs](https://nodejs.org/en)
 * [ExpressJs](https://expressjs.com/)
 * [TailwindCss](https://tailwindcss.com/)
-* [MongoDb](https://www.mongodb.com/)
 * [Gemini](https://gemini.google.com/)
 * [Redis via Upstash](https://upstash.com/)
 * [Docker](https://www.docker.com/)
@@ -49,7 +48,6 @@ Code With Aura
 
 <a href="https://nodejs.org/en">NodeJs</a> is a JavaScript runtime, package manager. NodeJS uses V8 JavaScript engine as the JavaScript engine.
 
-<a href="https://www.mongodb.com//">MongoDB</a>  is a source-available, cross-platform, document-oriented database program. Classified as a NoSQL database product, MongoDB utilizes JSON-like documents with optional schemas. MongoDB is developed by MongoDB Inc. and current versions are licensed under the Server Side Public License.
 
 <a href="https://www.docker.com/">Docker</a> Docker is a software platform that allows you to build, test, and deploy applications quickly. Docker packages software into standardized units called containers that have everything the software needs to run including libraries, system tools, code, and runtime. Be sure that you have docker installed.  
 
@@ -104,6 +102,8 @@ docker build -t custom-compiler  .
 npm run dev
 ```
 This will start the development server  at http://localhost:3000/
+
+*Sorry for using Redis as a DB, ik its not a good practice but I did, idk why ;)* - **Sanjoy**
 
 ## Contributing
 

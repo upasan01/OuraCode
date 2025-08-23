@@ -1,6 +1,5 @@
 // route logic
 import { Request, Response } from "express";
-import Room from "../models/room.model.js";
 import crypto from "crypto"
 import { redis } from "../lib/redis.js";
 
@@ -17,9 +16,7 @@ export const createRoom = async (req: Request, res: Response) => {
 
         const finalRoomId = roomId || crypto.randomBytes(4).toString("hex")
 
-        const existingRoom = await Room.findOne({
-            roomId: finalRoomId
-        })
+        const existingRoom = await redis.exists(`room:${finalRoomId}`)
 
         if (existingRoom) {
             return res.status(409).json({
@@ -28,13 +25,7 @@ export const createRoom = async (req: Request, res: Response) => {
             })
         }
 
-        const room = await Room.create({
-            roomId: finalRoomId,
-            username: username,
-            language: language,
-            users: [username]
-        })
-
+        await redis.set(`room:${finalRoomId}`, finalRoomId)
         await redis.sadd(`room:${finalRoomId}:users`, username)
         await redis.set(`room:${finalRoomId}:language`, language)
         // expiretion will be enabled in prod
@@ -43,7 +34,11 @@ export const createRoom = async (req: Request, res: Response) => {
 
         return res.json({
             message: "Successfully room created",
-            room
+            room: {
+                language: language,
+                id: finalRoomId,
+                users: await redis.smembers(`room:${roomId}:users`)
+            }
         })
 
     } catch (err) {
