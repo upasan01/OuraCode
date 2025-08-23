@@ -4,6 +4,7 @@ import { redis } from "../lib/redis.js";
 import fs from "fs"
 import os from "os"
 import { spawn } from "child_process";
+import { isRateLimited } from "../rate-limiter.js";
 
 interface ExtWebSocket extends WebSocket {
     roomId?: string;
@@ -212,6 +213,15 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
                     const language = await redis.get(`room:${ws.roomId}:language`)
                     //console.log(language)
                     let code = ws.code
+                    const userId = ws.username
+                    //@ts-ignore
+                    if (await isRateLimited(userId)) {
+                        ws.send(JSON.stringify({
+                            type: "error",
+                            message: "Rate limit exceeded. Please slow down."
+                        }));
+                        return;
+                    }
 
                     // temp dir - linux/prod
                     /*const tempDir = path.join("/tmp", `${Date.now()}-${Math.random()}`)
