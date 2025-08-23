@@ -37,7 +37,7 @@ function ProtectedRoute() {
     const checkRoomAndUser = async () => {
       if (!roomCode) {
         setError("Missing roomId");
-        setStatusCode(400); // Bad Request for missing roomId
+        setStatusCode(400);
         setIsValid(false);
         return;
       }

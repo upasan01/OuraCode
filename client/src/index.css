@@ -1,11 +1,5 @@
 @import "tailwindcss";
 
-
-@theme {
-  --font-bitcount: 'Bitcount', cursive;
-  --font-playwrite: 'Playwrite HU', sans-serif;
-}
-
 @layer base {
   :root {
     --background: #1e1e2e;
@@ -27,12 +21,6 @@
     --border: #313244;
     --input: #313244;
     --ring: #f38ba8;
-    --chart-1: #f38ba8;
-    --chart-2: #a6e3a1;
-    --chart-3: #89b4fa;
-    --chart-4: #f9e2af;
-    --chart-5: #cba6f7;
-    --radius: 0.625rem;
     --sidebar: #181825;
     --sidebar-foreground: #cdd6f4;
     --sidebar-primary: #f38ba8;
@@ -41,44 +29,19 @@
     --sidebar-accent-foreground: #cdd6f4;
     --sidebar-border: #313244;
     --sidebar-ring: #f38ba8;
-  }
 
-  .dark {
-    --background: #1e1e2e;
-    --foreground: #cdd6f4;
-    --card: #181825;
-    --card-foreground: #cdd6f4;
-    --popover: #181825;
-    --popover-foreground: #cdd6f4;
-    --primary: #f38ba8;
-    --primary-foreground: #1e1e2e;
-    --secondary: #313244;
-    --secondary-foreground: #cdd6f4;
-    --muted: #313244;
-    --muted-foreground: #a6adc8;
-    --accent: #313244;
-    --accent-foreground: #cdd6f4;
-    --destructive: #f38ba8;
-    --destructive-foreground: #1e1e2e;
-    --border: #313244;
-    --input: #313244;
-    --ring: #f38ba8;
-    --chart-1: #f38ba8;
-    --chart-2: #a6e3a1;
-    --chart-3: #89b4fa;
-    --chart-4: #f9e2af;
-    --chart-5: #cba6f7;
-    --sidebar: #181825;
-    --sidebar-foreground: #cdd6f4;
-    --sidebar-primary: #f38ba8;
-    --sidebar-primary-foreground: #1e1e2e;
-    --sidebar-accent: #313244;
-    --sidebar-accent-foreground: #cdd6f4;
-    --sidebar-border: #313244;
-    --sidebar-ring: #f38ba8;
+    /* History page theme colors */
+    --history-primary: #a6e3a1;
+    --history-secondary: #89b4fa;
+    --history-accent: #fab387;
+    --history-background: #11111b;
+    --history-surface: #181825;
+    --history-border: #313244;
+    --history-text: #cdd6f4;
+    --history-muted: #6c7086;
+    --history-terminal: #a6e3a1;
   }
 }
-
 
 @theme inline {
   --color-background: var(--background);
@@ -100,15 +63,6 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -176,7 +130,7 @@
   }
 }
 
-/* Added custom scrollbar styling for Catppuccin theme */
+/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -195,29 +149,25 @@
   background: #45475a;
 }
 
-/* Remote cursor line style */
+/* Remote cursor styling */
 .remote-cursor-line {
   position: absolute;
 }
 
-/* Base style for the remote cursor line pseudo-element */
 .remote-cursor-line::before {
   content: '';
   position: absolute;
   width: 2px;
   height: 100%;
-  /* The background-color will be set dynamically */
 }
 
-/* Base style for the username label in the glyph margin */
 .remote-cursor-label {
   position: absolute;
 }
 
-/* Style for the username label pseudo-element */
 .remote-cursor-label::after {
   position: absolute;
-  top: -1.4em; /* Position it above the cursor line */
+  top: -1.4em;
   left: -2px;
   padding: 2px 6px;
   border-radius: 3px;
@@ -225,5 +175,230 @@
   font-size: 12px;
   font-family: sans-serif;
   white-space: nowrap;
-  /* The background-color and content will be set dynamically */
+}
+
+/* HISTORY PAGE SPECIFIC STYLES */
+
+/* Glitch overlay animation */
+.glitch-overlay {
+  position: absolute;
+  inset: 0;
+  background: #0f0;
+  mix-blend-mode: screen;
+  animation: glitchFlash 0.2s linear 3;
+  z-index: 50;
+}
+
+@keyframes glitchFlash {
+  0% {
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 0.6;
+  }
+
+  40% {
+    opacity: 0;
+  }
+
+  60% {
+    opacity: 0.8;
+  }
+
+  80% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+/* TV Frame */
+.tv-frame {
+  border: 8px solid #333;
+  border-radius: 2rem;
+  box-shadow: 0 0 40px #00ff77aa;
+  background: linear-gradient(to bottom, #111, #000);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Monitor Screen */
+.monitor-screen {
+  border-radius: 0.75rem;
+  box-shadow: inset 0 0 20px #00ff77aa;
+  background: #000;
+  overflow: hidden;
+  position: relative;
+}
+
+/* History text scrolling */
+.history-text {
+  animation: scrollUp 60s linear infinite;
+}
+
+@keyframes scrollUp {
+  0% {
+    transform: translateY(100%);
+  }
+
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+/* Blinking cursor effect */
+.history-text::after {
+  content: '|';
+  display: inline-block;
+  width: 1ch;
+  animation: blink 1s step-start infinite;
+  color: #a6e3a1;
+}
+
+@keyframes blink {
+
+  0%,
+  50%,
+  100% {
+    opacity: 1;
+  }
+
+  25%,
+  75% {
+    opacity: 0;
+  }
+}
+
+@keyframes movieCredits {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes glitchFlash1 {
+
+  0%,
+  90% {
+    opacity: 0;
+  }
+
+  5% {
+    opacity: 0.8;
+  }
+
+  10%,
+  15% {
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 0.6;
+  }
+
+  25%,
+  85% {
+    opacity: 0;
+  }
+}
+
+@keyframes glitchFlash2 {
+
+  0%,
+  85% {
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 0.7;
+  }
+
+  15%,
+  25% {
+    opacity: 0;
+  }
+
+  30% {
+    opacity: 0.5;
+  }
+
+  35%,
+  80% {
+    opacity: 0;
+  }
+}
+
+@keyframes glitchFlash3 {
+
+  0%,
+  80% {
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 0.6;
+  }
+
+  20%,
+  35% {
+    opacity: 0;
+  }
+
+  40% {
+    opacity: 0.4;
+  }
+
+  45%,
+  75% {
+    opacity: 0;
+  }
+}
+
+@keyframes scanlines {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(20px);
+  }
+}
+
+/* Button styling */
+.controls button {
+  background-color: #00ff77;
+  color: #000;
+  font-weight: bold;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px #0f0a;
+  transition: all 0.2s ease;
+}
+
+.controls button:hover {
+  background-color: #00cc55;
+  transform: scale(1.05);
+}
+
+/* Scrollbar for monitor */
+.monitor-screen::-webkit-scrollbar {
+  width: 6px;
+}
+
+.monitor-screen::-webkit-scrollbar-thumb {
+  background-color: #00ff77aa;
+  border-radius: 3px;
+}
+
+.monitor-screen::-webkit-scrollbar-track {
+  background-color: #000;
 }
