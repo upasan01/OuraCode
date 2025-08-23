@@ -50,7 +50,7 @@ const CreateRoom = ({isJoinMode, setIsJoinMode}) => {
             // Update the roomCode state with the backend-generated or confirmed code
             setRoomCode(response.room.roomId);
 
-            navigate(`/room?roomId=${response.room.roomId}`, {
+            navigate(`/room?roomId=${response.room.id}`, {
                 state: {
                     language: selectedLanguage,
                     username: username,
