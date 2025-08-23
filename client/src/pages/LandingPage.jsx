@@ -309,7 +309,7 @@ export default function GoonShareAILanding() {
                 size="sm"
                 onClick={() => {
                   window.open(
-                    "https://github.com/Mahir-o4/GoonShareAI",
+                    "https://github.com/Mahir-o4/OuraCode",
                     "_blank"
                   );
                 }}
@@ -358,12 +358,12 @@ export default function GoonShareAILanding() {
               </p>
               <div className="flex space-x-3 sm:space-x-4">
                 <a
-                  href="https://github.com/yourusername/GoonShareAI"
+                  href="https://github.com/Mahir-o4/OuraCode"
                   className="text-[#9399b2] hover:text-[#cdd6f4] transition-colors"
                 >
                   <Github className="h-4 w-4 sm:h-5 sm:w-5" />
                 </a>
-                <a
+                {/* <a
                   href="#"
                   className="text-[#9399b2] hover:text-[#cdd6f4] transition-colors"
                 >
@@ -374,11 +374,11 @@ export default function GoonShareAILanding() {
                   className="text-[#9399b2] hover:text-[#cdd6f4] transition-colors"
                 >
                   <Discord className="h-4 w-4 sm:h-5 sm:w-5" />
-                </a>
+                </a> */}
               </div>
             </div>
 
-            {/* Right Side - Sarcasm */}
+            {/* Right Side */}
             <div className="flex flex-col items-center sm:items-end text-xs sm:text-sm text-[#9399b2] space-y-1">
               <p>
                 {"/* Warning: May cause merge conflicts and mild despair. */"}

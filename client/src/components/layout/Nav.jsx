@@ -117,7 +117,7 @@ const Nav = ({ onCreateNowClick, onJoinNowClick }) => {
                 className="text-sm text-[#9399b2] hover:text-[#fab387] transition-colors font-mono flex items-center space-x-1"
                 onClick={(e) => {
                   e.preventDefault();
-                  window.open("https://github.com/Mahir-o4/GoonShareAI", "_blank");
+                  window.open("https://github.com/Mahir-o4/OuraCode", "_blank");
                 }}
               >
                 <GithubIcon className="h-4 w-4" />
@@ -218,7 +218,7 @@ const Nav = ({ onCreateNowClick, onJoinNowClick }) => {
                     onClick={(e) => {
                       e.preventDefault();
                       setIsMobileMenuOpen(false);
-                      window.open("https://github.com/Mahir-o4/GoonShareAI", "_blank");
+                      window.open("https://github.com/Mahir-o4/OuraCode", "_blank");
                     }}
                   >
                     <GithubIcon className="h-5 w-5" />

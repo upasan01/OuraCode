@@ -17,12 +17,12 @@ function App() {
       <Toaster position="top-center" reverseOrder={false} />
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route element={<ProtectedRoute />}>
           <Route path="/room" element={<Room />} />
+        <Route element={<ProtectedRoute />}>
         </Route>
         <Route path="/error" element={<ErrorPage />} />
-        <Route element={<HistoryProtectedRoute />}>
           <Route path="/history" element={<History />} />
+        <Route element={<HistoryProtectedRoute />}>
         </Route>
       </Routes>
     </Router>

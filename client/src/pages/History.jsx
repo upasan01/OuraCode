@@ -11,7 +11,6 @@ export default function History() {
 
   const textRef = useRef(null);
 
-  // Start animation after overlay disappears
   useEffect(() => {
     const timer = setTimeout(() => {
       setGlitchActive(false);
@@ -25,7 +24,7 @@ export default function History() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Enhanced glitch and booting effects
+
   useEffect(() => {
     let soundInterval = null; 
 
@@ -57,7 +56,7 @@ export default function History() {
 
         // Play it once immediately, then set it to repeat
         playBootSound();
-        soundInterval = setInterval(playBootSound, 1500); // Repeats every 1.5 seconds
+        soundInterval = setInterval(playBootSound, 1500); //not working for some reason
       } catch (e) {
         console.log("Audio not available");
       }
@@ -260,20 +259,20 @@ export default function History() {
           className="absolute inset-0 flex flex-col items-center justify-center z-50 text-green-400 font-mono space-y-4"
           style={{ pointerEvents: "none" }}
         >
-          <div className="text-3xl sm:text-4xl animate-pulse">
+          <div className="text-base sm:text-3xl animate-pulse px-3 text-center">
             BOOTING OURACŌDE TERMINAL v2.1
           </div>
-          <div className="text-lg sm:text-xl">
+          <div className="text-xs sm:text-xl px-3 text-center">
             ▁▂▃▄▅▆▇█ LOADING HISTORY MODULE █▇▆▅▄▃▂▁
           </div>
-          <div className="text-sm animate-bounce mt-4">
+          <div className="text-xs sm:text-sm animate-bounce mt-2 sm:mt-4 px-3 text-center">
             INITIALIZING THE GOON HISTORY
           </div>
         </div>
       )}
       {/* TV Frame */}
       <div
-        className="z-20 relative w-[90%] sm:w-[80%] md:w-[70%] lg:w-[60%] xl:w-[50%] aspect-[4/3] border-8 border-gray-700 rounded-3xl shadow-2xl bg-gradient-to-b from-gray-800 to-black flex flex-col items-center justify-center"
+        className="z-20 relative w-full max-w-xs sm:max-w-[80%] md:max-w-[70%] lg:max-w-[60%] xl:max-w-[50%] aspect-[4/3] border-4 sm:border-8 border-gray-700 rounded-2xl sm:rounded-3xl shadow-2xl bg-gradient-to-b from-gray-800 to-black flex flex-col items-center justify-center px-2 sm:px-0 py-2 sm:py-0"
         style={{
           boxShadow: "0 0 40px #00ff7766",
           borderColor: "#00ff77",
@@ -281,19 +280,19 @@ export default function History() {
       >
         {/* Screen */}
         <div
-          className="w-[95%] h-[85%] bg-black rounded-xl overflow-hidden relative border-2 border-gray-600 z-10"
+          className="w-[95%] h-[50vh] sm:h-[85%] bg-black rounded-xl overflow-hidden relative border-2 border-gray-600 z-10"
           style={{
             boxShadow: "inset 0 0 20px #00ff7766",
             background:
-              "linear-gradient(180deg, rgba(0,255,119,0.08) 0%, rgba(0,0,0,1) 100%)", // green tint
+              "linear-gradient(180deg, rgba(0,255,119,0.08) 0%, rgba(0,0,0,1) 100%)", 
           }}
         >
-          {/* Movie Credits Style Scrolling Text - Only render after overlay is gone */}
+          {/*Scrolling text */}
           {animationStarted && (
             <div className="absolute inset-0 flex items-end justify-center">
               <div
                 ref={textRef}
-                className="text-green-400 font-mono text-xs sm:text-sm md:text-base leading-relaxed text-center px-4"
+                className="text-green-400 font-mono text-xs sm:text-base md:text-base leading-relaxed text-center px-3 sm:px-4"
                 style={{
                   animation: isPlaying
                     ? `movieCredits ${120 / scrollSpeed}s linear infinite`
@@ -305,7 +304,7 @@ export default function History() {
                 }}
               >
                 {historyLines.map((line, idx) => (
-                  <div key={idx} className="mb-4">
+                  <div key={idx} className="mb-2 sm:mb-4 text-xs sm:text-base md:text-base break-words">
                     {line}
                     {idx === historyLines.length - 1 && (
                       <span className="inline-block w-2 bg-green-400 animate-pulse ml-1">
@@ -320,11 +319,11 @@ export default function History() {
         </div>
 
         {/* Controls */}
-        <div className="flex flex-wrap justify-center gap-3 mt-4 px-4">
+  <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mt-2 sm:mt-4 px-2 sm:px-4">
           <button
             onClick={handlePlayPause}
             disabled={!animationStarted}
-            className={`font-bold px-4 py-2 rounded-lg shadow-lg transition-all duration-200 ${
+            className={`font-bold px-2 py-1 sm:px-4 sm:py-2 rounded-md sm:rounded-lg shadow-lg transition-all duration-200 text-xs sm:text-base ${
               animationStarted
                 ? "bg-green-400 text-black hover:bg-green-300 hover:scale-105"
                 : "bg-gray-600 text-gray-400 cursor-not-allowed"
@@ -336,7 +335,7 @@ export default function History() {
           <button
             onClick={handleSpeedDecrease}
             disabled={!animationStarted}
-            className={`font-bold px-4 py-2 rounded-lg shadow-lg transition-all duration-200 ${
+            className={`font-bold px-2 py-1 sm:px-4 sm:py-2 rounded-md sm:rounded-lg shadow-lg transition-all duration-200 text-xs sm:text-base ${
               animationStarted
                 ? "bg-green-400 text-black hover:bg-green-300 hover:scale-105"
                 : "bg-gray-600 text-gray-400 cursor-not-allowed"
@@ -346,7 +345,7 @@ export default function History() {
           </button>
 
           <div
-            className={`font-bold px-3 py-2 rounded-lg shadow-lg flex items-center ${
+            className={`font-bold px-2 py-1 sm:px-3 sm:py-2 rounded-md sm:rounded-lg shadow-lg flex items-center text-xs sm:text-base ${
               animationStarted
                 ? "bg-green-400 text-black"
                 : "bg-gray-600 text-gray-400"
@@ -358,7 +357,7 @@ export default function History() {
           <button
             onClick={handleSpeedIncrease}
             disabled={!animationStarted}
-            className={`font-bold px-4 py-2 rounded-lg shadow-lg transition-all duration-200 ${
+            className={`font-bold px-2 py-1 sm:px-4 sm:py-2 rounded-md sm:rounded-lg shadow-lg transition-all duration-200 text-xs sm:text-base ${
               animationStarted
                 ? "bg-green-400 text-black hover:bg-green-300 hover:scale-105"
                 : "bg-gray-600 text-gray-400 cursor-not-allowed"
@@ -369,7 +368,7 @@ export default function History() {
 
           <button
             onClick={handleSoundToggle}
-            className="bg-green-400 text-black font-bold px-4 py-2 rounded-lg shadow-lg hover:bg-green-300 hover:scale-105 transition-all duration-200"
+            className="bg-green-400 text-black font-bold px-2 py-1 sm:px-4 sm:py-2 rounded-md sm:rounded-lg shadow-lg hover:bg-green-300 hover:scale-105 transition-all duration-200 text-xs sm:text-base"
           >
             {soundOn ? "🔊 Sound" : "🔇 Muted"}
           </button>
