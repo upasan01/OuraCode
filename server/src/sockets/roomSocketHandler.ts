@@ -223,42 +223,78 @@ export const roomSocketHandler = (ws: ExtWebSocket, wss: WebSocketServer) => {
                         return;
                     }
 
-                    // temp dir - linux/prod
-                    /*const tempDir = path.join("/tmp", `${Date.now()}-${Math.random()}`)
-                    fs.mkdirSync(tempDir)*/
+                    let filePath, dockerCmd, tempDir;
+                    // java verification and managing the filename for it
+                    if (language === "java") {
+                        const match = code.match(/public\s+class\s+([A-Za-z_]\w*)/);
 
-                    // win
-                    const tempDir = path.join(os.tmpdir(), `${Date.now()}-${Math.random()}`)
-                    fs.mkdirSync(tempDir, { recursive: true })
-                    //console.log(tempDir)
+                        // if class name found → use it, else fallback "Main"
+                        const javaFileName = (match && match[1]) ? match[1] : "main";
 
-                    const extension = language
-                    const filePath = path.join(tempDir, `main.${extension}`)
-                    // auto-inject flushing for all C/C++ codes - VIBE CODED
-                    if (language === "c" || language === "cpp") {
-                        code = ws.code.replace(
-                            /int\s+main\s*\([^)]*\)\s*{/,
-                            match => `${match}\n    setvbuf(stdout, NULL, _IONBF, 0);`
-                        );
+                        // temp dir - linux/prod
+                        /*const tempDir = path.join("/tmp", `${Date.now()}-${Math.random()}`)
+                        fs.mkdirSync(tempDir)*/
+
+                        tempDir = path.join(os.tmpdir(), `${Date.now()}-${Math.random()}`)
+                        fs.mkdirSync(tempDir, { recursive: true })
+
+                        filePath = path.join(tempDir, `${javaFileName}.java`);
+
+                        fs.writeFileSync(filePath, code); // <--- missing in your snippet
+
+                        // docker run command
+                        dockerCmd = [
+                            "run", // run new docker container
+                            "--rm", // after process exits auto remove the container
+                            "-i", //enables stdin
+                            "--network", "none", // disable network inside container
+                            "--memory", "200m", // container ram limit 200mb
+                            "--cpus", "0.5", // half core usage
+                            "-v", `${tempDir}:/code`, // mounts host folder in container, tempDis host folder and /code is where the code will appear in container
+                            "custom-compiler", // my custom docker image name
+                            //@ts-ignore
+                            ...languageCommands[language](`/code/${javaFileName}.java`) // tells the container run command for the given lang
+                        ]
+
+                    } else {
+                        // temp dir - linux/prod
+                        /*const tempDir = path.join("/tmp", `${Date.now()}-${Math.random()}`)
+                        fs.mkdirSync(tempDir)*/
+
+                        // win
+                        tempDir = path.join(os.tmpdir(), `${Date.now()}-${Math.random()}`)
+                        fs.mkdirSync(tempDir, { recursive: true })
+                        //console.log(tempDir)
+
+                        const extension = language
+                        filePath = path.join(tempDir, `main.${extension}`)
+                        // auto-inject flushing for all C/C++ codes - VIBE CODED
+                        if (language === "c" || language === "cpp") {
+                            code = ws.code.replace(
+                                /int\s+main\s*\([^)]*\)\s*{/,
+                                match => `${match}\n    setvbuf(stdout, NULL, _IONBF, 0);`
+                            );
+                        }
+
+                        // writting the code inside code.ext file
+                        fs.writeFileSync(filePath, code);
+                        //console.log(filePath)
+
+                        // docker run command
+                        dockerCmd = [
+                            "run", // run new docker container
+                            "--rm", // after process exits auto remove the container
+                            "-i", //enables stdin
+                            "--network", "none", // disable network inside container
+                            "--memory", "200m", // container ram limit 200mb
+                            "--cpus", "0.5", // half core usage
+                            "-v", `${tempDir}:/code`, // mounts host folder in container, tempDis host folder and /code is where the code will appear in container
+                            "custom-compiler", // my custom docker image name
+                            //@ts-ignore
+                            ...languageCommands[language](`/code/main.${extension}`) // tells the container run command for the given lang
+                        ]
+
                     }
-
-                    // writting the code inside code.ext file
-                    fs.writeFileSync(filePath, code);
-                    //console.log(filePath)
-
-                    // docker run command
-                    const dockerCmd = [
-                        "run", // run new docker container
-                        "--rm", // after process exits auto remove the container
-                        "-i", //enables stdin
-                        "--network", "none", // disable network inside container
-                        "--memory", "200m", // container ram limit 200mb
-                        "--cpus", "0.5", // half core usage
-                        "-v", `${tempDir}:/code`, // mounts host folder in container, tempDis host folder and /code is where the code will appear in container
-                        "custom-compiler", // my custom docker image name
-                        //@ts-ignore
-                        ...languageCommands[language](`/code/main.${extension}`) // tells the container run command for the given lang
-                    ]
 
                     // spawn docker process
                     const docker = spawn("docker", dockerCmd, {

@@ -98,6 +98,19 @@ npm install
 ```bash
 docker build -t custom-compiler  .
 ```
+- **If you are working on linux then:**
+Go to- `server/src/sockets/roomSocketHandler.ts` and look at line `237-238` and `251-252` and replace
+```bash
+const tempDir = path.join(os.tmpdir(), `${Date.now()}-${Math.random()}`)
+fs.mkdirSync(tempDir, { recursive: true })
+```
+with
+```bash
+const tempDir = path.join("/tmp", `${Date.now()}-${Math.random()}`)
+fs.mkdirSync(tempDir)
+```
+Bcz the first one is for Windows and the second one is for Linux.
+
 ```bash
 npm run dev
 ```
