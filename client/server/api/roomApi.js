@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3000/api/v1/room'; 
+const API_BASE_URL = import.meta.env.VITE_ROOM_API_URL; 
 
+// The room creation API call
 export const createRoom = async (roomData) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/create`, roomData);
@@ -12,6 +13,7 @@ export const createRoom = async (roomData) => {
   }
 };
 
+// The joining room API call
 export const joinRoom = async ({ roomId, username }) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/join`, { roomId, username });

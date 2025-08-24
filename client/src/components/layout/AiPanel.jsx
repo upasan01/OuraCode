@@ -17,7 +17,7 @@ const MOBILE_PANEL_WIDTH = 300;
  * @typedef {Object} ChatMessage
  * @property {string} id - uuid that slaps different 
  * @property {'user'|'ai'} role - who's talking rn
- * @property {string} text - the actual tea ☕
+ * @property {string} text - the actual tea 
  * @property {'pending'|'done'|'error'} [status] - current mood
  * @property {number} [timestamp] - when this happened
  * @property {string} [prompt] - backup prompt for when we need to retry (big brain move)
@@ -43,13 +43,13 @@ const AiPanel = forwardRef(({
     const [currentChatRequestId, setCurrentChatRequestId] = useState(null);
     const [retryingMessageIds, setRetryingMessageIds] = useState(new Set());
 
-    // panel sizing things ↔️
+    // panel sizing things
     const [panelWidth, setPanelWidth] = useState(DEFAULT_PANEL_WIDTH);
     const [isMobile, setIsMobile] = useState(false);
     const isResizing = useRef(false);
     const chatContainerRef = useRef(null);
     
-    // keeping track of requests so we can yeet them if needed 🗑️
+    // keeping track of requests so we can yeet them if needed 
     const activeRequestsRef = useRef(new Map()); // Map<requestId, AbortController>
 
     // mobile responsiveness detection
@@ -68,7 +68,7 @@ const AiPanel = forwardRef(({
         triggerReview: () => handleReview()
     }));
 
-    // auto scroll like a good chat app should 📱
+    // auto scroll like a good chat app should 
     useEffect(() => {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -81,7 +81,7 @@ const AiPanel = forwardRef(({
         chatHistoryRef.current = chatHistory;
     }, [chatHistory]);
 
-    // id generator that actually works 💪
+    // id generator that actually works 
     const makeId = () => (typeof uuidv4 === 'function' ? uuidv4() : uid());
 
     // add message to chat (and keep refs happy)
@@ -102,7 +102,7 @@ const AiPanel = forwardRef(({
         });
     };
 
-    // retry failed messages (because we don't give up) 💪
+    // retry failed messages (because we don't give up)
     const retryMessageById = async (messageId) => {
         const message = chatHistoryRef.current.find(m => m.id === messageId);
         if (!message || message.role !== 'ai') {
@@ -167,7 +167,7 @@ const AiPanel = forwardRef(({
         }
     };
 
-    // cancel specific request (for when you change your mind) ❌
+    // cancel specific request (for when you change your mind)
     const cancelRequestById = (requestId) => {
         const abortController = activeRequestsRef.current.get(requestId);
         if (abortController) {
@@ -178,7 +178,7 @@ const AiPanel = forwardRef(({
         }
     };
 
-    // nuclear option - cancel everything 💥
+    // nuclear option - cancel everything
     const cancelAllRequests = () => {
         console.log(`Cancelling ${activeRequestsRef.current.size} active requests`);
         activeRequestsRef.current.forEach((abortController, requestId) => {
@@ -194,7 +194,7 @@ const AiPanel = forwardRef(({
         return activeRequestsRef.current.has(requestId);
     };
 
-    // panel resize magic ↔️ (desktop only)
+    // panel resize magic (desktop only)
     const handleMouseDown = (e) => {
         if (isMobile) return; // no resizing on mobile
         e.preventDefault();
@@ -228,7 +228,7 @@ const AiPanel = forwardRef(({
         }
     }, [isOpen, activeRequestCount]);
 
-    // cleanup when component goes bye bye 👋
+    // cleanup when component goes bye bye
     useEffect(() => {
         return () => {
             document.removeEventListener("mousemove", handleMouseMove);
@@ -238,7 +238,7 @@ const AiPanel = forwardRef(({
         };
     }, []);
 
-    // the real MVP - talks to gemini with cancel support 🧠
+    // the real MVP - talks to gemini with cancel support
     const callGeminiAPI = async (prompt, requestId) => {
         const apiKey = import.meta.env.VITE_GENAI_API_KEY;
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
@@ -258,7 +258,7 @@ const AiPanel = forwardRef(({
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
-                signal: abortController.signal // this is what makes cancellation work 🎯
+                signal: abortController.signal // this is what makes cancellation work
             });
 
             // check if request got yeeted mid-way
@@ -277,7 +277,7 @@ const AiPanel = forwardRef(({
             
             return text;
         } catch (error) {
-            // handle cancellation like a pro 😎
+            // handle cancellation like a pro
             if (error.name === 'AbortError' || error.message === 'Request was cancelled') {
                 console.log(`Request ${requestId} was cancelled`);
                 throw new Error("Request was cancelled");
@@ -292,7 +292,7 @@ const AiPanel = forwardRef(({
         }
     };
 
-    // handle code review (the main feature) 🔍
+    // handle code review (the main feature)
     const handleReview = async () => {
         if (!code.trim()) {
             setError("Please enter some code to review.");
@@ -322,7 +322,7 @@ const AiPanel = forwardRef(({
             prompt: prompt
         };
 
-        // add both messages at once (no race conditions allowed) 🏁
+        // add both messages at once (no race conditions allowed)
         pushMessage(userMessage);
         pushMessage(aiMessage);
 
@@ -350,7 +350,7 @@ const AiPanel = forwardRef(({
         }
     };
 
-    // handle chat submissions (the fun part) 💬
+    // handle chat submissions (the fun part)
     const handleChatSubmit = async (e) => {
         e.preventDefault();
         if (!chatInput.trim() || isChatLoading) return;
@@ -359,7 +359,7 @@ const AiPanel = forwardRef(({
         setChatInput("");
         setIsChatLoading(true);
 
-        // create messages with unique IDs (consistency is key) 🔑
+        // create messages with unique IDs (consistency is key)
         const userMessageId = makeId();
         const aiMessageId = makeId();
         
@@ -387,7 +387,7 @@ const AiPanel = forwardRef(({
             text: "",
             status: "pending",
             timestamp: Date.now(),
-            prompt: prompt // save prompt for retry magic ✨
+            prompt: prompt // save prompt for retry magic
         };
 
         // add both messages at once (race conditions = not today)
@@ -420,10 +420,10 @@ const AiPanel = forwardRef(({
         }
     };
 
-    // send/cancel button handler (the ChatGPT vibes) ✨
+    // send/cancel button handler (the ChatGPT vibes) 
     const handleSendCancelClick = (e) => {
         if (isChatLoading && currentChatRequestId) {
-            // cancel mode - stop that request right now 🛑
+            // cancel mode - stop that request right now
             e.preventDefault();
             cancelRequestById(currentChatRequestId);
             updateMessageById(currentChatRequestId, {
@@ -433,7 +433,7 @@ const AiPanel = forwardRef(({
             setIsChatLoading(false);
             setCurrentChatRequestId(null);
         } else {
-            // send mode - let the form handle it 📤
+            // send mode - let the form handle it
             return;
         }
     };

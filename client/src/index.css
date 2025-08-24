@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* Some styles may not be actually used, they were used at some point but maybe not now, and I am too lazy to remove them */
 @layer base {
   :root {
     --background: #1e1e2e;

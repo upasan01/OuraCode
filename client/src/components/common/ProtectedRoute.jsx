@@ -4,7 +4,8 @@ import axios from "axios";
 
 function ProtectedRoute() {
   const [searchParams] = useSearchParams();
-  const roomCode = searchParams.get("roomId");
+  const roomId = searchParams.get("roomId");
+  const API_BASE_URL = import.meta.env.VITE_ROOM_API_URL;
 
   const [isValid, setIsValid] = useState(null);
   const [error, setError] = useState("");
@@ -12,7 +13,7 @@ function ProtectedRoute() {
 
   const validateRoom = async (roomId) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/v1/room/verify?roomId=${roomId}`);
+      const response = await axios.get(`${API_BASE_URL}/verify?roomId=${roomId}`);
       if (response.status === 200) {
         return { isValid: true };
       }
@@ -35,14 +36,14 @@ function ProtectedRoute() {
 
   useEffect(() => {
     const checkRoomAndUser = async () => {
-      if (!roomCode) {
+      if (!roomId) {
         setError("Missing roomId");
         setStatusCode(400);
         setIsValid(false);
         return;
       }
 
-      const result = await validateRoom(roomCode);
+      const result = await validateRoom(roomId);
       setIsValid(result.isValid);
       
       if (!result.isValid) {
@@ -52,7 +53,7 @@ function ProtectedRoute() {
     };
 
     checkRoomAndUser();
-  }, [roomCode]);
+  }, [roomId]);
 
   if (isValid === null) {
     return (

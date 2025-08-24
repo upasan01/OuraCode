@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { Play, ArrowRight, Copy } from "lucide-react";
+import { Play, ArrowRight } from "lucide-react";
 import { createRoom, joinRoom } from "../../../server/api/roomApi";
 import { useNavigate } from "react-router-dom";
 import { LoadingIcon } from '../ui/Icons';

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Menu, X, GitPullRequestCreate, Zap, Users, Settings, Code2, Terminal, Github as GithubIcon, House } from "lucide-react";
 import { Button } from "../ui/button";
-import Github from 'react-syntax-highlighter/dist/esm/styles/hljs/github';
 
 const Nav = ({ onCreateNowClick, onJoinNowClick }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -29,7 +28,7 @@ const Nav = ({ onCreateNowClick, onJoinNowClick }) => {
             <Button
               onClick={() => {
                 onJoinNowClick?.();
-                // Add delay to allow CreateRoom to re-render in join mode
+                // Delay to allow CreateRoom to re-render in join mode
                 setTimeout(() => {
                   const roomSection = document.getElementById("room");
                   if (roomSection) {

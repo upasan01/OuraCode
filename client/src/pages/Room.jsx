@@ -8,11 +8,10 @@ import { ScrollArea } from "../components/ui/ScrollArea";
 import { Badge } from "../components/ui/badge"; // 
 import { LoadingIcon, EnhanceIcon } from "../components/ui/Icons";
 import BackgroundGradientAnimation from "../components/ui/BackgroundGradientAnimation";
-import { SiJavascript, SiPython, SiCplusplus, SiC, SiTypescript, SiKotlin } from 'react-icons/si';
-import { FaJava, FaRust, FaPhp, FaSwift } from "react-icons/fa";
+import { SiJavascript, SiPython, SiCplusplus, SiC } from 'react-icons/si';
+import { FaJava } from "react-icons/fa";
 import { TbBrandCSharp } from "react-icons/tb";
 import { FaGolang } from "react-icons/fa6";
-import { DiRuby } from "react-icons/di";
 
 // App Components
 import CodeEditor from "../components/layout/CodeEditor";

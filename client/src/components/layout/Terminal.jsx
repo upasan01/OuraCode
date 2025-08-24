@@ -39,7 +39,7 @@ const Terminal = forwardRef(
     const audioPoolRef = useRef([]);
     const currentAudioRef = useRef(null);
     const lastIndexRef = useRef(null);
-    const playQueueRef = useRef([]); // fr fr no cap playlist shuffle queue bestie 💀
+    const playQueueRef = useRef([]); // fr fr no cap playlist shuffle queue bestie
 
     const [isGoonPlaying, setIsGoonPlaying] = useState(false);
     const [currentTrack, setCurrentTrack] = useState(null);
@@ -75,7 +75,7 @@ const Terminal = forwardRef(
     const inputRef = useRef(null);
     const messagesEndRef = useRef(null);
 
-    // Persist state (keeping that data fresh ✨)
+    // Persist state (keeping that data fresh)
     useEffect(() => {
       try {
         localStorage.setItem("goon_terminal_height", String(height));
@@ -87,7 +87,7 @@ const Terminal = forwardRef(
       } catch {}
     }, [goonVolume]);
 
-    // Robust scroll helper: ensures messagesEndRef and input are visible (no cap scrolling hits different 📱)
+    // Robust scroll helper: ensures messagesEndRef and input are visible (no cap scrolling hits different)
     const scrollToBottom = (opts = { smooth: true }) => {
       const smooth = !!opts.smooth;
       try {
@@ -143,12 +143,12 @@ const Terminal = forwardRef(
       } catch {}
     };
 
-    // Auto-scroll when output changes (keeping it real smooth 🎯)
+    // Auto-scroll when output changes (keeping it real smooth)
     useEffect(() => {
       scrollToBottom({ smooth: true });
     }, [output]);
 
-    // Scroll when opening (gotta see that terminal content periodt 📜)
+    // Scroll when opening (gotta see that terminal content periodt)
     useEffect(() => {
       if (isOpen) {
         const t = setTimeout(() => scrollToBottom({ smooth: true }), 80);
@@ -156,7 +156,7 @@ const Terminal = forwardRef(
       }
     }, [isOpen]);
 
-    // Helper to add output lines (serving fresh terminal content 📝)
+    // Helper to add output lines (serving fresh terminal content)
     const addOutput = (content, type = "output") => {
       setOutput((prev) => {
         const lastOutput = prev.length > 0 ? prev[prev.length - 1] : null;
@@ -181,7 +181,7 @@ const Terminal = forwardRef(
         }
       });
     };
-    // Preload audio pool (loading up the bops for later fr 🎵)
+    // Preload audio pool (loading up the bops for later fr)
     useEffect(() => {
       audioPoolRef.current = audioList.current
         .map((src) => {
@@ -257,25 +257,25 @@ const Terminal = forwardRef(
         } catch {}
       }
 
-      // If queue empty, create a shuffled queue of indices (restocking the playlist queue bestie 📋)
+      // If queue empty, create a shuffled queue of indices (restocking the playlist queue bestie)
       if (!playQueueRef.current || playQueueRef.current.length === 0) {
         const indices = list.map((_, i) => i);
         let shuffled = shuffleArray(indices);
 
-        // If the first would repeat lastIndex, rotate once (if possible) (no repeats allowed periodt 🚫)
+        // If the first would repeat lastIndex, rotate once (if possible) (no repeats allowed periodt)
         if (
           lastIndexRef.current != null &&
           shuffled[0] === lastIndexRef.current &&
           shuffled.length > 1
         ) {
-          // swap first two (switching it up real quick ✨)
+          // swap first two (switching it up real quick)
           [shuffled[0], shuffled[1]] = [shuffled[1], shuffled[0]];
         }
 
         playQueueRef.current = shuffled;
       }
 
-      // Pop next index from queue (getting the next banger ready 🎤)
+      // Pop next index from queue (getting the next banger ready)
       const idx = playQueueRef.current.shift();
       lastIndexRef.current = idx;
 
@@ -351,7 +351,7 @@ const Terminal = forwardRef(
       return () => document.removeEventListener("keydown", handler);
     }, [isOpen]);
 
-    // Focus input when terminal opens (putting that cursor where it needs to be ✨)
+    // Focus input when terminal opens (putting that cursor where it needs to be)
     useEffect(() => {
       if (isOpen && inputRef.current) {
         const tid = setTimeout(() => {
@@ -381,7 +381,7 @@ const Terminal = forwardRef(
       prevOpenRef.current = isOpen;
     }, [isOpen, onClose]);
 
-    // Resizing: ensure we scroll to bottom after resize end (keeping that scroll game strong 📏)
+    // Resizing: ensure we scroll to bottom after resize end (keeping that scroll game strong)
     useEffect(() => {
       let lastRaf = null;
       const onMove = (e) => {
@@ -440,7 +440,7 @@ const Terminal = forwardRef(
       };
     }, [isResizing, editorSelector, minHeight, maxHeightPx]);
 
-    // Command submit + history navigation (handling that terminal business 💼)
+    // Command submit + history navigation (handling that terminal business)
     const handleSubmit = (e) => {
       e?.preventDefault();
       const cmd = input.trim();
@@ -547,7 +547,7 @@ const Terminal = forwardRef(
       }
     };
 
-    // ensure input focus scrolls into view (user clicks the input) (making sure that input stays visible bestie 👀)
+    // ensure input focus scrolls into view (user clicks the input) (making sure that input stays visible bestie)
     useEffect(() => {
       const el = inputRef.current;
       if (!el) return;
@@ -577,7 +577,7 @@ const Terminal = forwardRef(
           </div>
         </div>
 
-        {/* Header (the terminal drip at the top fr 💻) */}
+        {/* Header (the terminal drip at the top fr) */}
         <div className="h-7 sm:h-8 border-b border-[#313244] flex items-center px-2 sm:px-3 bg-[#181825] text-xs">
           <div className="flex items-center gap-1 sm:gap-3">
             <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 bg-[#1e1e2e] border-r border-[#313244] rounded-t-sm">

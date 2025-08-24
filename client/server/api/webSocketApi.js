@@ -18,7 +18,7 @@ class WebSocketManager {
         this.setupEventListeners();
     }
 
-    // event listener setup teaching our socket how to behave no cap
+    // event listener setup teaching our socket how to behave
     setupEventListeners() {
         this.socket.onopen = () => {
             this.connected = true;
@@ -90,7 +90,7 @@ class WebSocketManager {
         }
     }
 
-    // send message to server sliding into backend's DMs
+    // send message to server like sliding into backend's DMs
     sendMessage(message) {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(JSON.stringify(message));
